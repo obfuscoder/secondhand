@@ -1,0 +1,31 @@
+package com.postcode.gui;
+
+import java.awt.BorderLayout;
+import java.awt.Container;
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.table.AbstractTableModel;
+
+public class PostCode  extends JFrame{
+
+	public PostCode()
+	{
+		super("PLZOverview");
+		setSize(800, 800);
+		setLocation(200, 50);
+		addComponentsToPane(getContentPane());
+		pack();
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setVisible(true);
+	}
+
+	private void addComponentsToPane(Container pane) {
+		JLabel title = new JLabel("Flohmarkt");
+		pane.add(title, BorderLayout.NORTH);
+		
+	}
+	
+	class PLZTableModel extends AbstractTableModel {
+	}
+}

@@ -1,0 +1,6 @@
+1388610469323	Rename field 'menuItem'
+1388610478545	Rename field 'filechooser'
+1388691991984	Rename field 'menu'
+1388697058496	Extract method 'importMenu'
+1388706141301	Rename field 'filechooserMenu'
+1388706387677	Extract method 'importCSVFile'

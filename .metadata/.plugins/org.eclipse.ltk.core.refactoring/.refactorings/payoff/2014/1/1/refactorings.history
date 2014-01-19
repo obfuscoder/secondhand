@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;com.payoff.gui.BarCodeGeneratorGui&apos; to &apos;PayOffGui&apos;&#x0D;&#x0A;- Original project: &apos;payoff&apos;&#x0D;&#x0A;- Original element: &apos;com.payoff.gui.BarCodeGeneratorGui&apos;&#x0D;&#x0A;- Renamed element: &apos;com.payoff.gui.PayOffGui&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;BarCodeGeneratorGui&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src&lt;com.payoff.gui{BarCodeGeneratorGui.java[BarCodeGeneratorGui" matchStrategy="1" name="PayOffGui" qualified="false" references="true" similarDeclarations="false" stamp="1388669464663" textual="false" version="1.0"/>
+</session>

@@ -1,0 +1,28 @@
+package com.secondhandcommon.items.reader;
+
+import java.util.Map;
+
+import com.barcodecommon.csvread.CsvReader;
+
+public class ItemFinder {
+
+	String _file = "C:\\Users\\Anne\\flohmarkt\\completion\\completeItemFile.csv";;
+	public ItemFinder()
+	{
+	}
+
+	public ItemFinder( String file )
+	{
+		_file = file;
+	}
+	
+	public Object[] getItemForNr( String itemNr)
+	{
+		return new CsvReader(_file).getItem(itemNr);
+	}
+	
+	public Map getAllItems()
+	{
+		return new CsvReader(_file).getAllItems();
+	}
+}
