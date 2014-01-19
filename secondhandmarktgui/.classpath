@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/secondhandsale"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/postCode"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/payoff"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/barcodefilegenerator"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/secondhandcommon"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/testscan"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
