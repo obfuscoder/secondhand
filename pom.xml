@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>de.obfusco.secondhand</groupId>
+    <artifactId>secondhand</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>secondhand</name>
+    <modules>
+        <module>secondhand-storage</module>
+        <module>secondhand-gui</module>
+        <module>secondhand-barcodefilegenerator</module>
+        <module>secondhand-common</module>
+    <module>secondhand-payoff</module>
+    <module>secondhand-postcode</module>
+    <module>secondhand-sale</module>
+    <module>secondhand-testscan</module>
+  </modules>
+    <properties>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+    </properties>
+</project>
