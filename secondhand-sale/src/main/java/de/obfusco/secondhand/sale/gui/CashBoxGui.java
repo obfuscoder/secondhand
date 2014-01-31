@@ -15,7 +15,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import javax.print.Doc;
@@ -42,24 +41,21 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import com.itextpdf.text.DocumentException;
 
+import de.obfusco.secondhand.sale.service.StorageService;
 import de.obfusco.secondhand.storage.StorageConfiguration;
-import de.obfusco.secondhand.storage.model.Customer;
-import de.obfusco.secondhand.storage.model.Purchase;
 import de.obfusco.secondhand.storage.model.ReservedItem;
-import de.obfusco.secondhand.storage.repository.CustomerRepository;
-import de.obfusco.secondhand.storage.repository.PurchaseRepository;
-import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFImageWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Transactional;
 
 @Configuration
+@ComponentScan("de.obfusco.secondhand")
 @Import(StorageConfiguration.class)
 public class CashBoxGui extends JFrame implements ActionListener {
 
@@ -76,13 +72,7 @@ public class CashBoxGui extends JFrame implements ActionListener {
     String change;
 
     @Autowired
-    private ReservedItemRepository reservedItemRepository;
-
-    @Autowired
-    private CustomerRepository customerRepository;
-
-    @Autowired
-    private PurchaseRepository purchaseRepository;
+    StorageService storageService;
 
     JButton readyButton = new JButton("Fertig");
     JButton newButton = new JButton("Neuer Kunde");
@@ -336,9 +326,8 @@ public class CashBoxGui extends JFrame implements ActionListener {
                     }
                 }
             }
-            storeSoldInformation(postCode);
+            storageService.storeSoldInformation(tablemodel.getColumnData(0), postCode);
 
-            // TODO store zip code in db (postCode)
             newButton.setEnabled(true);
             printButton.setEnabled(true);
             readyButton.setEnabled(false);
@@ -417,20 +406,6 @@ public class CashBoxGui extends JFrame implements ActionListener {
                 e1.printStackTrace();
             }
         }
-
-    }
-
-    @Transactional
-    private void storeSoldInformation(int postCode) {
-        Date soldDate = new Date();
-        Customer customer = Customer.create(postCode);
-        customerRepository.save(customer);
-        for (Object code : tablemodel.getColumnData(0)) {
-            ReservedItem item = reservedItemRepository.findByCode(code.toString());
-            item.setSold(soldDate);
-            reservedItemRepository.save(item);
-            purchaseRepository.save(Purchase.create(item, customer));
-        }
     }
 
     private static class App {
@@ -450,11 +425,11 @@ public class CashBoxGui extends JFrame implements ActionListener {
             return data;
         }
 
-        public List<Object> getColumnData(int col) {
-            List<Object> columnData = new ArrayList<>();
+        public List<String> getColumnData(int col) {
+            List<String> columnData = new ArrayList<>();
             for (int i = 0; i < data.size(); i++) {
                 Object[] row = (Object[]) data.get(i);
-                columnData.add(row[col]);
+                columnData.add(row[col].toString());
             }
 
             return columnData;
@@ -523,7 +498,7 @@ public class CashBoxGui extends JFrame implements ActionListener {
         setErrorText(" ");
         Object[] data = null;
         ReservedItem reservedItem;
-        reservedItem = reservedItemRepository.findByCode(code);
+        reservedItem = storageService.getReservedItem(code);
         if (reservedItem == null) {
             setErrorText("Artikel mit Nummer \"" + code
                     + "\" existiert nicht!");

@@ -1,10 +1,8 @@
 package de.obfusco.secondhand.storage.repository;
 
 import de.obfusco.secondhand.storage.model.Seller;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.CrudRepository;
 
-@Repository
-public interface SellerRepository extends JpaRepository<Seller, Integer> {
+public interface SellerRepository extends CrudRepository<Seller, Integer> {
 
 }

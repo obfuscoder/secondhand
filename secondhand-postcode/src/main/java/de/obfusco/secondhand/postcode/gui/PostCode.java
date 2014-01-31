@@ -12,32 +12,39 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
-import de.obfusco.secondhand.common.items.reader.CsvFinder;
+import de.obfusco.secondhand.storage.model.ZipCodeCount;
+import de.obfusco.secondhand.storage.repository.CustomerRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.stereotype.Component;
+
+@Component
 public class PostCode extends JFrame {
 
     private static final long serialVersionUID = 839062362772789004L;
-    CsvFinder finder;
     JTable postCodeTable;
     PostCodeTableModel tablemodel;
 
-    public PostCode() {
+    CustomerRepository customerRepository;
+
+    @Autowired
+    public PostCode(CustomerRepository customerRepository) {
         super("PLZOverview");
+        this.customerRepository = customerRepository;
         setSize(800, 800);
         setLocation(200, 50);
         addComponentsToPane(getContentPane());
         pack();
 //		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
-
-        finder = new CsvFinder();
     }
 
     private void addComponentsToPane(Container pane) {
         JLabel title = new JLabel("PLZ Übersicht");
         pane.add(title, BorderLayout.NORTH);
-
-        tablemodel = new PostCodeTableModel();
+        tablemodel = new PostCodeTableModel(customerRepository.getZipCodeCounts());
 
         postCodeTable = new JTable(tablemodel);
 
@@ -49,8 +56,11 @@ public class PostCode extends JFrame {
 
         private List<String> columnNames = new ArrayList<>(Arrays.asList(
                 "PLZ", "Anzahl"));
+        private List<ZipCodeCount> zipCodeCounts;
 
-        private List<String[]> data = CsvFinder.getAllPostCodes();
+        private PostCodeTableModel(List<ZipCodeCount> zipCodeCounts) {
+            this.zipCodeCounts = zipCodeCounts;
+        }
 
         @Override
         public int getColumnCount() {
@@ -59,25 +69,28 @@ public class PostCode extends JFrame {
 
         @Override
         public int getRowCount() {
-            return data.size();
+            return zipCodeCounts.size();
         }
 
         @Override
         public Object getValueAt(int row, int col) {
-            Object[] itemrow = (String[]) data.get(row);
-
-            return itemrow[col];
+            switch (col) {
+                case 0:
+                    return zipCodeCounts.get(row).getZipCode();
+                case 1:
+                    return zipCodeCounts.get(row).getCount();
+            }
+            return null;
         }
 
         @Override
         public String getColumnName(int index) {
             return (String) columnNames.get(index);
         }
-
     }
 
     public static void main(String args[]) {
-        PostCode gui = new PostCode();
+        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(PostCodeConfiguration.class);
     }
 
 }

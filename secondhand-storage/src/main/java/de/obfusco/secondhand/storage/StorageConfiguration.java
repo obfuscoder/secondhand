@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -26,7 +27,7 @@ public class StorageConfiguration {
         dataSource.setUrl("jdbc:mysql://localhost:3306/floh");
         dataSource.setUsername("root");
         dataSource.setPassword("");
-        return dataSource;
+        return new TransactionAwareDataSourceProxy(dataSource);
     }
 
     @Bean
@@ -51,7 +52,6 @@ public class StorageConfiguration {
     @Bean
     PlatformTransactionManager transactionManager() {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setDataSource(dataSource());
         transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
         return transactionManager;
     }

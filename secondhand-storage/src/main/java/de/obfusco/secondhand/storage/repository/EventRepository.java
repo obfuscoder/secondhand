@@ -1,10 +1,9 @@
 package de.obfusco.secondhand.storage.repository;
 
 import de.obfusco.secondhand.storage.model.Event;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-@Repository
-public interface EventRepository extends JpaRepository<Event, Integer> {
-    
+import org.springframework.data.repository.CrudRepository;
+
+public interface EventRepository extends CrudRepository<Event, Integer> {
+
 }

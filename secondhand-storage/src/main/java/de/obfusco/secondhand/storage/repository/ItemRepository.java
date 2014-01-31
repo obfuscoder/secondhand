@@ -1,10 +1,8 @@
 package de.obfusco.secondhand.storage.repository;
 
 import de.obfusco.secondhand.storage.model.Item;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.CrudRepository;
 
-@Repository
-public interface ItemRepository extends JpaRepository<Item, Integer> {
+public interface ItemRepository extends CrudRepository<Item, Integer> {
 
 }
