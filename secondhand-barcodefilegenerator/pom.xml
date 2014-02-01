@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>secondhand-common</artifactId>
+            <artifactId>secondhand-storage</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

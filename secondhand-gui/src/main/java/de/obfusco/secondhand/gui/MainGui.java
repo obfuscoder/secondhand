@@ -31,11 +31,21 @@ import javax.swing.SwingConstants;
 import de.obfusco.secondhand.barcodefilegenerator.BarCodeGeneratorGui;
 import de.obfusco.secondhand.common.csvread.CsvReader;
 import de.obfusco.secondhand.payoff.gui.PayOffGui;
-import de.obfusco.secondhand.postcode.gui.PostCode;
+import de.obfusco.secondhand.postcode.gui.PostCodeGui;
 import de.obfusco.secondhand.sale.gui.CashBoxGui;
 import de.obfusco.secondhand.testscan.gui.TestScanGui;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
 public class MainGui extends JFrame implements ActionListener {
+
+    @Autowired
+    PostCodeGui postCodeGui;
+
+    @Autowired
+    CashBoxGui cashBoxGui;
 
     private static final long serialVersionUID = 4961295225628108431L;
     public JButton sale;
@@ -368,7 +378,7 @@ public class MainGui extends JFrame implements ActionListener {
 
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                new CashBoxGui();
+                cashBoxGui.setVisible(true);
             }
         });
 
@@ -377,7 +387,7 @@ public class MainGui extends JFrame implements ActionListener {
 
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                new PostCode();
+                postCodeGui.setVisible(true);
             }
         });
 
@@ -425,10 +435,6 @@ public class MainGui extends JFrame implements ActionListener {
         panel.add(testScan);
 
         pane.add(panel, BorderLayout.SOUTH);
-    }
-
-    public static void main(String args[]) {
-        MainGui gui = new MainGui();
     }
 
     /**

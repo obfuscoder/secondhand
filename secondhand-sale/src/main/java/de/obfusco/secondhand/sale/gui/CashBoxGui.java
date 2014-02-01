@@ -42,21 +42,14 @@ import javax.swing.table.DefaultTableCellRenderer;
 import com.itextpdf.text.DocumentException;
 
 import de.obfusco.secondhand.sale.service.StorageService;
-import de.obfusco.secondhand.storage.StorageConfiguration;
 import de.obfusco.secondhand.storage.model.ReservedItem;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFImageWriter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.stereotype.Component;
 
-@Configuration
-@ComponentScan("de.obfusco.secondhand")
-@Import(StorageConfiguration.class)
+@Component
 public class CashBoxGui extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = -698049510249510666L;
@@ -87,8 +80,6 @@ public class CashBoxGui extends JFrame implements ActionListener {
         setLocation(400, 10);
         addComponentsToPane(getContentPane());
         pack();
-        // setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true);
     }
 
     private void addComponentsToPane(Container pane) {
@@ -166,19 +157,6 @@ public class CashBoxGui extends JFrame implements ActionListener {
                         return;
                     }
 
-                    // int checksum = 0;
-                    // for (int i = 0; i < 7; i++) {
-                    // checksum += Character.getNumericValue(itemText
-                    // .charAt(i));
-                    // }
-                    //
-                    // if (Character.getNumericValue(itemText.charAt(7)) !=
-                    // checksum % 10) {
-                    // setErrorText("Artikelnummer " + itemNr.getText() +
-                    // " ist falsch! Bitte überprüfen Sie die Eingabe.");
-                    // itemNr.setText("");
-                    // return;
-                    // }
                     addItem();
                 }
 
@@ -548,9 +526,5 @@ public class CashBoxGui extends JFrame implements ActionListener {
 
         itemNr.requestFocus();
 
-    }
-
-    public static void main(String args[]) {
-        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(CashBoxGui.class);
     }
 }

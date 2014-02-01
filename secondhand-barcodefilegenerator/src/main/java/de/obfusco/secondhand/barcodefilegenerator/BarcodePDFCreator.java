@@ -25,9 +25,6 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import de.obfusco.secondhand.common.constants.Constants;
-import de.obfusco.secondhand.common.items.reader.CsvFinder;
-
 public class BarcodePDFCreator {
 
     /**
@@ -188,16 +185,14 @@ public class BarcodePDFCreator {
 
     public void createPDFFiles() throws IOException, DocumentException {
 
-        for (int customercount = 1; customercount < Constants.CUSTOMER_COUNT; customercount++) {
-            CsvFinder finder;
+        for (int customercount = 1; customercount < 10; customercount++) {
 
             String customer = new DecimalFormat("000").format(customercount);
             String path = resultpath + customer + "\\";
-            finder = new CsvFinder(path + customer + "_userItems.csv");
             if (!items.isEmpty()) {
                 items.clear();
             }
-            items = finder.getAllItems();
+            //items = finder.getAllItems();
             itemkeys = new ArrayList<>(items.keySet());
             itemCounter = 0;
             Collections.sort(itemkeys);

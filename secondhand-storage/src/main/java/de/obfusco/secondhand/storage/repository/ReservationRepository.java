@@ -6,4 +6,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface ReservationRepository extends CrudRepository<Reservation, Integer> {
 
+    public Reservation findByEventIdAndNumber(int eventId, int number);
 }

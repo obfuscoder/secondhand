@@ -16,12 +16,10 @@ import de.obfusco.secondhand.storage.model.ZipCodeCount;
 import de.obfusco.secondhand.storage.repository.CustomerRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PostCode extends JFrame {
+public class PostCodeGui extends JFrame {
 
     private static final long serialVersionUID = 839062362772789004L;
     JTable postCodeTable;
@@ -30,15 +28,13 @@ public class PostCode extends JFrame {
     CustomerRepository customerRepository;
 
     @Autowired
-    public PostCode(CustomerRepository customerRepository) {
-        super("PLZOverview");
+    public PostCodeGui(CustomerRepository customerRepository) {
+        super("PLZ Übersicht");
         this.customerRepository = customerRepository;
         setSize(800, 800);
         setLocation(200, 50);
         addComponentsToPane(getContentPane());
         pack();
-//		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true);
     }
 
     private void addComponentsToPane(Container pane) {
@@ -88,9 +84,4 @@ public class PostCode extends JFrame {
             return (String) columnNames.get(index);
         }
     }
-
-    public static void main(String args[]) {
-        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(PostCodeConfiguration.class);
-    }
-
 }

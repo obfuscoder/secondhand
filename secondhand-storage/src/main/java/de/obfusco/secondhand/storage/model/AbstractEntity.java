@@ -1,5 +1,6 @@
 package de.obfusco.secondhand.storage.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.GeneratedValue;
@@ -15,7 +16,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 @MappedSuperclass
-abstract class AbstractEntity {
+abstract class AbstractEntity implements Serializable {
 
     @Id
     @GeneratedValue

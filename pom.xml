@@ -10,12 +10,11 @@
         <module>secondhand-storage</module>
         <module>secondhand-gui</module>
         <module>secondhand-barcodefilegenerator</module>
-        <module>secondhand-common</module>
-    <module>secondhand-payoff</module>
-    <module>secondhand-postcode</module>
-    <module>secondhand-sale</module>
-    <module>secondhand-testscan</module>
-  </modules>
+        <module>secondhand-payoff</module>
+        <module>secondhand-postcode</module>
+        <module>secondhand-sale</module>
+        <module>secondhand-testscan</module>
+    </modules>
     <properties>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>

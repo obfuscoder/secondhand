@@ -24,21 +24,25 @@ import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import de.obfusco.secondhand.common.items.reader.CsvFinder;
-import de.obfusco.secondhand.common.sold.file.SoldFileWriter;
+import de.obfusco.secondhand.storage.model.ReservedItem;
+import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
 public class TestScanGui extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = -698049510249510666L;
-    CsvFinder finder;
     JTextField itemNr;
     CashTableModel tablemodel;
     JLabel errorLabel;
     JTable cashTable;
 
-    SoldFileWriter nrToFileWriter;
-
     JButton clearButton = new JButton("Tabelle leeren");
+
+    @Autowired
+    private ReservedItemRepository reservedItemRepository;
 
     public TestScanGui() {
         super("Barcode Test");
@@ -46,11 +50,6 @@ public class TestScanGui extends JFrame implements ActionListener {
         setLocation(400, 10);
         addComponentsToPane(getContentPane());
         pack();
-        // setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true);
-
-        finder = new CsvFinder();
-        nrToFileWriter = new SoldFileWriter();
     }
 
     private void addComponentsToPane(Container pane) {
@@ -128,19 +127,6 @@ public class TestScanGui extends JFrame implements ActionListener {
                         return;
                     }
 
-                    // int checksum = 0;
-                    // for (int i = 0; i < 7; i++) {
-                    // checksum += Character.getNumericValue(itemText
-                    // .charAt(i));
-                    // }
-                    //
-                    // if (Character.getNumericValue(itemText.charAt(7)) !=
-                    // checksum % 10) {
-                    // setErrorText("Artikelnummer " + itemNr.getText() +
-                    // " ist falsch! Bitte überprüfen Sie die Eingabe.");
-                    // itemNr.setText("");
-                    // return;
-                    // }
                     addItem();
                 }
 
@@ -189,20 +175,43 @@ public class TestScanGui extends JFrame implements ActionListener {
         private List<String> columnNames = new ArrayList<String>(Arrays.asList(
                 "ArtNr", "Kategorie", "Bezeichnung", "Groesse", "Preis"));
 
-        private List<Object> data = new ArrayList<Object>();
+        private List<ReservedItem> data = new ArrayList<>();
 
-        public List<Object> getData() {
+        public List<ReservedItem> getData() {
             return data;
         }
 
         public List<Object> getColumnData(int col) {
             List<Object> columnData = new ArrayList<Object>();
             for (int i = 0; i < data.size(); i++) {
-                Object[] row = (Object[]) data.get(i);
-                columnData.add(row[col]);
+                ReservedItem item = data.get(i);
+                String columnValue = getItemValueForColumn(item, col);
+                columnData.add(columnValue);
             }
 
             return columnData;
+        }
+
+        private String getItemValueForColumn(ReservedItem item, int col) {
+            String columnValue = "";
+            switch (col) {
+                case 0:
+                    columnValue = item.getCode();
+                    break;
+                case 1:
+                    columnValue = item.getItem().getCategory().getName();
+                    break;
+                case 2:
+                    columnValue = item.getItem().getDescription();
+                    break;
+                case 3:
+                    columnValue = item.getItem().getSize();
+                    break;
+                case 4:
+                    columnValue = item.getItem().getPrice().toString();
+                    break;
+            }
+            return columnValue;
         }
 
         @Override
@@ -217,9 +226,7 @@ public class TestScanGui extends JFrame implements ActionListener {
 
         @Override
         public Object getValueAt(int row, int col) {
-            Object[] itemrow = (Object[]) data.get(row);
-
-            return itemrow[col];
+            return getItemValueForColumn(data.get(row), col);
         }
 
         @Override
@@ -239,32 +246,27 @@ public class TestScanGui extends JFrame implements ActionListener {
             return false;
         }
 
-        public void addRow(Object[] row) {
+        public void addRow(ReservedItem item) {
 
-            if (data.contains(row)) {
+            if (data.contains(item)) {
                 setErrorText("Artikel schon vorhanden!");
             } else {
-                data.add(row);
+                data.add(item);
                 this.fireTableDataChanged();
             }
         }
 
         public void delRow(int row) {
-
-            Object[] itemrow = (Object[]) data.get(row);
             data.remove(row);
             this.fireTableDataChanged();
-
         }
-
     }
 
     public void addItem() {
         setErrorText(" ");
-        Object[] data;
-        data = finder.getItemForNr(itemNr.getText());
-        if (data != null) {
-            tablemodel.addRow(data);
+        ReservedItem item = reservedItemRepository.findByCode(itemNr.getText());
+        if (item != null) {
+            tablemodel.addRow(item);
         } else {
             setErrorText("Artikel mit Nummer \"" + itemNr.getText()
                     + "\" existiert nicht!");
@@ -296,9 +298,4 @@ public class TestScanGui extends JFrame implements ActionListener {
         itemNr.requestFocus();
 
     }
-
-    public static void main(String args[]) {
-        TestScanGui gui = new TestScanGui();
-    }
-
 }

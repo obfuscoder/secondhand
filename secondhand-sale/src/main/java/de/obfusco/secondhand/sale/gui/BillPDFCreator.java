@@ -32,8 +32,8 @@ public class BillPDFCreator {
                 + cal.get(Calendar.HOUR_OF_DAY) + ":"
                 + cal.get(Calendar.MINUTE);
 
-        document.add(new Phrase(new Chunk("Rechnung Flohmarkt ", FontFactory
-                .getFont(FontFactory.HELVETICA_BOLD, 24))));
+        document.add(new Phrase(new Chunk("Rechnung Flohmarkt ",
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 24))));
         document.add(new Paragraph(""));
         document.add(new Phrase(new Chunk(date, FontFactory.getFont(
                 FontFactory.HELVETICA_BOLD, 12))));
@@ -42,8 +42,8 @@ public class BillPDFCreator {
         document.add(insertItemTable(data, sum, bar, change));
 
         document.add(new Paragraph("\n"));
-        document.add(new Phrase(new Chunk("Vielen Dank für Ihren Einkauf. Der Erlös kommt den Kindergärten \n \"Arche Noah\" und \"Regenbogen\" zugute.", FontFactory
-                .getFont(FontFactory.HELVETICA, 10))));
+        document.add(new Phrase(new Chunk("Vielen Dank für Ihren Einkauf. Der Erlös kommt den Kindergärten \n \"Arche Noah\" und \"Regenbogen\" zugute.",
+                FontFactory.getFont(FontFactory.HELVETICA, 10))));
 
         document.close();
     }

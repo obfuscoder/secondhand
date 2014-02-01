@@ -12,6 +12,9 @@ public class ReservedItem extends AbstractEntity {
     @ManyToOne
     Item item;
 
+    @ManyToOne
+    Reservation reservation;
+
     String code;
 
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
@@ -23,6 +26,10 @@ public class ReservedItem extends AbstractEntity {
 
     public Item getItem() {
         return item;
+    }
+
+    public Reservation getReservation() {
+        return reservation;
     }
 
     public boolean isSold() {

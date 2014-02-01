@@ -10,7 +10,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -21,7 +24,22 @@ import javax.swing.SwingConstants;
 
 import com.itextpdf.text.DocumentException;
 
+import de.obfusco.secondhand.storage.repository.ReservationRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
 public class BarCodeGeneratorGui extends JFrame implements ActionListener {
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private BarCodeSheet barCodeSheet;
+
+    @Autowired
+    private BarCodeLabelSheet barCodeLabelSheet;
 
     public JButton justBarcode;
     public JButton etiquettes;
@@ -38,7 +56,6 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
         setLocation(200, 50);
         addComponentsToPane(getContentPane());
         pack();
-        setVisible(true);
     }
 
     private void addComponentsToPane(Container pane) {
@@ -116,38 +133,29 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
         if (event.getSource() == justBarcode) {
 
             try {
-
-                filename = new BARCodeSheet().createPDFFile(Integer
-                        .parseInt(customerNr.getText()));
+                filename = barCodeSheet.createPDFFile(
+                        reservationRepository.findByEventIdAndNumber(1,
+                                Integer.parseInt(customerNr.getText())));
 
                 etiquettesLabel.setText("Barcodes für " + customerNr.getText());
 
-            } catch (NumberFormatException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (DocumentException e) {
+            } catch (NumberFormatException | IOException | DocumentException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         } else if (event.getSource() == etiquettes) {
             try {
 
-                filename = new BarCodeLabelSheet().createPDFFile(Integer
-                        .parseInt(customerNr.getText()));
+                filename = barCodeLabelSheet.createPDFFile(
+                        reservationRepository.findByEventIdAndNumber(1,
+                                Integer.parseInt(customerNr.getText())));
 
                 etiquettesLabel.setText("Etiketten für " + customerNr.getText());
-            } catch (NumberFormatException e) {
+            } catch (FileNotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (DocumentException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            } catch (DocumentException ex) {
+                Logger.getLogger(BarCodeGeneratorGui.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 

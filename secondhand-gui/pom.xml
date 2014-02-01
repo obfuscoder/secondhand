@@ -20,11 +20,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>secondhand-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>secondhand-payoff</artifactId>
             <version>${project.version}</version>
         </dependency>
