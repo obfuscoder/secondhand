@@ -3,12 +3,26 @@ package de.obfusco.secondhand.sale.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
+import javax.print.Doc;
+import javax.print.DocFlavor;
+import javax.print.DocPrintJob;
+import javax.print.PrintException;
+import javax.print.PrintService;
+import javax.print.PrintServiceLookup;
+import javax.print.SimpleDoc;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
@@ -18,6 +32,11 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.util.PDFImageWriter;
+
+import com.itextpdf.text.DocumentException;
 
 import de.obfusco.secondhand.sale.service.StorageService;
 
@@ -34,6 +53,7 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 
 	JButton okButton = new JButton("OK");
 	JButton cancelButton = new JButton("Cancel");
+	JButton printButton = new JButton("Drucken");
 
 	JLabel title = new JLabel("Verkauf abschließen");
 
@@ -41,6 +61,11 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 
 	StorageService storageService;
 	List<String> items;
+
+	int postCode = 0;
+
+	private static final String PRINTTO = "C:\\flohmarkt\\bill.pdf";
+	private static final String PRINTTOIMG = "C:\\flohmarkt\\billimage";
 
 	public CheckOutDialog(JFrame parentFrame) {
 
@@ -105,6 +130,10 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 					calculateChange();
 					postCodeTextField.requestFocus();
 				}
+				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+					frame.getItemNr().requestFocus();
+					dispose();
+				}
 
 			}
 
@@ -130,7 +159,12 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 
+					getPostcode();
 					okButton.requestFocus();
+				}
+				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+					frame.getItemNr().requestFocus();
+					dispose();
 				}
 
 			}
@@ -171,7 +205,7 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 
 		bottomPanel.add(errorLabel, BorderLayout.SOUTH);
 
-		JPanel buttonPanel = new JPanel(new GridLayout(0, 2));
+		JPanel buttonPanel = new JPanel(new GridLayout(0, 3));
 
 		okButton.addActionListener(this);
 		okButton.addKeyListener(new KeyListener() {
@@ -193,12 +227,18 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					completeOrder();
 				}
+				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+					dispose();
+					frame.getItemNr().requestFocus();
+				}
 			}
 		});
 		cancelButton.addActionListener(this);
+		printButton.addActionListener(this);
 
 		buttonPanel.add(okButton);
 		buttonPanel.add(cancelButton);
+		buttonPanel.add(printButton);
 
 		bottomPanel.add(buttonPanel);
 
@@ -206,37 +246,96 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 
 	}
 
+	private boolean getPostcode() {
+		String postText = postCodeTextField.getText();
+		postCode = 0;
+		if (postText.length() == 5) {
+			try {
+				postCode = Integer.parseInt(postText);
+				errorLabel.setText("");
+				return true;
+			} catch (NumberFormatException ex) {
+				errorLabel.setText("Ungültige PLZ. Bitte nur Zahlen eingeben.");
+				postCodeTextField.requestFocus();
+				return false;
+			}
+		} else if (postText.length() != 0) {
+			errorLabel.setText("Ungültige PLZ. 5 Stellen bitte.");
+			postCodeTextField.requestFocus();
+			return false;
+		}
+		return true;
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		if (e.getSource() == okButton) {
 			completeOrder();
-		} else {
+		} else if (e.getSource() == cancelButton) {
 			this.dispose();
+		} else if (e.getSource() == printButton) {
+			try {
+				String bar = "";
+				if (getBarString() != null && !getBarString().equals("")) {
+					bar = String.format("%.2f",
+							Float.parseFloat(getBarString()));
+				} else {
+					bar = String.format("%.2f", Float.parseFloat(frame
+							.getPrice().replace(",", ".")));
+				}
+				new BillPDFCreator().createPdf(PRINTTO, frame.getTableData(),
+						frame.getPrice(), bar, getChange());
+			} catch (IOException | DocumentException ex) {
+				ex.printStackTrace();
+			}
+
+			PDDocument document = null;
+			try {
+				document = PDDocument.load(PRINTTO);
+				int pages = document.getPageCount();
+				PDFImageWriter writer = new PDFImageWriter();
+				boolean success = writer.writeImage(document, "jpg", "", 1, 1,
+						PRINTTOIMG, BufferedImage.TYPE_INT_RGB, Toolkit
+								.getDefaultToolkit().getScreenResolution());
+
+				DocFlavor flavor = DocFlavor.INPUT_STREAM.JPEG;
+				PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
+				PrintService pservice = PrintServiceLookup
+						.lookupDefaultPrintService();
+				DocPrintJob pj = pservice.createPrintJob();
+				for (int i = 0; i < pages; i++) {
+					try {
+						FileInputStream fis = new FileInputStream(PRINTTOIMG
+								+ (i + 1) + ".jpg");
+						Doc doc = new SimpleDoc(fis, flavor, null);
+						pj.print(doc, aset);
+					} catch (FileNotFoundException fe) {
+					} catch (PrintException ex) {
+						System.out.println("Fehler beim drucken: " + ex);
+					}
+				}
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 
 	}
 
 	private void completeOrder() {
-		String postText = postCodeTextField.getText();
-		int postCode = 0;
-		if (postText.length() == 5) {
-			try {
-				postCode = Integer.parseInt(postText);
-				errorLabel.setText("");
-			} catch (NumberFormatException ex) {
-				errorLabel.setText("Ungültige PLZ. Bitte nur Zahlen eingeben.");
-				return;
-			}
-		} else if (postText.length() != 0) {
-			errorLabel.setText("Ungültige PLZ. 5 Stellen bitte.");
-			return;
-		}
+
 		calculateChange();
+
+		boolean postcodeOK = true;
+		if (postCode == 0 && postCodeTextField.getText().length() > 0) {
+			postcodeOK = getPostcode();
+		}
+		if (!postcodeOK)
+			return;
 		storageService.storeSoldInformation(items, postCode);
 
 		frame.getNewButton().setEnabled(true);
-		frame.getPrintButton().setEnabled(true);
 		frame.getReadyButton().setEnabled(false);
 		frame.getItemNr().setEnabled(false);
 		frame.getCashTable().setEnabled(false);
@@ -262,6 +361,10 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 
 	public String getBarString() {
 		return barTextField.getText();
+	}
+
+	public String getChange() {
+		return change;
 	}
 
 }
