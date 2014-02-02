@@ -51,7 +51,6 @@ public class MainGui extends JFrame implements ActionListener {
     public JButton testScan;
     JMenuBar menuBar;
     JMenu filemenu;
-    JMenu import_export_menu;
     JMenuItem itemImportMenu;
     JMenuItem customerImportMenu;
     JMenuItem close;
@@ -94,10 +93,8 @@ public class MainGui extends JFrame implements ActionListener {
 
         menuBar = new JMenuBar();
         filemenu = new JMenu("Datei");
-        import_export_menu = new JMenu("Verkauf Import/Export");
 
         menuBar.add(filemenu);
-        menuBar.add(import_export_menu);
 
         itemImportMenu = new JMenuItem("ArtikelImport");
         itemImportMenu.addActionListener(this);
@@ -116,9 +113,6 @@ public class MainGui extends JFrame implements ActionListener {
         importMenu.addActionListener(this);
         exportMenu = new JMenuItem("Export");
         exportMenu.addActionListener(this);
-
-        import_export_menu.add(importMenu);
-        import_export_menu.add(exportMenu);
 
         this.setJMenuBar(menuBar);
 
