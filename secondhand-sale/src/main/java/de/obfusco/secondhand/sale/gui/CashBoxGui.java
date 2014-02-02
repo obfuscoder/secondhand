@@ -283,6 +283,15 @@ public class CashBoxGui extends JFrame implements ActionListener {
         if (event.getSource() == readyButton) {
 
             errorLabel.setText("");
+            
+            // TEST
+            
+            CheckOutDialog checkout = new CheckOutDialog(this, priceLabel.getText() );
+            checkout.setLocationRelativeTo(this);
+            checkout.setVisible(true);
+            
+            // TEST END
+            
             String postText = postCodeTextField.getText();
             int postCode = 0;
             if (postText.length() != 0 && postText.length() != 0) {
