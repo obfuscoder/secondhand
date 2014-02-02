@@ -22,7 +22,6 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Font;
 
 import de.obfusco.secondhand.payoff.file.SellerPayOff;
 import de.obfusco.secondhand.payoff.file.TotalPayOff;
@@ -80,8 +79,8 @@ public class PayOffGui extends JFrame {
         pane.add(hint);
 
         totalPayoff = new JLabel("Gesamtübersicht");
-        totalPayoff.setFont(title.getFont().deriveFont(Font.UNDERLINE, 20.0f));
-        totalPayoff.setForeground(Color.BLUE);
+        totalPayoff.setFont(title.getFont().deriveFont(20.0f));
+        totalPayoff.setForeground(Color.BLUE.darker());
         totalPayoff.setCursor(Cursor
                 .getPredefinedCursor(Cursor.HAND_CURSOR));
 
@@ -126,8 +125,8 @@ public class PayOffGui extends JFrame {
 
             JLabel customerPayoffNr = new JLabel(reservation.getNumber() + " | " + reservation.getSeller().getName());
 
-            customerPayoffNr.setFont(title.getFont().deriveFont(Font.UNDERLINE, 14.0f));
-            customerPayoffNr.setForeground(Color.BLUE);
+            customerPayoffNr.setFont(title.getFont().deriveFont(14.0f));
+            customerPayoffNr.setForeground(Color.BLUE.darker());
             customerPayoffNr.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
             customerPayoffNr.addMouseListener(new MouseListener() {
