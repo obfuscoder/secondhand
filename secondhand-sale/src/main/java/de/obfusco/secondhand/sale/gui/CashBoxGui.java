@@ -6,6 +6,8 @@ import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
@@ -51,7 +53,7 @@ public class CashBoxGui extends JFrame implements ActionListener {
 
 	public CashBoxGui() {
 		super("Flohmarkt Verkauf");
-		setSize(600, 800);
+		setSize(800, 600);
 		addComponentsToPane(getContentPane());
 		pack();
 		setLocationRelativeTo(null);
@@ -91,8 +93,10 @@ public class CashBoxGui extends JFrame implements ActionListener {
 
 		DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
 		rightRenderer.setHorizontalAlignment(DefaultTableCellRenderer.RIGHT);
-		cashTable.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
+		cashTable.getColumnModel().getColumn(0).setPreferredWidth(100);
+		cashTable.getColumnModel().getColumn(1).setPreferredWidth(100);
 		cashTable.getColumnModel().getColumn(2).setPreferredWidth(300);
+		cashTable.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
 
 		itemNr = new JTextField();
 		itemNr.addKeyListener(new KeyListener() {
@@ -137,6 +141,12 @@ public class CashBoxGui extends JFrame implements ActionListener {
 			}
 		});
 
+		cashTable.addComponentListener(new ComponentAdapter() {
+		    public void componentResized(ComponentEvent e) {
+		    	cashTable.scrollRectToVisible(cashTable.getCellRect(cashTable.getRowCount()-1, 0, true));
+		    }
+		});
+		
 		JPanel itemPanel = new JPanel();
 		itemPanel.setLayout(new BorderLayout());
 		itemPanel.add(itemNr, BorderLayout.NORTH);
@@ -201,7 +211,8 @@ public class CashBoxGui extends JFrame implements ActionListener {
 		});
 
 		JPanel southPanel = new JPanel();
-		southPanel.setLayout(new GridLayout(1, 0));
+		southPanel.setLayout(new GridLayout(2, 0));
+		southPanel.add(sumPanel);
 		southPanel.add(buttonPanel);
 
 		pane.add(southPanel, BorderLayout.SOUTH);
