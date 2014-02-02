@@ -24,6 +24,8 @@ import javax.swing.SwingConstants;
 
 import com.itextpdf.text.DocumentException;
 
+import de.obfusco.secondhand.storage.model.Event;
+import de.obfusco.secondhand.storage.repository.EventRepository;
 import de.obfusco.secondhand.storage.repository.ReservationRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,9 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private EventRepository eventRepository;
 
     @Autowired
     private BarCodeSheet barCodeSheet;
@@ -53,9 +58,9 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
     public BarCodeGeneratorGui() {
         super("Etiketten/ Barcodes");
         setSize(1000, 800);
-        setLocation(200, 50);
         addComponentsToPane(getContentPane());
         pack();
+        setLocationRelativeTo(null);
     }
 
     private void addComponentsToPane(Container pane) {
@@ -129,13 +134,15 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == justBarcode) {
-
+    public void actionPerformed(ActionEvent actionEvent) {
+        final Event event = eventRepository.findOne(1);
+        if (actionEvent.getSource() == justBarcode) {
             try {
                 filename = barCodeSheet.createPDFFile(
-                        reservationRepository.findByEventIdAndNumber(1,
-                                Integer.parseInt(customerNr.getText())));
+                        reservationRepository.findByEventAndNumber(
+                                event,
+                                Integer.parseInt(customerNr.getText()))
+                );
 
                 etiquettesLabel.setText("Barcodes für " + customerNr.getText());
 
@@ -143,11 +150,12 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        } else if (event.getSource() == etiquettes) {
+        } else if (actionEvent.getSource() == etiquettes) {
             try {
 
                 filename = barCodeLabelSheet.createPDFFile(
-                        reservationRepository.findByEventIdAndNumber(1,
+                        reservationRepository.findByEventAndNumber(
+                                event,
                                 Integer.parseInt(customerNr.getText())));
 
                 etiquettesLabel.setText("Etiketten für " + customerNr.getText());

@@ -2,6 +2,7 @@ package de.obfusco.secondhand.storage.repository;
 
 import java.util.List;
 
+import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.Reservation;
 import de.obfusco.secondhand.storage.model.ReservedItem;
 
@@ -12,4 +13,8 @@ public interface ReservedItemRepository extends CrudRepository<ReservedItem, Int
     ReservedItem findByCode(String code);
 
     List<ReservedItem> findByReservation(Reservation reservation);
+
+    List<ReservedItem> findByReservationAndSoldNotNull(Reservation reservation);
+
+    List<ReservedItem> findByReservationEventAndSoldNotNull(Event event);
 }

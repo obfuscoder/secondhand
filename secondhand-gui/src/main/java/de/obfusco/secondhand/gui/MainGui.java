@@ -5,18 +5,6 @@ import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.Collections;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -29,7 +17,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import de.obfusco.secondhand.barcodefilegenerator.BarCodeGeneratorGui;
-import de.obfusco.secondhand.common.csvread.CsvReader;
 import de.obfusco.secondhand.payoff.gui.PayOffGui;
 import de.obfusco.secondhand.postcode.gui.PostCodeGui;
 import de.obfusco.secondhand.sale.gui.CashBoxGui;
@@ -47,10 +34,18 @@ public class MainGui extends JFrame implements ActionListener {
     @Autowired
     CashBoxGui cashBoxGui;
 
+    @Autowired
+    TestScanGui testScanGui;
+
+    @Autowired
+    BarCodeGeneratorGui barCodeGeneratorGui;
+
+    @Autowired
+    PayOffGui payOffGui;
+
     private static final long serialVersionUID = 4961295225628108431L;
     public JButton sale;
     public JButton billgenerator;
-    public JButton billgeneratorComplete;
     public JButton barcodegenerator;
     public JButton plzOverview;
     public JButton testScan;
@@ -78,257 +73,14 @@ public class MainGui extends JFrame implements ActionListener {
         setLocation(200, 10);
         addComponentsToPane(getContentPane());
         pack();
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
 
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == itemImportMenu) {
-            int returnVal = fc.showOpenDialog(MainGui.this);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-
-                importCSVFile(completeFilepath, completefile);
-
-                CsvReader reader = new CsvReader(true);
-                reader.saveItemsToCustomerFolder();
-            }
-        } else if (e.getSource() == customerImportMenu) {
-            int returnVal = fc.showOpenDialog(MainGui.this);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                importCSVFile(customerFilepath, customerFile);
-            }
-        } else if (e.getSource() == close) {
+        if (e.getSource() == close) {
             System.exit(0);
-        } else if (e.getSource() == exportMenu) {
-
-            ExtensionFileFilter filter = new ExtensionFileFilter(
-                    new String[]{".CSV"}, "Comma Delimited File (*.CSV)");
-            fc.addChoosableFileFilter(filter);
-            fc.setFileFilter(filter);
-            fc.setAcceptAllFileFilterUsed(false);
-            int retrival = fc.showSaveDialog(null);
-            if (retrival == fc.APPROVE_OPTION) {
-
-                File sourceFile = new File(soldFilepath + soldFile);
-                File destFile = fc.getSelectedFile();
-
-                if (!destFile.getName().contains(".")) {
-                    destFile = new File(destFile.getPath() + ".csv");
-                }
-
-                if (destFile.exists()) {
-                    destFile.delete();
-                }
-                try {
-                    destFile.createNewFile();
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-
-                FileChannel source = null;
-                FileChannel destination = null;
-
-                try {
-                    source = new FileInputStream(sourceFile).getChannel();
-                    destination = new FileOutputStream(destFile).getChannel();
-                    destination.transferFrom(source, 0, source.size());
-
-                } catch (FileNotFoundException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                } finally {
-                    try {
-                        if (source != null) {
-                            source.close();
-                        }
-                        if (destination != null) {
-                            destination.close();
-                        }
-                    } catch (IOException e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    }
-                }
-            }
-        } else if (e.getSource() == importMenu) {
-            importMenu();
-        }
-    }
-
-    private void importCSVFile(String path, String file) {
-        (new File(path)).mkdirs();
-
-        File sourceFile = fc.getSelectedFile();
-        File destFile = new File(path + file);
-
-        if (destFile.exists()) {
-            destFile.delete();
-        }
-        try {
-            destFile.createNewFile();
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-
-        FileChannel source = null;
-        FileChannel destination = null;
-
-        try {
-            source = new FileInputStream(sourceFile).getChannel();
-            destination = new FileOutputStream(destFile).getChannel();
-            destination.transferFrom(source, 0, source.size());
-
-        } catch (FileNotFoundException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        } finally {
-            try {
-                if (source != null) {
-                    source.close();
-                }
-                if (destination != null) {
-                    destination.close();
-                }
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-        }
-    }
-
-    private void importMenu() {
-        File destFile = new File(completeresult + completeresultfile);
-        if (!destFile.exists()) {
-            (new File(completeresult)).mkdirs();
-            File sourceFile = new File(soldFilepath + soldFile);
-
-            if (destFile.exists()) {
-                destFile.delete();
-            }
-            try {
-                destFile.createNewFile();
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-
-            FileChannel source = null;
-            FileChannel destination = null;
-
-            try {
-                source = new FileInputStream(sourceFile).getChannel();
-                destination = new FileOutputStream(destFile).getChannel();
-                destination.transferFrom(source, 0, source.size());
-
-            } catch (FileNotFoundException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            } finally {
-                try {
-                    if (source != null) {
-                        source.close();
-                    }
-                    if (destination != null) {
-                        destination.close();
-                    }
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-            }
-        }
-
-        int returnVal = fc.showOpenDialog(MainGui.this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-
-            ArrayList<String> completeItems = new ArrayList<String>();
-            BufferedReader completeIn;
-            try {
-                completeIn = new BufferedReader(new FileReader(completeresult
-                        + completeresultfile));
-
-                // einlesen
-                String itemNr = "";
-                while ((itemNr = completeIn.readLine()) != null) {
-                    completeItems.add(itemNr);
-                }
-
-                completeIn.close();
-            } catch (FileNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException ex) {
-
-            }
-
-            String itemNr = "";
-            BufferedReader in;
-            try {
-                in = new BufferedReader(new FileReader(fc.getSelectedFile()));
-
-                // einlesen
-                ArrayList<String> content = new ArrayList<String>();
-
-                while ((itemNr = in.readLine()) != null) {
-                    if (!completeItems.contains(itemNr)) {
-                        completeItems.add(itemNr);
-                    }
-                }
-
-                in.close();
-            } catch (FileNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException ex) {
-
-            }
-
-            Collections.sort(completeItems);
-            try {
-                createCompleteFile(completeItems);
-            } catch (FileNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-
-    }
-
-    public void createCompleteFile(ArrayList<String> items)
-            throws FileNotFoundException {
-        BufferedWriter writer = null;
-        try {
-
-            writer = new BufferedWriter(new FileWriter(completeresult
-                    + completeresultfile));
-            for (int i = 0; i < items.size(); i++) {
-                writer.write(items.get(i));
-                writer.newLine();
-                writer.flush();
-            }
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
@@ -396,16 +148,7 @@ public class MainGui extends JFrame implements ActionListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                new PayOffGui(false);
-            }
-        });
-
-        billgeneratorComplete = new JButton("Abrechnung Gesamt");
-        billgeneratorComplete.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new PayOffGui(true);
+                payOffGui.open();
             }
         });
 
@@ -414,7 +157,7 @@ public class MainGui extends JFrame implements ActionListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                new BarCodeGeneratorGui();
+                barCodeGeneratorGui.setVisible(true);
             }
         });
 
@@ -423,79 +166,16 @@ public class MainGui extends JFrame implements ActionListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                new TestScanGui();
+                testScanGui.setVisible(true);
             }
         });
 
         panel.add(sale);
         panel.add(plzOverview);
         panel.add(billgenerator);
-        panel.add(billgeneratorComplete);
         panel.add(barcodegenerator);
         panel.add(testScan);
 
         pane.add(panel, BorderLayout.SOUTH);
-    }
-
-    /**
-     * Inherited FileFilter class to facilitate reuse when multiple file filter
-     * selections are required. For example purposes, I used a static nested
-     * class, which is defined as below as a member of our original
-     * FileChooserExample class.
-     */
-    static class ExtensionFileFilter extends javax.swing.filechooser.FileFilter {
-
-        private java.util.List<String> extensions;
-        private String description;
-
-        public ExtensionFileFilter(String[] exts, String desc) {
-            if (exts != null) {
-                extensions = new java.util.ArrayList<String>();
-
-                for (String ext : exts) {
-
-                    // Clean array of extensions to remove "."
-                    // and transform to lowercase.
-                    extensions.add(ext.replace(".", "").trim().toLowerCase());
-                }
-            } // No else need; null extensions handled below.
-
-            // Using inline if syntax, use input from desc or use
-            // a default value.
-            // Wrap with an if statement to default as well as
-            // avoid NullPointerException when using trim().
-            description = (desc != null) ? desc.trim() : "Custom File List";
-        }
-
-        // Handles which files are allowed by filter.
-        @Override
-        public boolean accept(File f) {
-
-            // Allow directories to be seen.
-            if (f.isDirectory()) {
-                return true;
-            }
-
-            // exit if no extensions exist.
-            if (extensions == null) {
-                return false;
-            }
-
-            // Allows files with extensions specified to be seen.
-            for (String ext : extensions) {
-                if (f.getName().toLowerCase().endsWith("." + ext)) {
-                    return true;
-                }
-            }
-
-            // Otherwise file is not shown.
-            return false;
-        }
-
-        // 'Files of Type' description
-        @Override
-        public String getDescription() {
-            return description;
-        }
     }
 }

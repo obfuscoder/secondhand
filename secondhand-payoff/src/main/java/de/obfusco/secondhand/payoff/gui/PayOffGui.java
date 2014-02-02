@@ -7,59 +7,70 @@ import java.awt.Desktop;
 import java.awt.GridLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.File;
 import java.io.IOException;
-import java.util.Map;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import de.obfusco.secondhand.common.items.reader.CsvFinder;
-import de.obfusco.secondhand.payoff.file.PayOffFile;
+import com.itextpdf.text.DocumentException;
 
+import de.obfusco.secondhand.payoff.file.CustomerPayOff;
+import de.obfusco.secondhand.payoff.file.TotalPayOff;
+import de.obfusco.secondhand.storage.model.Reservation;
+import de.obfusco.secondhand.storage.repository.EventRepository;
+import de.obfusco.secondhand.storage.repository.ReservationRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
 public class PayOffGui extends JFrame {
+
+    public static final int EVENT_ID = 1;
 
     public JLabel totalPayoff;
     public JLabel totalPayoffLink;
 
     private String resultpath = "C:\\flohmarkt\\Abrechnung\\";
-    private String completeresultpath = "C:\\flohmarkt\\KomplettAbrechnung\\";
     private static final String filename = "total_payoff.pdf";
 
-    private String payofftitle = "Abrechnung";
-    private String completepayofftitle = "Abrechnung Gesamt";
-    private static String titel = "Abrechnung";
+    private static final String TITLE = "Abrechnung";
 
-    CsvFinder finder;
+    @Autowired
+    TotalPayOff totalPayOff;
 
-    Map customerMap;
+    @Autowired
+    CustomerPayOff customerPayOff;
 
-    public PayOffGui(boolean completePayoff) {
-        super(titel);
+    @Autowired
+    ReservationRepository reservationRepository;
 
-        finder = new CsvFinder();
+    @Autowired
+    EventRepository eventRepository;
 
-        customerMap = finder.getAllCustomer();
+    public PayOffGui() {
+        super(TITLE);
+        setSize(800, 800);
+        setLocationRelativeTo(null);
+    }
 
-        if (completePayoff) {
-            payofftitle = completepayofftitle;
-            resultpath = completeresultpath;
-        }
-
-        setSize(1000, 800);
-        setLocation(200, 50);
-        new PayOffFile(completePayoff);
-        addComponentsToPane(getContentPane());
-        pack();
+    public void open() {
+        final Container pane = getContentPane();
+        pane.removeAll();
+        addComponentsToPane(pane);
         setVisible(true);
     }
 
     private void addComponentsToPane(Container pane) {
-        JLabel title = new JLabel(payofftitle);
+        JLabel title = new JLabel(TITLE);
         title.setFont(title.getFont().deriveFont(30.0f));
         title.setHorizontalAlignment(SwingConstants.CENTER);
         pane.add(title, BorderLayout.NORTH);
@@ -73,47 +84,34 @@ public class PayOffGui extends JFrame {
                 .getPredefinedCursor(Cursor.HAND_CURSOR));
 
         totalPayoffLink.addMouseListener(new MouseListener() {
-
             @Override
-            public void mouseReleased(MouseEvent e) {
-                // TODO Auto-generated method stub
-
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    Desktop.getDesktop().open(totalPayOff.createTotalPayoffFile(
+                            eventRepository.findOne(EVENT_ID)));
+                } catch (DocumentException | IOException ex) {
+                    Logger.getLogger(PayOffGui.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
 
             @Override
             public void mousePressed(MouseEvent e) {
-                // TODO Auto-generated method stub
-
             }
 
             @Override
-            public void mouseExited(MouseEvent e) {
-                // TODO Auto-generated method stub
-
+            public void mouseReleased(MouseEvent e) {
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                // TODO Auto-generated method stub
-
             }
 
             @Override
-            public void mouseClicked(MouseEvent e) {
-                try {
-                    Desktop.getDesktop().open(new File(resultpath + filename));
-                } catch (IOException e1) {
-
-                    e1.printStackTrace();
-                }
+            public void mouseExited(MouseEvent e) {
             }
         });
-
-        // SubDirs
-        File file = new File(resultpath);
-        String[] names = file.list();
-
-        panel.setLayout(new GridLayout(names.length + 2, 2));
+        List<Reservation> reservations = reservationRepository.findByEvent(eventRepository.findOne(EVENT_ID));
+        panel.setLayout(new GridLayout(reservations.size() + 3, 2));
         panel.setBorder(new EmptyBorder(12, 12, 12, 12));
 
         panel.add(new JSeparator(JSeparator.HORIZONTAL));
@@ -125,62 +123,45 @@ public class PayOffGui extends JFrame {
         panel.add(new JSeparator(JSeparator.HORIZONTAL));
         panel.add(new JSeparator(JSeparator.HORIZONTAL));
 
-        for (String name : names) {
-            if (new File(resultpath + name).isDirectory()) {
+        for (final Reservation reservation : reservations) {
 
-                if (!customerMap.containsKey(Integer.parseInt(name))) {
-                    return;
+            JLabel customerPayoffNr = new JLabel(reservation.getNumber() + " | " + reservation.getSeller().getName());
+
+            customerPayoffNr.setFont(title.getFont().deriveFont(14.0f));
+            final String file_name = resultpath + reservation.getNumber() + "\\" + filename;
+            JLabel payoffLink = new JLabel(file_name);
+            payoffLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+            payoffLink.addMouseListener(new MouseListener() {
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
                 }
 
-                Object[] customer = (Object[]) customerMap.get(Integer.parseInt(name));
-                JLabel customerPayoffNr = new JLabel(name + " | " + (String) customer[1]);
+                @Override
+                public void mousePressed(MouseEvent e) {
+                }
 
-                customerPayoffNr.setFont(title.getFont().deriveFont(14.0f));
-                final String file_name = resultpath + name + "\\" + filename;
-                JLabel payoffLink = new JLabel(file_name);
+                @Override
+                public void mouseExited(MouseEvent e) {
+                }
 
-                payoffLink.addMouseListener(new MouseListener() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                }
 
-                    @Override
-                    public void mouseReleased(MouseEvent e) {
-                        // TODO Auto-generated method stub
-
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    try {
+                        Desktop.getDesktop().open(customerPayOff.createFile(reservation));
+                    } catch (DocumentException | IOException ex) {
+                        Logger.getLogger(PayOffGui.class.getName()).log(Level.SEVERE, null, ex);
                     }
-
-                    @Override
-                    public void mousePressed(MouseEvent e) {
-                        // TODO Auto-generated method stub
-
-                    }
-
-                    @Override
-                    public void mouseExited(MouseEvent e) {
-                        // TODO Auto-generated method stub
-
-                    }
-
-                    @Override
-                    public void mouseEntered(MouseEvent e) {
-                        // TODO Auto-generated method stub
-
-                    }
-
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        try {
-                            Desktop.getDesktop().open(new File(file_name));
-                        } catch (IOException e1) {
-
-                            e1.printStackTrace();
-                        }
-                    }
-                });
-                panel.add(customerPayoffNr);
-                panel.add(payoffLink);
-            }
+                }
+            });
+            panel.add(customerPayoffNr);
+            panel.add(payoffLink);
         }
-
-        pane.add(panel, BorderLayout.CENTER);
-
+        pane.add(new JScrollPane(panel), BorderLayout.CENTER);
     }
 }

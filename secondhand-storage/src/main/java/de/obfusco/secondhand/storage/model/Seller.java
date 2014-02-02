@@ -18,4 +18,8 @@ public class Seller extends AbstractEntity {
     public String getLastName() {
         return lastName;
     }
+
+    public String getName() {
+        return getFirstName() + " " + getLastName();
+    }
 }

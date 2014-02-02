@@ -35,6 +35,7 @@ public class PostCodeGui extends JFrame {
         setLocation(200, 50);
         addComponentsToPane(getContentPane());
         pack();
+        setLocationRelativeTo(null);
     }
 
     private void addComponentsToPane(Container pane) {

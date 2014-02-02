@@ -23,4 +23,8 @@ public class Reservation extends AbstractEntity {
     public Event getEvent() {
         return event;
     }
+
+    public Seller getSeller() {
+        return seller;
+    }
 }

@@ -56,7 +56,7 @@ public class CashBoxGui extends JFrame implements ActionListener {
     JTextField itemNr;
     CashTableModel tablemodel;
     JLabel errorLabel;
-    JLabel priseLabel;
+    JLabel priceLabel;
     JTable cashTable;
     JLabel changeBarlabel;
     JTextField barTextField;
@@ -77,9 +77,9 @@ public class CashBoxGui extends JFrame implements ActionListener {
     public CashBoxGui() {
         super("Flohmarkt Verkauf");
         setSize(600, 600);
-        setLocation(400, 10);
         addComponentsToPane(getContentPane());
         pack();
+        setLocationRelativeTo(null);
     }
 
     private void addComponentsToPane(Container pane) {
@@ -171,14 +171,14 @@ public class CashBoxGui extends JFrame implements ActionListener {
         itemPanel.add(errorLabel, BorderLayout.SOUTH);
 
         JLabel sumLabel = new JLabel("SUMME: ");
-        priseLabel = new JLabel("0");
+        priceLabel = new JLabel("0");
         JLabel sumeuroLabel = new JLabel("Euro");
         JPanel sumPanel = new JPanel(new GridLayout(0, 3));
         sumLabel.setFont(title.getFont().deriveFont(20.0f));
-        priseLabel.setFont(title.getFont().deriveFont(20.0f));
+        priceLabel.setFont(title.getFont().deriveFont(20.0f));
         sumeuroLabel.setFont(title.getFont().deriveFont(20.0f));
         sumPanel.add(sumLabel);
-        sumPanel.add(priseLabel);
+        sumPanel.add(priceLabel);
         sumPanel.add(sumeuroLabel);
 
         pane.add(itemPanel, BorderLayout.CENTER);
@@ -269,7 +269,7 @@ public class CashBoxGui extends JFrame implements ActionListener {
         float bar = Float
                 .parseFloat((barTextField.getText()).replace(",", "."));
         float prise = Float
-                .parseFloat((priseLabel.getText()).replace(",", "."));
+                .parseFloat((priceLabel.getText()).replace(",", "."));
         float back = bar * 100 - prise * 100;
         back /= 100;
 
@@ -282,18 +282,14 @@ public class CashBoxGui extends JFrame implements ActionListener {
 
         if (event.getSource() == readyButton) {
 
+            errorLabel.setText("");
             String postText = postCodeTextField.getText();
             int postCode = 0;
-            if (postText.length() < 5 && postText.length() > 0) {
-                errorLabel.setText("Ungültige PLZ. Zu kurz.");
-                return;
-            } else if (postText.length() > 5) {
-                errorLabel.setText("Ungültige PLZ. Zu lang.");
+            if (postText.length() != 0 && postText.length() != 0) {
+                errorLabel.setText("Ungültige PLZ. 5 Stellen bitte.");
                 return;
             } else {
-                if (postText.length() == 0) {
-                    errorLabel.setText("");
-                } else {
+                if (postText.length() == 5) {
                     try {
                         postCode = Integer.parseInt(postText);
                         errorLabel.setText("");
@@ -304,23 +300,26 @@ public class CashBoxGui extends JFrame implements ActionListener {
                     }
                 }
             }
+            calculateChange();
             storageService.storeSoldInformation(tablemodel.getColumnData(0), postCode);
 
             newButton.setEnabled(true);
             printButton.setEnabled(true);
             readyButton.setEnabled(false);
-
-            calculateChange();
-            postCodeTextField.setEditable(false);
-            barTextField.setEditable(false);
+            itemNr.setEnabled(false);
+            postCodeTextField.setEnabled(false);
+            barTextField.setEnabled(false);
+            cashTable.setEnabled(false);
 
         } else if (event.getSource() == newButton) {
 
             newButton.setEnabled(false);
             printButton.setEnabled(false);
             readyButton.setEnabled(true);
-            postCodeTextField.setEditable(true);
-            barTextField.setEditable(true);
+            itemNr.setEnabled(true);
+            postCodeTextField.setEnabled(true);
+            barTextField.setEnabled(true);
+            cashTable.setEnabled(true);
 
             itemNr.setText("");
             int rowCount = tablemodel.getRowCount();
@@ -328,7 +327,7 @@ public class CashBoxGui extends JFrame implements ActionListener {
                 tablemodel.delRow(0);
             }
 
-            priseLabel.setText("0,00");
+            priceLabel.setText("0,00");
             barTextField.setText("");
             changeBarlabel.setText("0,00");
             postCodeTextField.setText("");
@@ -505,9 +504,9 @@ public class CashBoxGui extends JFrame implements ActionListener {
         totalPrise = totalPrise * 100 + prise * 100;
         totalPrise /= 100;
         sum = String.format("%.2f", totalPrise);
-        priseLabel.setText(sum);
-        priseLabel.getParent().invalidate();
-        priseLabel.getParent().validate();
+        priceLabel.setText(sum);
+        priceLabel.getParent().invalidate();
+        priceLabel.getParent().validate();
         this.validate();
         this.pack();
     }

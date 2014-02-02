@@ -47,9 +47,9 @@ public class TestScanGui extends JFrame implements ActionListener {
     public TestScanGui() {
         super("Barcode Test");
         setSize(600, 600);
-        setLocation(400, 10);
         addComponentsToPane(getContentPane());
         pack();
+        setLocationRelativeTo(null);
     }
 
     private void addComponentsToPane(Container pane) {

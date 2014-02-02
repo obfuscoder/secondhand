@@ -1,8 +1,8 @@
 package de.obfusco.secondhand.payoff.file;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,32 +17,25 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import de.obfusco.secondhand.common.items.reader.CsvFinder;
+import de.obfusco.secondhand.storage.model.Reservation;
 
-public class PayOffCustomer {
+import org.springframework.stereotype.Component;
+
+@Component
+public class CustomerPayOff {
 
     String path = "C:\\flohmarkt\\Abrechnung\\";
     String completeBillpath = "C:\\flohmarkt\\KomplettAbrechnung\\";
     String filename;
-    List<Object[]> itemdata;
     float entryfee;
     String customer;
-    Object[] customerInfo;
 
-    public PayOffCustomer(String customer, List<Object[]> data, float entryfee, boolean completePayoff, Object[] customerInfo) {
-
-        if (completePayoff) {
-            path = completeBillpath;
-        }
-        this.customerInfo = customerInfo;
+    public CustomerPayOff() {
         path = path + customer + "\\";
         filename = "total_payoff.pdf";
-        itemdata = data;
-        this.customer = customer;
-        this.entryfee = entryfee;
     }
 
-    public void createFile() throws IOException, DocumentException {
+    public File createFile(Reservation reservation) throws DocumentException, FileNotFoundException {
         boolean success = (new File(path)).mkdirs();
         if (!success) {
             System.out.println("create Dir failed");
@@ -58,45 +51,36 @@ public class PayOffCustomer {
 
         document.add(new Phrase("\n\n"));
 
-        if (customerInfo == null) {
-            document.add(new Phrase("Keine Kundeninformation!"));
-        } else {
-            document.add(new Phrase((customerInfo[1]).toString() + "\n"));
-            document.add(new Phrase((customerInfo[2]).toString() + "\n"));
-            document.add(new Phrase((customerInfo[3]).toString() + "\n\n"));
-            document.add(new Phrase("Tel: " + (customerInfo[4]).toString() + "\n"));
-            document.add(new Phrase("Email: " + (customerInfo[5]).toString()));
-
-        }
-
+//        document.add(new Phrase((customerInfo[1]).toString() + "\n"));
+//        document.add(new Phrase((customerInfo[2]).toString() + "\n"));
+//        document.add(new Phrase((customerInfo[3]).toString() + "\n\n"));
+//        document.add(new Phrase("Tel: " + (customerInfo[4]).toString() + "\n"));
+//        document.add(new Phrase("Email: " + (customerInfo[5]).toString()));
         document.add(new Phrase("\n\n"));
 
         document.add(new Phrase("Kundennr: " + customer + "\n\n"));
 
-        document.add(new Phrase(new Chunk(itemdata.size() + " Artikel wurde(n) verkauft", FontFactory
-                .getFont(FontFactory.HELVETICA_BOLD, 18))));
-
-        CsvFinder finder = new CsvFinder();
-
-        Map<String, Object[]> customerItems = finder.getAllCustomerItems(customer);
+//        document.add(new Phrase(new Chunk(itemdata.size() + " Artikel wurde(n) verkauft", FontFactory
+//                .getFont(FontFactory.HELVETICA_BOLD, 18))));
+        //CsvFinder finder = new CsvFinder();
+        Map<String, Object[]> customerItems = null; //finder.getAllCustomerItems(customer);
 
         float kitasum = (float) 0.0;
         float prise = 0;
         float totalprise = (float) 0.0;
-        for (Object[] items : itemdata) {
-            customerItems.remove(items[0]);
-            prise = Float.parseFloat(((String) items[4]).replace(",", "."));
-            totalprise = totalprise * 100 + prise * 100;
-            totalprise /= 100;
-        }
+//        for (Object[] items : itemdata) {
+//            customerItems.remove(items[0]);
+//            prise = Float.parseFloat(((String) items[4]).replace(",", "."));
+//            totalprise = totalprise * 100 + prise * 100;
+//            totalprise /= 100;
+//        }
 
         kitasum = (float) (totalprise * 0.2);
 
         float totalsum = totalprise * 100 - (kitasum * 100 + entryfee * 100);
         totalsum /= 100;
 
-        document.add(createItemTable(itemdata, String.format("%.2f", totalprise), String.format("%.2f", kitasum), String.format("%.2f", entryfee), String.format("%.2f", totalsum)));
-
+//        document.add(createItemTable(itemdata, String.format("%.2f", totalprise), String.format("%.2f", kitasum), String.format("%.2f", entryfee), String.format("%.2f", totalsum)));
         document.add(new Phrase("\n"));
         document.add(new Phrase(new Chunk(customerItems.size() + " Artikel wurde(n) nicht verkauft", FontFactory
                 .getFont(FontFactory.HELVETICA_BOLD, 18))));
@@ -113,6 +97,7 @@ public class PayOffCustomer {
         document.add(createItemTable((List<Object[]>) customerItemList, String.format("%.2f", totalprise)));
 
         document.close();
+        return null;
     }
 
     public static PdfPTable createItemTable(List<Object[]> data, String sum) {
