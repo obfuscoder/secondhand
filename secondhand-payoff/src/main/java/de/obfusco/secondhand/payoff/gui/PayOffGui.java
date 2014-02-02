@@ -22,7 +22,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.itextpdf.text.DocumentException;
 
-import de.obfusco.secondhand.payoff.file.CustomerPayOff;
+import de.obfusco.secondhand.payoff.file.SellerPayOff;
 import de.obfusco.secondhand.payoff.file.TotalPayOff;
 import de.obfusco.secondhand.storage.model.Reservation;
 import de.obfusco.secondhand.storage.repository.EventRepository;
@@ -48,7 +48,7 @@ public class PayOffGui extends JFrame {
     TotalPayOff totalPayOff;
 
     @Autowired
-    CustomerPayOff customerPayOff;
+    SellerPayOff sellerPayOff;
 
     @Autowired
     ReservationRepository reservationRepository;
@@ -153,7 +153,7 @@ public class PayOffGui extends JFrame {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     try {
-                        Desktop.getDesktop().open(customerPayOff.createFile(reservation));
+                        Desktop.getDesktop().open(sellerPayOff.createFile(reservation));
                     } catch (DocumentException | IOException ex) {
                         Logger.getLogger(PayOffGui.class.getName()).log(Level.SEVERE, null, ex);
                     }
