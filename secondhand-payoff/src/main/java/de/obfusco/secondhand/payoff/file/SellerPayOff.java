@@ -24,37 +24,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SellerPayOff {
-
-    String path = "C:\\flohmarkt\\Abrechnung\\";
-    String completeBillpath = "C:\\flohmarkt\\KomplettAbrechnung\\";
-    String filename;
-    private static final double ENTRY_FEE = 2.5;
-    String customer;
+public class SellerPayOff extends BasePayOff {
 
     @Autowired
     ReservedItemRepository reservedItemRepository;
 
-    public SellerPayOff() {
-        path = path + customer + "\\";
-        filename = "total_payoff.pdf";
-    }
-
-    public File createFile(Reservation reservation) throws DocumentException, FileNotFoundException {
-        boolean success = (new File(path)).mkdirs();
-        if (!success) {
-            System.out.println("create Dir failed");
-        }
+    public File createFile(String path, Reservation reservation) throws DocumentException, FileNotFoundException {
 
         String fullPath = path + reservation.getNumber() + "_payoff.pdf";
         Document document = new Document();
         PdfWriter writer = PdfWriter.getInstance(document,
                 new FileOutputStream(fullPath));
         document.open();
-
-        document.add(new Phrase(new Chunk("Abrechnung Flohmarkt", FontFactory
-                .getFont(FontFactory.HELVETICA_BOLD, 24))));
-
+        addHeader(document);
         document.add(new Phrase("\n\n"));
 
         Seller seller = reservation.getSeller();
@@ -71,65 +53,57 @@ public class SellerPayOff {
         document.add(new Phrase(new Chunk(soldItems.size() + " Artikel wurde(n) verkauft",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18))));
 
-        double kitaSum = 0;
-        double totalPrice = 0.0;
+        double totalPrice = 0;
         for (ReservedItem item : soldItems) {
-            totalPrice = totalPrice * 100 + item.getItem().getPrice().doubleValue() * 100;
-            totalPrice /= 100;
+            totalPrice += item.getItem().getPrice().doubleValue();
         }
+        double kitaSum = totalPrice * CHILDCARE_SHARE;
+        double totalSum = totalPrice - (kitaSum + ENTRY_FEE);
 
-        kitaSum = totalPrice * 0.2;
-
-        double totalSum = totalPrice * 100 - (kitaSum * 100 + ENTRY_FEE * 100);
-        totalSum /= 100;
-
-        document.add(createItemTable(soldItems, totalPrice, true, kitaSum, ENTRY_FEE, totalSum));
+        PdfPTable table = createItemTable(soldItems);
+        addSeparatorLine(table);
+        addTotalLine(table, "Summe", currency.format(totalPrice), true);
+        addTotalLine(table, "Erlös Kita (" + percent.format(CHILDCARE_SHARE) + ")", currency.format(kitaSum), false);
+        addTotalLine(table, "Teilnahmegebühr", currency.format(ENTRY_FEE), false);
+        addTotalLine(table, "Gewinn", currency.format(totalSum), true);
+        document.add(table);
         document.add(new Phrase("\n"));
+
         List<ReservedItem> unsoldItems = reservedItemRepository.findByReservationAndSoldNull(reservation);
         document.add(new Phrase(new Chunk(unsoldItems.size() + " Artikel wurde(n) nicht verkauft",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18))));
 
         totalPrice = 0;
         for (ReservedItem item : unsoldItems) {
-            totalPrice = totalPrice * 100 + item.getItem().getPrice().doubleValue() * 100;
-            totalPrice /= 100;
+            totalPrice += item.getItem().getPrice().doubleValue();
         }
-        document.add(createItemTable(unsoldItems, totalPrice));
-
+        table = createItemTable(unsoldItems);
+        addSeparatorLine(table);
+        addTotalLine(table, "Summe", currency.format(totalPrice), true);
+        document.add(table);
         document.close();
         return new File(fullPath);
     }
 
-    public static PdfPTable createItemTable(List<ReservedItem> items, double sum) {
-        return createItemTable(items, sum, false, 0, 0, 0);
+    private void addSeparatorLine(PdfPTable table) {
+        PdfPCell cell = new PdfPCell(new Phrase("------------------------------------------------------------"));
+        cell.setColspan(5);
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        table.addCell(cell);
     }
 
-    public static PdfPTable createItemTable(List<ReservedItem> items, double sum, boolean addFinalSums, double kitaSum, double entryFee, double totalSum) {
-
+    private PdfPTable createItemTable(List<ReservedItem> items) {
         PdfPTable table = new PdfPTable(5);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
-        PdfPCell cell;
-
-        cell = new PdfPCell(new Phrase(new Chunk("Pos", FontFactory.getFont(
-                FontFactory.HELVETICA_BOLD, 12))));
-        table.addCell(cell);
-        cell = new PdfPCell(new Phrase(new Chunk("ArtNr", FontFactory.getFont(
-                FontFactory.HELVETICA_BOLD, 12))));
-        table.addCell(cell);
-        cell = new PdfPCell(new Phrase(new Chunk("Kategorie",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
-        table.addCell(cell);
-        cell = new PdfPCell(new Phrase(new Chunk("Gr.", FontFactory.getFont(
-                FontFactory.HELVETICA_BOLD, 12))));
-        table.addCell(cell);
-        cell = new PdfPCell(new Phrase(new Chunk("Preis", FontFactory.getFont(
-                FontFactory.HELVETICA_BOLD, 12))));
-        cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        table.addCell(cell);
+        String[] columnNames = {"Pos", "ArtNr", "Kategorie", "Größe", "Preis"};
+        for (String columnName : columnNames) {
+            table.addCell(new PdfPCell(new Phrase(new Chunk(columnName,
+                    FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)))));
+        }
 
         for (int i = 0; i < items.size(); i++) {
             ReservedItem item = items.get(i);
-            cell = new PdfPCell(new Phrase("" + (i + 1)));
+            PdfPCell cell = new PdfPCell(new Phrase("" + (i + 1)));
             table.addCell(cell);
             cell = new PdfPCell(new Phrase(item.getCode()));
             table.addCell(cell);
@@ -137,7 +111,7 @@ public class SellerPayOff {
             table.addCell(cell);
             cell = new PdfPCell(new Phrase(item.getItem().getSize()));
             table.addCell(cell);
-            cell = new PdfPCell(new Phrase("" + item.getItem().getPrice().floatValue()));
+            cell = new PdfPCell(new Phrase(currency.format(item.getItem().getPrice())));
             cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             table.addCell(cell);
             //new Row
@@ -145,50 +119,6 @@ public class SellerPayOff {
             cell.setColspan(5);
             table.addCell(cell);
         }
-
-        cell = new PdfPCell(new Phrase("------------------------------------------------------------"));
-        cell.setColspan(5);
-        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        table.addCell(cell);
-
-        cell = new PdfPCell(new Phrase(new Chunk("Summe", FontFactory.getFont(
-                FontFactory.HELVETICA_BOLD, 12))));
-        cell.setColspan(4);
-        table.addCell(cell);
-        cell = new PdfPCell(new Phrase(new Chunk(sum + " EURO", FontFactory.getFont(
-                FontFactory.HELVETICA_BOLD, 12))));
-        cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        table.addCell(cell);
-
-        if (addFinalSums) {
-            cell = new PdfPCell(new Phrase(new Chunk("Erlös Kita (20%)", FontFactory.getFont(
-                    FontFactory.HELVETICA, 12))));
-            cell.setColspan(4);
-            table.addCell(cell);
-            cell = new PdfPCell(new Phrase(new Chunk("- " + kitaSum + " EURO", FontFactory.getFont(
-                    FontFactory.HELVETICA, 12))));
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase(new Chunk("Teilnahmegebühr", FontFactory.getFont(
-                    FontFactory.HELVETICA, 12))));
-            cell.setColspan(4);
-            table.addCell(cell);
-            cell = new PdfPCell(new Phrase(new Chunk("- " + entryFee + " EURO", FontFactory.getFont(
-                    FontFactory.HELVETICA, 12))));
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase(new Chunk("Gewinn", FontFactory.getFont(
-                    FontFactory.HELVETICA_BOLD, 12))));
-            cell.setColspan(4);
-            table.addCell(cell);
-            cell = new PdfPCell(new Phrase(new Chunk(totalSum + " EURO", FontFactory.getFont(
-                    FontFactory.HELVETICA_BOLD, 12))));
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            table.addCell(cell);
-        }
-
         return table;
     }
 }
