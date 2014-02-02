@@ -1,2 +1,5 @@
 nbproject
 target
+.project
+.settings
+.classpath
