@@ -14,6 +14,7 @@
         <module>secondhand-postcode</module>
         <module>secondhand-sale</module>
         <module>secondhand-testscan</module>
+        <module>secoundhand-receipt</module>
         <module>secondhand-filesync</module>
     </modules>
     <properties>

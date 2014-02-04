@@ -10,6 +10,7 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -32,7 +33,7 @@ public class SellerPayOff extends BasePayOff {
     public File createFile(String path, Reservation reservation) throws DocumentException, FileNotFoundException {
 
         String fullPath = path + reservation.getNumber() + "_payoff.pdf";
-        Document document = new Document();
+        Document document = new Document(PageSize.A4,80, 50, 50, 30);
         PdfWriter writer = PdfWriter.getInstance(document,
                 new FileOutputStream(fullPath));
         document.open();

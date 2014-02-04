@@ -8,6 +8,7 @@ import java.util.List;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
+import com.itextpdf.text.PageSize;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -33,7 +34,7 @@ public class TotalPayOff extends BasePayOff {
     public File createTotalPayoffFile(String path, Event event) throws DocumentException, FileNotFoundException {
 
         String fullPath = path + "total.pdf";
-        Document document = new Document();
+        Document document = new Document(PageSize.A4,80, 50, 50, 30);
         PdfWriter writer = PdfWriter.getInstance(document,
                 new FileOutputStream(fullPath));
         document.open();
