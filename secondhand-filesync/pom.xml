@@ -8,9 +8,10 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <groupId>de.obfusco.secondhand</groupId>
-    <artifactId>secondhand-gui</artifactId>
+    <artifactId>secondhand-filesync</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>secondhand-gui</name>
+    <name>secondhand-filesync</name>
+    <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -29,7 +30,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>de.obfusco.secondhand.gui.Main</mainClass>
+                                    <mainClass>de.obfusco.secondhand.filesync.FileSync</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -38,31 +39,10 @@
             </plugin>
         </plugins>
     </build>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>secondhand-barcodefilegenerator</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>secondhand-payoff</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>secondhand-postcode</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>secondhand-sale</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>secondhand-testscan</artifactId>
+            <artifactId>secondhand-storage</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

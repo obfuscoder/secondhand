@@ -14,6 +14,11 @@ import org.springframework.context.annotation.Import;
 public class Main {
 
     public static void main(String args[]) {
-        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(Main.class);
+        System.out.println("Starting application ...");
+        try {
+            ApplicationContext applicationContext = new AnnotationConfigApplicationContext(Main.class);
+        } catch (Exception ex) {
+            System.err.println("Error while starting application! Error: " + ex.getMessage());
+        }
     }
 }

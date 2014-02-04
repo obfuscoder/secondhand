@@ -14,6 +14,7 @@
         <module>secondhand-postcode</module>
         <module>secondhand-sale</module>
         <module>secondhand-testscan</module>
+        <module>secondhand-filesync</module>
     </modules>
     <properties>
         <maven.compiler.source>1.7</maven.compiler.source>
