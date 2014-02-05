@@ -54,7 +54,7 @@ public class ReceiptFile {
 		addHeader(document);
 		document.add(new Phrase("\n\n"));
 		document.add(new Phrase(
-				"Mit meiner Unterschrift bestätige ich die Teilnahmebedingungen."));
+				"Mit meiner Unterschrift bestaetige ich die Teilnahmebedingungen."));
 
 		List<Reservation> reservations = reservationRepository
 				.findByEvent(eventRepository.findOne(EVENT_ID));

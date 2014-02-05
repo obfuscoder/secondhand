@@ -2,9 +2,12 @@ package de.obfusco.secondhand.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -19,11 +22,14 @@ import javax.swing.SwingConstants;
 import de.obfusco.secondhand.barcodefilegenerator.BarCodeGeneratorGui;
 import de.obfusco.secondhand.payoff.gui.PayOffGui;
 import de.obfusco.secondhand.postcode.gui.PostCodeGui;
+import de.obfusco.secondhand.receipt.file.ReceiptFile;
 import de.obfusco.secondhand.sale.gui.CashBoxGui;
 import de.obfusco.secondhand.testscan.gui.TestScanGui;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.itextpdf.text.DocumentException;
 
 @Component
 public class MainGui extends JFrame implements ActionListener {
@@ -42,6 +48,9 @@ public class MainGui extends JFrame implements ActionListener {
 
     @Autowired
     PayOffGui payOffGui;
+    
+    @Autowired
+    ReceiptFile receiptFile;
 
     private static final long serialVersionUID = 4961295225628108431L;
     public JButton sale;
@@ -51,11 +60,8 @@ public class MainGui extends JFrame implements ActionListener {
     public JButton testScan;
     JMenuBar menuBar;
     JMenu filemenu;
-    JMenuItem itemImportMenu;
-    JMenuItem customerImportMenu;
+    JMenuItem createSellerReceipt;
     JMenuItem close;
-    JMenuItem importMenu;
-    JMenuItem exportMenu;
     JFileChooser fc;
     String customerFilepath = "C:\\flohmarkt\\Customer\\";
     String customerFile = "customer.csv";
@@ -81,6 +87,22 @@ public class MainGui extends JFrame implements ActionListener {
         if (e.getSource() == close) {
             System.exit(0);
         }
+        else if (e.getSource() == createSellerReceipt )
+        {
+        	try {
+        		Desktop.getDesktop().open(receiptFile.createFile());
+				 
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (DocumentException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+        }
     }
 
     private void addComponentsToPane(Container pane) {
@@ -96,23 +118,14 @@ public class MainGui extends JFrame implements ActionListener {
 
         menuBar.add(filemenu);
 
-        itemImportMenu = new JMenuItem("ArtikelImport");
-        itemImportMenu.addActionListener(this);
-
-        customerImportMenu = new JMenuItem("KundenImport");
-        customerImportMenu.addActionListener(this);
+        createSellerReceipt = new JMenuItem("Öffne Annahme Verkäuferliste");
+        createSellerReceipt.addActionListener(this);
 
         close = new JMenuItem("Schließen");
         close.addActionListener(this);
 
-        filemenu.add(itemImportMenu);
-        filemenu.add(customerImportMenu);
+        filemenu.add(createSellerReceipt);
         filemenu.add(close);
-
-        importMenu = new JMenuItem("Import");
-        importMenu.addActionListener(this);
-        exportMenu = new JMenuItem("Export");
-        exportMenu.addActionListener(this);
 
         this.setJMenuBar(menuBar);
 
