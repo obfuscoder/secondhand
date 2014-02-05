@@ -1,8 +1,11 @@
 package de.obfusco.secondhand.payoff.file;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import com.itextpdf.text.Chunk;
@@ -30,12 +33,13 @@ public class SellerPayOff extends BasePayOff {
     @Autowired
     ReservedItemRepository reservedItemRepository;
 
-    public File createFile(String path, Reservation reservation) throws DocumentException, FileNotFoundException {
-
-        String fullPath = path + reservation.getNumber() + "_payoff.pdf";
-        Document document = new Document(PageSize.A4,80, 50, 50, 30);
+    public File createFile(Path basePath, Reservation reservation) throws DocumentException, IOException {
+        Path targetPath = Paths.get(basePath.toString(), reservation.getNumber().toString());
+        Files.createDirectories(targetPath);
+        Path fullPath = Paths.get(targetPath.toString(), "payoff.pdf");
+        Document document = new Document(PageSize.A4, 80, 50, 50, 30);
         PdfWriter writer = PdfWriter.getInstance(document,
-                new FileOutputStream(fullPath));
+                new FileOutputStream(fullPath.toFile()));
         document.open();
         addHeader(document);
         document.add(new Phrase("\n\n"));
@@ -64,8 +68,8 @@ public class SellerPayOff extends BasePayOff {
         PdfPTable table = createItemTable(soldItems);
         addSeparatorLine(table);
         addTotalLine(table, "Summe", currency.format(totalPrice), true);
-        addTotalLine(table, "Erlös Kita (" + percent.format(CHILDCARE_SHARE) + ")", currency.format(kitaSum), false);
-        addTotalLine(table, "Teilnahmegebühr", currency.format(ENTRY_FEE), false);
+        addTotalLine(table, "Erlös Kita (" + percent.format(CHILDCARE_SHARE) + ")", currency.format(-kitaSum), false);
+        addTotalLine(table, "Teilnahmegebühr", currency.format(-ENTRY_FEE), false);
         addTotalLine(table, "Gewinn", currency.format(totalSum), true);
         document.add(table);
         document.add(new Phrase("\n"));
@@ -83,7 +87,7 @@ public class SellerPayOff extends BasePayOff {
         addTotalLine(table, "Summe", currency.format(totalPrice), true);
         document.add(table);
         document.close();
-        return new File(fullPath);
+        return fullPath.toFile();
     }
 
     private void addSeparatorLine(PdfPTable table) {

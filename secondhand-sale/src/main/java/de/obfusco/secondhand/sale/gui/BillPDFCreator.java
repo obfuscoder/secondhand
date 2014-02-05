@@ -1,9 +1,15 @@
 package de.obfusco.secondhand.sale.gui;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -18,12 +24,17 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 public class BillPDFCreator {
 
-    public void createPdf(String filename, List<Object> data, String sum, String bar, String change)
+    private static NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
+
+    public File createPdf(Path basePath, List<Object> data, Double sum, Double bar, Double change)
             throws IOException, DocumentException {
+
+        Files.createDirectories(basePath);
+        Path targetPath = Paths.get(basePath.toString(), "sale.pdf");
 
         Document document = new Document();// new Rectangle(250, 1000));
         PdfWriter writer = PdfWriter.getInstance(document,
-                new FileOutputStream(filename));
+                new FileOutputStream(targetPath.toFile()));
         document.open();
 
         Calendar cal = Calendar.getInstance();
@@ -46,9 +57,11 @@ public class BillPDFCreator {
                 FontFactory.getFont(FontFactory.HELVETICA, 10))));
 
         document.close();
+
+        return targetPath.toFile();
     }
 
-    public static PdfPTable insertItemTable(List<Object> data, String sum, String bar, String change) {
+    public static PdfPTable insertItemTable(List<Object> data, Double sum, Double bar, Double change) {
 
         PdfPTable table = new PdfPTable(5);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -80,7 +93,7 @@ public class BillPDFCreator {
             table.addCell(cell);
             cell = new PdfPCell(new Phrase((String) items[3]));
             table.addCell(cell);
-            cell = new PdfPCell(new Phrase((String) items[4]));
+            cell = new PdfPCell(new Phrase(currency.format(Double.parseDouble(items[4].toString()))));
             cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             table.addCell(cell);
             //new Row
@@ -97,7 +110,7 @@ public class BillPDFCreator {
         cell = new PdfPCell(new Phrase(new Chunk("Summe", FontFactory.getFont(
                 FontFactory.HELVETICA_BOLD, 12))));
         table.addCell(cell);
-        cell = new PdfPCell(new Phrase(new Chunk(sum + " EURO", FontFactory.getFont(
+        cell = new PdfPCell(new Phrase(new Chunk(currency.format(sum), FontFactory.getFont(
                 FontFactory.HELVETICA_BOLD, 12))));
         cell.setColspan(4);
         cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -106,7 +119,7 @@ public class BillPDFCreator {
         cell = new PdfPCell(new Phrase(new Chunk("BAR", FontFactory.getFont(
                 FontFactory.HELVETICA, 12))));
         table.addCell(cell);
-        cell = new PdfPCell(new Phrase(new Chunk(bar + " EURO", FontFactory.getFont(
+        cell = new PdfPCell(new Phrase(new Chunk(currency.format(bar), FontFactory.getFont(
                 FontFactory.HELVETICA, 12))));
         cell.setColspan(4);
         cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -115,7 +128,7 @@ public class BillPDFCreator {
         cell = new PdfPCell(new Phrase(new Chunk("Rückgeld", FontFactory.getFont(
                 FontFactory.HELVETICA, 12))));
         table.addCell(cell);
-        cell = new PdfPCell(new Phrase(new Chunk(change + " EURO", FontFactory.getFont(
+        cell = new PdfPCell(new Phrase(new Chunk(change == null ? "--" : currency.format(change), FontFactory.getFont(
                 FontFactory.HELVETICA, 12))));
         cell.setColspan(4);
         cell.setHorizontalAlignment(Element.ALIGN_RIGHT);

@@ -9,11 +9,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -53,7 +51,9 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
 
     public JLabel etiquettesLabel;
     public JLabel etiquettesLink;
-    public String filename;
+
+    Path basePath = Paths.get("data/pdfs/labels");
+    Path targetPath;
 
     public BarCodeGeneratorGui() {
         super("Etiketten/ Barcodes");
@@ -113,7 +113,7 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
             @Override
             public void mouseClicked(MouseEvent e) {
                 try {
-                    Desktop.getDesktop().open(new File(filename));
+                    Desktop.getDesktop().open(targetPath.toFile());
                 } catch (IOException e1) {
 
                     e1.printStackTrace();
@@ -138,35 +138,30 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
         final Event event = eventRepository.findOne(1);
         if (actionEvent.getSource() == justBarcode) {
             try {
-                filename = barCodeSheet.createPDFFile(
+                targetPath = barCodeSheet.createPDFFile(basePath,
                         reservationRepository.findByEventAndNumber(
-                                event,
-                                Integer.parseInt(customerNr.getText()))
+                                event, Integer.parseInt(customerNr.getText()))
                 );
 
                 etiquettesLabel.setText("Barcodes für " + customerNr.getText());
 
             } catch (NumberFormatException | IOException | DocumentException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         } else if (actionEvent.getSource() == etiquettes) {
             try {
 
-                filename = barCodeLabelSheet.createPDFFile(
+                targetPath = barCodeLabelSheet.createPDFFile(basePath,
                         reservationRepository.findByEventAndNumber(
                                 event,
                                 Integer.parseInt(customerNr.getText())));
 
                 etiquettesLabel.setText("Etiketten für " + customerNr.getText());
-            } catch (FileNotFoundException e) {
-                // TODO Auto-generated catch block
+            } catch (DocumentException | IOException e) {
                 e.printStackTrace();
-            } catch (DocumentException ex) {
-                Logger.getLogger(BarCodeGeneratorGui.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
-        etiquettesLink.setText(filename);
+        etiquettesLink.setText(targetPath.toString());
     }
 }

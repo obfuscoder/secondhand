@@ -1,8 +1,10 @@
 package de.obfusco.secondhand.barcodefilegenerator;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -38,24 +40,20 @@ public class BarCodeSheet {
 
     public static final int NUMBER_OF_COLUMNS = 4;
 
-    /**
-     * The resulting PDF.
-     */
-    private static final String RESULT = "C:\\flohmarkt\\result_o_b.pdf";
-    private static final String resultpath = "C:\\flohmarkt\\completion\\";
-
     @SuppressWarnings("unchecked")
     public BarCodeSheet() {
 
     }
 
-    public String createPdf(String path) throws IOException,
+    public Path createPdf(Path targetPath) throws IOException,
             DocumentException {
 
+        Files.createDirectories(targetPath);
         Document document = new Document(PageSize.A4, 0, 0, 0, 0);
-        String filename = "result_o_b.pdf";
+        String filename = "barcodes.pdf";
+        Path filePath = Paths.get(targetPath.toString(), filename);
         PdfWriter writer = PdfWriter.getInstance(document,
-                new FileOutputStream(filename));
+                new FileOutputStream(filePath.toFile()));
         document.open();
 
         PdfPTable table = null;
@@ -72,7 +70,7 @@ public class BarCodeSheet {
             document.add(table);
         }
         document.close();
-        return filename;
+        return filePath;
     }
 
     private PdfPTable createTableLine() {
@@ -124,14 +122,11 @@ public class BarCodeSheet {
 
     List<ReservedItem> items;
 
-    public String createPDFFile(Reservation reservation) throws IOException, DocumentException {
+    public Path createPDFFile(Path basePath, Reservation reservation) throws IOException, DocumentException {
         String customer = new DecimalFormat("000").format(reservation.getNumber());
-        String path = resultpath + customer + "\\";
-        (new File(path)).mkdirs();
+        Path targetPath = Paths.get(basePath.toString(), customer);
+        Files.createDirectories(targetPath);
         items = reservedItemRepository.findByReservation(reservation);
-
-        String filename = createPdf(path);
-
-        return filename;
+        return createPdf(targetPath);
     }
 }

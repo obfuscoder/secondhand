@@ -1,8 +1,11 @@
 package de.obfusco.secondhand.barcodefilegenerator;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -36,9 +39,6 @@ public class BarCodeLabelSheet {
     public static final int NUMBER_OF_ROWS = 5;
     public static final int NUMBER_OF_COLUMNS = 3;
 
-    private static final String RESULT = "C:\\flohmarkt\\resultLabel.pdf";
-    private static final String resultpath = "C:\\flohmarkt\\completion\\";
-
     @Autowired
     ReservedItemRepository reservedItemRepository;
 
@@ -47,12 +47,13 @@ public class BarCodeLabelSheet {
 
     }
 
-    public String createPdf(String path) throws DocumentException, FileNotFoundException {
+    public Path createPdf(Path targetPath) throws DocumentException, IOException {
 
         Document document = new Document(PageSize.A4, 0, 0, 40, 40);
-        String filename = path + "resultLabel.pdf";
+        Files.createDirectories(targetPath);
+        Path filePath = Paths.get(targetPath.toString(), "labels.pdf");
         PdfWriter writer = PdfWriter.getInstance(document,
-                new FileOutputStream(filename));
+                new FileOutputStream(filePath.toFile()));
         document.open();
 
         PdfPTable table = null;
@@ -72,7 +73,7 @@ public class BarCodeLabelSheet {
             document.add(table);
         }
         document.close();
-        return filename;
+        return filePath;
     }
 
     private PdfPTable createTableLine() {
@@ -179,15 +180,12 @@ public class BarCodeLabelSheet {
 
     List<ReservedItem> items;
 
-    public String createPDFFile(Reservation reservation) throws DocumentException, FileNotFoundException {
+    public Path createPDFFile(Path basePath, Reservation reservation) throws DocumentException, FileNotFoundException, IOException {
         String customer = new DecimalFormat("000").format(reservation.getNumber());
-        String path = resultpath + customer + "\\";
-        (new File(path)).mkdirs();
+        Path targetPath = Paths.get(basePath.toString(), customer);
+        Files.createDirectories(targetPath);
         items = reservedItemRepository.findByReservation(reservation);
-
-        String filename = createPdf(path);
-
-        return filename;
+        return createPdf(targetPath);
     }
 
 }

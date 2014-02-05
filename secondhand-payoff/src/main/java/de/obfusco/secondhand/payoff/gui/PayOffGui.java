@@ -8,6 +8,8 @@ import java.awt.GridLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,8 +41,6 @@ public class PayOffGui extends JFrame {
 
     public JLabel totalPayoff;
 
-    private String resultpath = "C:\\flohmarkt\\Abrechnung\\";
-
     private static final String TITLE = "Abrechnung";
 
     @Autowired
@@ -54,6 +54,8 @@ public class PayOffGui extends JFrame {
 
     @Autowired
     EventRepository eventRepository;
+
+    Path basePath = Paths.get("data/pdfs/payoff");
 
     public PayOffGui() {
         super(TITLE);
@@ -88,7 +90,7 @@ public class PayOffGui extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 try {
-                    Desktop.getDesktop().open(totalPayOff.createTotalPayoffFile(resultpath,
+                    Desktop.getDesktop().open(totalPayOff.createTotalPayoffFile(basePath,
                             eventRepository.findOne(EVENT_ID)));
                 } catch (DocumentException | IOException ex) {
                     Logger.getLogger(PayOffGui.class.getName()).log(Level.SEVERE, null, ex);
@@ -150,7 +152,7 @@ public class PayOffGui extends JFrame {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     try {
-                        Desktop.getDesktop().open(sellerPayOff.createFile(resultpath, reservation));
+                        Desktop.getDesktop().open(sellerPayOff.createFile(basePath, reservation));
                     } catch (DocumentException | IOException ex) {
                         Logger.getLogger(PayOffGui.class.getName()).log(Level.SEVERE, null, ex);
                     }

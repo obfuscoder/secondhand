@@ -1,8 +1,11 @@
 package de.obfusco.secondhand.payoff.file;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import com.itextpdf.text.Document;
@@ -31,17 +34,17 @@ public class TotalPayOff extends BasePayOff {
     @Autowired
     ReservationRepository reservationRepository;
 
-    public File createTotalPayoffFile(String path, Event event) throws DocumentException, FileNotFoundException {
-
-        String fullPath = path + "total.pdf";
-        Document document = new Document(PageSize.A4,80, 50, 50, 30);
+    public File createTotalPayoffFile(Path basePath, Event event) throws DocumentException, IOException {
+        Files.createDirectories(basePath);
+        Path fullPath = Paths.get(basePath.toString(), "payoff.pdf");
+        Document document = new Document(PageSize.A4, 80, 50, 50, 30);
         PdfWriter writer = PdfWriter.getInstance(document,
-                new FileOutputStream(fullPath));
+                new FileOutputStream(fullPath.toFile()));
         document.open();
         addHeader(document);
         document.add(createTotalTable(event));
         document.close();
-        return new File(fullPath);
+        return fullPath.toFile();
     }
 
     private PdfPTable createTotalTable(Event event) {
