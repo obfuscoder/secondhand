@@ -2,6 +2,7 @@ package de.obfusco.secondhand.filesync;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import de.obfusco.secondhand.storage.model.ReservedItem;
 import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
@@ -37,7 +39,13 @@ class FileSync {
         File syncFolder = new File(path);
         syncFolder.mkdirs();
         Set<String> filesToRead = new HashSet<>();
-        filesToRead.addAll(Arrays.asList(syncFolder.list()));
+        filesToRead.addAll(Arrays.asList(syncFolder.list(new FilenameFilter() {
+
+            @Override
+            public boolean accept(File dir, String name) {
+                return name != null && name.length() == 8 && Pattern.matches("\\d{8}", name);
+            }
+        })));
         System.out.println("Found " + filesToRead.size() + " files in sync folder");
         List<ReservedItem> soldItems = reservedItemRepository.findBySoldNotNull();
         System.out.println("Found " + soldItems.size() + " sold items in database");
