@@ -7,11 +7,8 @@
         <artifactId>secondhand</artifactId>
         <version>1.0.0</version>
     </parent>
-    <groupId>de.obfusco.secondhand</groupId>
     <artifactId>secondhand-filesync</artifactId>
-    <version>1.0.0</version>
     <name>secondhand-filesync</name>
-    <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
