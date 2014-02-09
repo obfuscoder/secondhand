@@ -5,11 +5,11 @@
     <parent>
         <groupId>de.obfusco.secondhand</groupId>
         <artifactId>secondhand</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
     <groupId>de.obfusco.secondhand</groupId>
     <artifactId>secondhand-barcodefilegenerator</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>secondhand-barcodefilegenerator</name>
     <url>http://maven.apache.org</url>
     <properties>
