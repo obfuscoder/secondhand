@@ -58,9 +58,9 @@ public class MainGui extends JFrame implements ActionListener {
     public JButton barcodegenerator;
     public JButton plzOverview;
     public JButton testScan;
+    public JButton createSellerReceipt;
     JMenuBar menuBar;
     JMenu filemenu;
-    JMenuItem createSellerReceipt;
     JMenuItem close;
     JFileChooser fc;
 
@@ -79,13 +79,6 @@ public class MainGui extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == close) {
             System.exit(0);
-        } else if (e.getSource() == createSellerReceipt) {
-            try {
-                Desktop.getDesktop().open(receiptFile.createFile(Paths.get("data/pdfs/receipts")));
-
-            } catch (IOException | DocumentException e1) {
-                e1.printStackTrace();
-            }
         }
     }
 
@@ -102,19 +95,15 @@ public class MainGui extends JFrame implements ActionListener {
 
         menuBar.add(filemenu);
 
-        createSellerReceipt = new JMenuItem("Öffne Annahme Verkäuferliste");
-        createSellerReceipt.addActionListener(this);
-
         close = new JMenuItem("Schließen");
         close.addActionListener(this);
 
-        filemenu.add(createSellerReceipt);
         filemenu.add(close);
 
         this.setJMenuBar(menuBar);
 
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(1, 6));
+        panel.setLayout(new GridLayout(3, 2));
 
         sale = new JButton("Verkauf");
         sale.addActionListener(new ActionListener() {
@@ -124,6 +113,7 @@ public class MainGui extends JFrame implements ActionListener {
                 cashBoxGui.setVisible(true);
             }
         });
+        sale.setFont(sale.getFont().deriveFont(30.0f));
 
         plzOverview = new JButton("PLZ Übersicht");
         plzOverview.addActionListener(new ActionListener() {
@@ -133,6 +123,7 @@ public class MainGui extends JFrame implements ActionListener {
                 postCodeGui.setVisible(true);
             }
         });
+        plzOverview.setFont(plzOverview.getFont().deriveFont(30.0f));
 
         billgenerator = new JButton("Abrechnung");
         billgenerator.addActionListener(new ActionListener() {
@@ -142,6 +133,7 @@ public class MainGui extends JFrame implements ActionListener {
                 payOffGui.open();
             }
         });
+        billgenerator.setFont(billgenerator.getFont().deriveFont(30.0f));
 
         barcodegenerator = new JButton("Barcodes drucken");
         barcodegenerator.addActionListener(new ActionListener() {
@@ -151,6 +143,7 @@ public class MainGui extends JFrame implements ActionListener {
                 barCodeGeneratorGui.setVisible(true);
             }
         });
+        barcodegenerator.setFont(barcodegenerator.getFont().deriveFont(30.0f));
 
         testScan = new JButton("Barcode- Test");
         testScan.addActionListener(new ActionListener() {
@@ -160,12 +153,29 @@ public class MainGui extends JFrame implements ActionListener {
                 testScanGui.setVisible(true);
             }
         });
+        testScan.setFont(testScan.getFont().deriveFont(30.0f));
+
+        createSellerReceipt = new JButton("Öffne Annahme Verkäuferliste");
+        createSellerReceipt.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Desktop.getDesktop().open(receiptFile.createFile(Paths.get("data/pdfs/receipts")));
+
+                } catch (IOException | DocumentException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+        createSellerReceipt.setFont(createSellerReceipt.getFont().deriveFont(30.0f));
 
         panel.add(sale);
         panel.add(plzOverview);
         panel.add(billgenerator);
         panel.add(barcodegenerator);
         panel.add(testScan);
+        panel.add(createSellerReceipt);
 
         pane.add(panel, BorderLayout.SOUTH);
     }

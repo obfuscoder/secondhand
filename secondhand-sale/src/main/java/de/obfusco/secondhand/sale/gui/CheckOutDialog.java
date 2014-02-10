@@ -27,6 +27,7 @@ import javax.swing.SwingConstants;
 import com.itextpdf.text.DocumentException;
 
 import de.obfusco.secondhand.sale.service.StorageService;
+import de.obfusco.secondhand.storage.model.ReservedItem;
 
 public class CheckOutDialog extends JDialog implements ActionListener {
 
@@ -48,7 +49,7 @@ public class CheckOutDialog extends JDialog implements ActionListener {
     CashBoxGui frame;
 
     StorageService storageService;
-    List<String> items;
+    List<ReservedItem> items;
 
     int postCode = 0;
     private Path basePath = Paths.get("data/pdfs/sale");
@@ -60,7 +61,7 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 
         frame = (CashBoxGui) parentFrame;
         this.storageService = frame.getStorageService();
-        this.items = frame.getTableItems();
+        this.items = frame.getTableData();
         errorLabel = new JLabel(" ");
         errorLabel.setForeground(new Color(255, 0, 0, 255));
 
@@ -269,7 +270,7 @@ public class CheckOutDialog extends JDialog implements ActionListener {
                     bar = Double.parseDouble(frame.getPrice().replace(",", "."));
                 }
                 File pdfFile = new BillPDFCreator().createPdf(basePath, frame.getTableData(),
-                        Double.parseDouble(frame.getPrice()), bar, getChange());
+                        Double.parseDouble(frame.getPrice().replace(",", ".")), bar, getChange());
                 Desktop.getDesktop().open(pdfFile);
             } catch (DocumentException | IOException ex) {
                 ex.printStackTrace();

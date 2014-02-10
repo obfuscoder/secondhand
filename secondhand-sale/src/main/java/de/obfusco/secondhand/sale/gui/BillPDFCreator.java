@@ -22,11 +22,13 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
+import de.obfusco.secondhand.storage.model.ReservedItem;
+
 public class BillPDFCreator {
 
     private static NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
-    public File createPdf(Path basePath, List<Object> data, Double sum, Double bar, Double change)
+    public File createPdf(Path basePath, List<ReservedItem> data, Double sum, Double bar, Double change)
             throws IOException, DocumentException {
 
         Files.createDirectories(basePath);
@@ -61,7 +63,7 @@ public class BillPDFCreator {
         return targetPath.toFile();
     }
 
-    public static PdfPTable insertItemTable(List<Object> data, Double sum, Double bar, Double change) {
+    public static PdfPTable insertItemTable(List<ReservedItem> data, Double sum, Double bar, Double change) {
 
         PdfPTable table = new PdfPTable(5);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -85,19 +87,19 @@ public class BillPDFCreator {
         table.addCell(cell);
 
         for (int i = 0; i < data.size(); i++) {
-            Object[] items = (Object[]) data.get(i);
+            ReservedItem item = data.get(i);
             table.addCell(Integer.toString(i + 1));
-            cell = new PdfPCell(new Phrase((String) items[0]));
+            cell = new PdfPCell(new Phrase(item.getCode()));
             table.addCell(cell);
-            cell = new PdfPCell(new Phrase((String) items[1]));
+            cell = new PdfPCell(new Phrase(item.getItem().getCategory().getName()));
             table.addCell(cell);
-            cell = new PdfPCell(new Phrase((String) items[3]));
+            cell = new PdfPCell(new Phrase(item.getItem().getSize()));
             table.addCell(cell);
-            cell = new PdfPCell(new Phrase(currency.format(Double.parseDouble(items[4].toString()))));
+            cell = new PdfPCell(new Phrase(currency.format(item.getItem().getPrice())));
             cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             table.addCell(cell);
             //new Row
-            cell = new PdfPCell(new Phrase((String) items[2]));
+            cell = new PdfPCell(new Phrase(item.getItem().getDescription()));
             cell.setColspan(5);
             table.addCell(cell);
         }

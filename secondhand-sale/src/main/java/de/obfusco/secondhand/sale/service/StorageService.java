@@ -26,13 +26,12 @@ public class StorageService {
     @Autowired
     private PurchaseRepository purchaseRepository;
 
-    public void storeSoldInformation(List<String> itemCodes, int zipCode) {
+    public void storeSoldInformation(List<ReservedItem> items, int zipCode) {
         Date soldDate = new Date();
         Customer customer = Customer.create(zipCode);
         customerRepository.save(customer);
-        for (String code : itemCodes) {
+        for (ReservedItem item : items) {
             try {
-                ReservedItem item = reservedItemRepository.findByCode(code.toString());
                 item.setSold(soldDate);
                 reservedItemRepository.save(item);
                 purchaseRepository.save(Purchase.create(item, customer));
