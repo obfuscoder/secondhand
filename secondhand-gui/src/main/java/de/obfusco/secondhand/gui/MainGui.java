@@ -13,9 +13,6 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
@@ -32,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MainGui extends JFrame implements ActionListener {
+public class MainGui extends JFrame {
 
     @Autowired
     PostCodeGui postCodeGui;
@@ -53,15 +50,15 @@ public class MainGui extends JFrame implements ActionListener {
     ReceiptFile receiptFile;
 
     private static final long serialVersionUID = 4961295225628108431L;
+
+    public static final float BUTTON_FONT_SIZE = 25.0f;
+
     public JButton sale;
     public JButton billgenerator;
     public JButton barcodegenerator;
     public JButton plzOverview;
     public JButton testScan;
     public JButton createSellerReceipt;
-    JMenuBar menuBar;
-    JMenu filemenu;
-    JMenuItem close;
     JFileChooser fc;
 
     public MainGui() {
@@ -75,13 +72,6 @@ public class MainGui extends JFrame implements ActionListener {
         setVisible(true);
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == close) {
-            System.exit(0);
-        }
-    }
-
     private void addComponentsToPane(Container pane) {
         JLabel title = new JLabel("Flohmarkt");
         title.setFont(title.getFont().deriveFont(50.0f));
@@ -90,20 +80,8 @@ public class MainGui extends JFrame implements ActionListener {
 
         fc = new JFileChooser();
 
-        menuBar = new JMenuBar();
-        filemenu = new JMenu("Datei");
-
-        menuBar.add(filemenu);
-
-        close = new JMenuItem("Schließen");
-        close.addActionListener(this);
-
-        filemenu.add(close);
-
-        this.setJMenuBar(menuBar);
-
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(3, 2));
+        panel.setLayout(new GridLayout(3, 2, 10, 10));
 
         sale = new JButton("Verkauf");
         sale.addActionListener(new ActionListener() {
@@ -113,7 +91,7 @@ public class MainGui extends JFrame implements ActionListener {
                 cashBoxGui.setVisible(true);
             }
         });
-        sale.setFont(sale.getFont().deriveFont(30.0f));
+        sale.setFont(sale.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         plzOverview = new JButton("PLZ Übersicht");
         plzOverview.addActionListener(new ActionListener() {
@@ -123,7 +101,7 @@ public class MainGui extends JFrame implements ActionListener {
                 postCodeGui.setVisible(true);
             }
         });
-        plzOverview.setFont(plzOverview.getFont().deriveFont(30.0f));
+        plzOverview.setFont(plzOverview.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         billgenerator = new JButton("Abrechnung");
         billgenerator.addActionListener(new ActionListener() {
@@ -133,7 +111,7 @@ public class MainGui extends JFrame implements ActionListener {
                 payOffGui.open();
             }
         });
-        billgenerator.setFont(billgenerator.getFont().deriveFont(30.0f));
+        billgenerator.setFont(billgenerator.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         barcodegenerator = new JButton("Barcodes drucken");
         barcodegenerator.addActionListener(new ActionListener() {
@@ -143,7 +121,7 @@ public class MainGui extends JFrame implements ActionListener {
                 barCodeGeneratorGui.setVisible(true);
             }
         });
-        barcodegenerator.setFont(barcodegenerator.getFont().deriveFont(30.0f));
+        barcodegenerator.setFont(barcodegenerator.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         testScan = new JButton("Barcode- Test");
         testScan.addActionListener(new ActionListener() {
@@ -153,9 +131,9 @@ public class MainGui extends JFrame implements ActionListener {
                 testScanGui.setVisible(true);
             }
         });
-        testScan.setFont(testScan.getFont().deriveFont(30.0f));
+        testScan.setFont(testScan.getFont().deriveFont(BUTTON_FONT_SIZE));
 
-        createSellerReceipt = new JButton("Öffne Annahme Verkäuferliste");
+        createSellerReceipt = new JButton("Annahme Verkäuferliste");
         createSellerReceipt.addActionListener(new ActionListener() {
 
             @Override
@@ -168,7 +146,7 @@ public class MainGui extends JFrame implements ActionListener {
                 }
             }
         });
-        createSellerReceipt.setFont(createSellerReceipt.getFont().deriveFont(30.0f));
+        createSellerReceipt.setFont(createSellerReceipt.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         panel.add(sale);
         panel.add(plzOverview);

@@ -71,6 +71,7 @@ public class CheckOutDialog extends JDialog implements ActionListener {
     }
 
     private void buildNewObjectDialog() {
+        setFont(getFont().deriveFont(20f));
 
         setLayout(new BorderLayout());
 
@@ -162,6 +163,7 @@ public class CheckOutDialog extends JDialog implements ActionListener {
         JLabel changeLabel = new JLabel("RÜCKGELD");
         changeBarlabel = new JLabel("0,00");
         changeBarlabel.setForeground(Color.red);
+        changeBarlabel.setFont(getFont());
 
         JLabel postCodeLabel = new JLabel("PLZ (optional)");
 

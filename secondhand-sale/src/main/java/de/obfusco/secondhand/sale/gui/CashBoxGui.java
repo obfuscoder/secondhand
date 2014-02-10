@@ -3,6 +3,7 @@ package de.obfusco.secondhand.sale.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -62,25 +63,29 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
 
     public CashBoxGui() {
         super("Flohmarkt Verkauf");
-        setSize(800, 600);
+        setSize(1000, 800);
         addComponentsToPane(getContentPane());
-        pack();
         setLocationRelativeTo(null);
     }
 
     private void addComponentsToPane(Container pane) {
+        pane.setFont(pane.getFont().deriveFont(20f));
 
         JLabel title = new JLabel("Flohmarkt Verkauf");
-        title.setFont(title.getFont().deriveFont(24.0f));
+        title.setFont(title.getFont().deriveFont(40.0f));
         title.setHorizontalAlignment(SwingConstants.CENTER);
         pane.add(title, BorderLayout.NORTH);
 
-        errorLabel = new JLabel(" ");
+        errorLabel = new JLabel("");
         errorLabel.setForeground(new Color(255, 0, 0, 255));
+        errorLabel.setFont(errorLabel.getFont().deriveFont(30f));
+        errorLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         tablemodel = new CashTableModel();
 
         cashTable = new JTable(tablemodel);
+        cashTable.setFont(pane.getFont());
+        cashTable.setRowHeight(30);
         cashTable.addKeyListener(new KeyListener() {
 
             @Override
@@ -108,6 +113,8 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         cashTable.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
 
         itemNr = new JTextField();
+        itemNr.setFont(itemNr.getFont().deriveFont(20f));
+        itemNr.setHorizontalAlignment(SwingConstants.CENTER);
         itemNr.addKeyListener(new KeyListener() {
 
             @Override
@@ -128,11 +135,8 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
                         openDialog();
                         return;
                     }
-                    if (itemText.length() != 8) {
-                        setErrorText("Artikelnummer "
-                                + itemNr.getText()
-                                + " ist falsch! Die Nummer muss 8 Zeichen lang sein!");
-
+                    if (itemText.length() != 8 || !itemText.matches("\\d{8}")) {
+                        setErrorText("Artikelnummer " + itemNr.getText() + " ist falsch.");
                         itemNr.setText("");
                         return;
                     }
@@ -158,30 +162,39 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
 
         JPanel itemPanel = new JPanel();
         itemPanel.setLayout(new BorderLayout());
-        itemPanel.add(itemNr, BorderLayout.NORTH);
+        JPanel topPanel = new JPanel(new BorderLayout());
+        itemPanel.add(topPanel, BorderLayout.NORTH);
+        topPanel.add(itemNr, BorderLayout.NORTH);
+        topPanel.add(errorLabel, BorderLayout.SOUTH);
         itemPanel.add(new JScrollPane(cashTable), BorderLayout.CENTER);
-        itemPanel.add(errorLabel, BorderLayout.SOUTH);
 
         JLabel countDescLabel = new JLabel("Artikel: ");
         countLabel = new JLabel("0");
         JLabel sumLabel = new JLabel("Summe: ");
-        priceLabel = new JLabel(currency.format(0));
-        JLabel euroLabel = new JLabel("Euro");
-        JPanel sumPanel = new JPanel(new GridLayout(0, 5));
-        countDescLabel.setFont(countDescLabel.getFont().deriveFont(20.0f));
-        countLabel.setFont(countLabel.getFont().deriveFont(20.0f));
-        sumLabel.setFont(title.getFont().deriveFont(20.0f));
-        priceLabel.setFont(title.getFont().deriveFont(20.0f));
-        euroLabel.setFont(euroLabel.getFont().deriveFont(20.0f));
-        sumPanel.add(countDescLabel);
-        sumPanel.add(countLabel);
+        priceLabel = new JLabel("0,00");
+        JLabel euroLabel = new JLabel(" €");
+        JPanel totalPanel = new JPanel(new GridLayout(0, 2));
+        JPanel countPanel = new JPanel(new GridBagLayout());
+        JPanel sumPanel = new JPanel(new GridBagLayout());
+        totalPanel.add(countPanel);
+        totalPanel.add(sumPanel);
+        countDescLabel.setFont(pane.getFont().deriveFont(40f));
+        countLabel.setFont(pane.getFont().deriveFont(40f));
+        sumLabel.setFont(pane.getFont().deriveFont(40f));
+        priceLabel.setFont(pane.getFont().deriveFont(40f));
+        priceLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        euroLabel.setFont(pane.getFont().deriveFont(40f));
+        countPanel.add(countDescLabel);
+        countPanel.add(countLabel);
         sumPanel.add(sumLabel);
         sumPanel.add(priceLabel);
         sumPanel.add(euroLabel);
         pane.add(itemPanel, BorderLayout.CENTER);
 
         newButton.setEnabled(false);
-        JPanel buttonPanel = new JPanel(new GridLayout(0, 2));
+        JPanel buttonPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+        readyButton.setFont(pane.getFont().deriveFont(30f));
+        newButton.setFont(pane.getFont().deriveFont(30f));
 
         buttonPanel.add(readyButton);
         buttonPanel.add(newButton);
@@ -226,7 +239,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
 
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new GridLayout(2, 0));
-        southPanel.add(sumPanel);
+        southPanel.add(totalPanel);
         southPanel.add(buttonPanel);
 
         pane.add(southPanel, BorderLayout.SOUTH);
@@ -285,7 +298,6 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         priceLabel.setText(currency.format(0));
         countLabel.setText("0");
         validate();
-        pack();
 
         itemNr.requestFocus();
     }
@@ -397,7 +409,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
     public void addItem() {
         String code = itemNr.getText();
         itemNr.setText("");
-        setErrorText(" ");
+        setErrorText("");
         ReservedItem reservedItem = storageService.getReservedItem(code);
         if (reservedItem == null) {
             setErrorText("Artikel mit Nummer \"" + code + "\" existiert nicht!");
@@ -416,7 +428,6 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         errorLabel.getParent().invalidate();
         errorLabel.getParent().validate();
         this.validate();
-        this.pack();
     }
 
     public void deleteSelectedRow() {
