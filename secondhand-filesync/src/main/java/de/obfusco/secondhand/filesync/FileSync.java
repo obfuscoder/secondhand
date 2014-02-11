@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 @Component
 class FileSync {
 
-    Logger logger = LoggerFactory.getLogger(FileSync.class);
+    private final static Logger LOG = LoggerFactory.getLogger(FileSync.class);
 
     @Autowired
     ReservedItemRepository reservedItemRepository;
@@ -53,12 +53,10 @@ class FileSync {
             String code = reservedItem.getCode();
             if (!filesToRead.contains(code)) {
                 File newFile = new File(syncFolder, code);
-                try {
-                    PrintWriter printWriter = new PrintWriter(newFile);
+                try (PrintWriter printWriter = new PrintWriter(newFile)) {
                     printWriter.print(dateFormat.format(reservedItem.getSold()));
-                    printWriter.close();
                 } catch (FileNotFoundException ex) {
-                    logger.error("File {} could not be opened for writing!", newFile);
+                    LOG.error("File {} could not be opened for writing!", newFile);
                 }
             }
             filesToRead.remove(code);
@@ -75,9 +73,9 @@ class FileSync {
                 reservedItem.setSold(parsedDate);
                 reservedItemRepository.save(reservedItem);
             } catch (IOException ex) {
-                logger.error("Could not read content of file {}!", fileToRead);
+                LOG.error("Could not read content of file " + fileToRead, ex);
             } catch (ParseException ex) {
-                logger.error("Could not parse content {} of file {}!", line, fileToRead);
+                LOG.error("Could not parse content " + line + " of file " + fileToRead, ex);
             }
         }
     }

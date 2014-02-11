@@ -1,6 +1,7 @@
 package de.obfusco.secondhand.payoff.file;
 
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 import com.itextpdf.text.Chunk;
@@ -10,8 +11,11 @@ import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+
+import de.obfusco.secondhand.storage.model.Event;
 
 abstract public class BasePayOff {
 
@@ -25,14 +29,22 @@ abstract public class BasePayOff {
         Font font = FontFactory.getFont((bold) ? FontFactory.HELVETICA_BOLD : FontFactory.HELVETICA, 12);
         PdfPCell cell;
         cell = new PdfPCell(new Phrase(new Chunk(label, font)));
+        cell.setBorder(Rectangle.TOP | Rectangle.BOTTOM);
+        cell.setBorderWidth(1);
         cell.setColspan(4);
         table.addCell(cell);
         cell = new PdfPCell(new Phrase(new Chunk(value, font)));
         cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell.setBorder(Rectangle.TOP | Rectangle.BOTTOM | Rectangle.LEFT);
+        cell.setBorderWidth(1);
         table.addCell(cell);
     }
 
-    protected void addHeader(Document document) throws DocumentException {
-        document.add(new Phrase(new Chunk("Abrechnung Flohmarkt", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 24))));
+    protected void addHeader(Document document, Event event) throws DocumentException {
+        document.add(new Phrase("Abrechnung Flohmarkt", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 24)));
+        document.add(new Phrase("\n" + event.getName() + "\n", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+        document.add(new Phrase(
+                SimpleDateFormat.getDateInstance(0, Locale.GERMAN).format(event.getDate()),
+                FontFactory.getFont(FontFactory.HELVETICA, 12)));
     }
 }

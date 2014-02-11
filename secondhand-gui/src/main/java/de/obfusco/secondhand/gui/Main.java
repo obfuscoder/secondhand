@@ -15,14 +15,14 @@ import org.springframework.context.annotation.Import;
 @Import(StorageConfiguration.class)
 public class Main {
 
-    public static void main(String args[]) {
-        Logger logger = LoggerFactory.getLogger(Main.class);
+    private final static Logger LOG = LoggerFactory.getLogger(Main.class);
 
-        logger.info("Starting application");
+    public static void main(String args[]) {
+        LOG.info("Starting application");
         try {
             ApplicationContext applicationContext = new AnnotationConfigApplicationContext(Main.class);
         } catch (Exception ex) {
-            logger.error("Error while starting application!", ex);
+            LOG.error("Error while starting application!", ex);
         }
     }
 }

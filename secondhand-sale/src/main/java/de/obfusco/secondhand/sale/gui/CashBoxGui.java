@@ -295,7 +295,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
             tablemodel.delRow(0);
         }
 
-        priceLabel.setText(currency.format(0));
+        priceLabel.setText("0,00");
         countLabel.setText("0");
         validate();
 

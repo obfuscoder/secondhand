@@ -1,6 +1,7 @@
 package de.obfusco.secondhand.payoff.file;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,6 +16,7 @@ import com.itextpdf.text.Element;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -24,6 +26,7 @@ import de.obfusco.secondhand.storage.model.ReservedItem;
 import de.obfusco.secondhand.storage.model.Seller;
 import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,15 +36,20 @@ public class SellerPayOff extends BasePayOff {
     @Autowired
     ReservedItemRepository reservedItemRepository;
 
+    public static final int NUMBER_OF_COLUMNS = 5;
+
     public File createFile(Path basePath, Reservation reservation) throws DocumentException, IOException {
         Path targetPath = Paths.get(basePath.toString(), reservation.getNumber().toString());
         Files.createDirectories(targetPath);
         Path fullPath = Paths.get(targetPath.toString(), "payoff.pdf");
-        Document document = new Document(PageSize.A4, 80, 50, 50, 30);
-        PdfWriter writer = PdfWriter.getInstance(document,
-                new FileOutputStream(fullPath.toFile()));
-        document.open();
-        addHeader(document);
+        Document document = createPdfDocument(fullPath);
+        addContentToPdf(document, reservation);
+        document.close();
+        return fullPath.toFile();
+    }
+
+    private void addContentToPdf(Document document, Reservation reservation) throws DocumentException {
+        addHeader(document, reservation.getEvent());
         document.add(new Phrase("\n\n"));
 
         Seller seller = reservation.getSeller();
@@ -63,12 +71,12 @@ public class SellerPayOff extends BasePayOff {
             totalPrice += item.getItem().getPrice().doubleValue();
         }
         double kitaSum = totalPrice * CHILDCARE_SHARE;
+        kitaSum = Math.ceil(kitaSum * 10) / 10;
         double totalSum = totalPrice - (kitaSum + ENTRY_FEE);
 
         PdfPTable table = createItemTable(soldItems);
-        addSeparatorLine(table);
         addTotalLine(table, "Summe", currency.format(totalPrice), true);
-        addTotalLine(table, "Erlös Kita (" + percent.format(CHILDCARE_SHARE) + ")", currency.format(-kitaSum), false);
+        addTotalLine(table, "Erlös Kita (" + percent.format(CHILDCARE_SHARE) + " auf 10 Cent aufgerundet)", currency.format(-kitaSum), false);
         addTotalLine(table, "Teilnahmegebühr", currency.format(-ENTRY_FEE), false);
         addTotalLine(table, "Gewinn", currency.format(totalSum), true);
         document.add(table);
@@ -83,47 +91,82 @@ public class SellerPayOff extends BasePayOff {
             totalPrice += item.getItem().getPrice().doubleValue();
         }
         table = createItemTable(unsoldItems);
-        addSeparatorLine(table);
         addTotalLine(table, "Summe", currency.format(totalPrice), true);
         document.add(table);
-        document.close();
-        return fullPath.toFile();
     }
 
-    private void addSeparatorLine(PdfPTable table) {
-        PdfPCell cell = new PdfPCell(new Phrase("------------------------------------------------------------"));
-        cell.setColspan(5);
-        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        table.addCell(cell);
-    }
-
-    private PdfPTable createItemTable(List<ReservedItem> items) {
-        PdfPTable table = new PdfPTable(5);
+    private PdfPTable createItemTable(List<ReservedItem> items) throws DocumentException {
+        PdfPTable table = new PdfPTable(NUMBER_OF_COLUMNS);
+        table.setWidthPercentage(100f);
+        table.setWidths(new int[]{1, 2, 8, 2, 2});
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
-        String[] columnNames = {"Pos", "ArtNr", "Kategorie", "Größe", "Preis"};
-        for (String columnName : columnNames) {
-            table.addCell(new PdfPCell(new Phrase(new Chunk(columnName,
-                    FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)))));
+        if (!items.isEmpty()) {
+            addItemHeader(table);
         }
 
         for (int i = 0; i < items.size(); i++) {
             ReservedItem item = items.get(i);
-            PdfPCell cell = new PdfPCell(new Phrase("" + (i + 1)));
-            table.addCell(cell);
-            cell = new PdfPCell(new Phrase(item.getCode()));
-            table.addCell(cell);
-            cell = new PdfPCell(new Phrase(item.getItem().getCategory().getName()));
-            table.addCell(cell);
-            cell = new PdfPCell(new Phrase(item.getItem().getSize()));
-            table.addCell(cell);
-            cell = new PdfPCell(new Phrase(currency.format(item.getItem().getPrice())));
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            table.addCell(cell);
-            //new Row
-            cell = new PdfPCell(new Phrase(item.getItem().getDescription()));
-            cell.setColspan(5);
-            table.addCell(cell);
+            for (int col = 0; col < NUMBER_OF_COLUMNS; col++) {
+                PdfPCell cell = new PdfPCell(new Phrase(getColText(item, i, col)));
+                cell.setBorder(col == 0 ? 0 : Rectangle.LEFT);
+                cell.setBorderWidth(1);
+                if (col == NUMBER_OF_COLUMNS - 1) {
+                    cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                }
+                table.addCell(cell);
+            }
         }
         return table;
+    }
+
+    private void addItemHeader(PdfPTable table) {
+        String[] columnNames = {"Pos", "ArtNr", "Beschreibung", "Größe", "Preis"};
+        for (int i = 0; i < columnNames.length; i++) {
+            String columnName = columnNames[i];
+            PdfPCell cell = new PdfPCell(new Phrase(new Chunk(columnName,
+                    FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
+            cell.setBorder((i == 0 ? 0 : Rectangle.LEFT) | Rectangle.BOTTOM);
+            cell.setBorderWidth(1);
+            table.addCell(cell);
+        }
+        table.setHeaderRows(1);
+    }
+
+    public File createFileForAll(Path basePath, List<Reservation> reservations) throws IOException, DocumentException {
+        Path targetPath = Paths.get(basePath.toString());
+        Files.createDirectories(targetPath);
+        Path fullPath = Paths.get(targetPath.toString(), "allpayoff.pdf");
+        Document document = createPdfDocument(fullPath);
+        for (Reservation reservation : reservations) {
+            addContentToPdf(document, reservation);
+            document.newPage();
+        }
+        document.close();
+        return fullPath.toFile();
+    }
+
+    private Document createPdfDocument(Path fullPath) throws FileNotFoundException, DocumentException {
+        Document document = new Document(PageSize.A4, 50, 50, 50, 40);
+        PdfWriter writer = PdfWriter.getInstance(document,
+                new FileOutputStream(fullPath.toFile()));
+        document.open();
+        return document;
+    }
+
+    private String getColText(ReservedItem item, int i, int col) {
+        switch (col) {
+            case 0:
+                return Integer.toString(i + 1);
+            case 1:
+                return item.getCode();
+            case 2:
+                return item.getItem().getDescription();
+            case 3:
+                return item.getItem().getSize();
+            case 4:
+                return currency.format(item.getItem().getPrice());
+            default:
+                return StringUtils.EMPTY;
+        }
     }
 }

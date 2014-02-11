@@ -25,11 +25,15 @@ import de.obfusco.secondhand.receipt.file.ReceiptFile;
 import de.obfusco.secondhand.sale.gui.CashBoxGui;
 import de.obfusco.secondhand.testscan.gui.TestScanGui;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MainGui extends JFrame {
+
+    private final static Logger LOG = LoggerFactory.getLogger(MainGui.class);
 
     @Autowired
     PostCodeGui postCodeGui;
@@ -142,7 +146,7 @@ public class MainGui extends JFrame {
                     Desktop.getDesktop().open(receiptFile.createFile(Paths.get("data/pdfs/receipts")));
 
                 } catch (IOException | DocumentException e1) {
-                    e1.printStackTrace();
+                    LOG.error("Failed to create and open receipts file", e1);
                 }
             }
         });

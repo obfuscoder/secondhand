@@ -26,11 +26,15 @@ import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.repository.EventRepository;
 import de.obfusco.secondhand.storage.repository.ReservationRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class BarCodeGeneratorGui extends JFrame implements ActionListener {
+
+    private final static Logger LOG = LoggerFactory.getLogger(BarCodeGeneratorGui.class);
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -88,26 +92,18 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
 
             @Override
             public void mouseReleased(MouseEvent arg0) {
-                // TODO Auto-generated method stub
-
             }
 
             @Override
             public void mousePressed(MouseEvent arg0) {
-                // TODO Auto-generated method stub
-
             }
 
             @Override
             public void mouseExited(MouseEvent arg0) {
-                // TODO Auto-generated method stub
-
             }
 
             @Override
             public void mouseEntered(MouseEvent arg0) {
-                // TODO Auto-generated method stub
-
             }
 
             @Override
@@ -115,8 +111,7 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
                 try {
                     Desktop.getDesktop().open(targetPath.toFile());
                 } catch (IOException e1) {
-
-                    e1.printStackTrace();
+                    LOG.error("Failed to open file " + targetPath.toString(), e1);
                 }
             }
         });
@@ -146,7 +141,7 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
                 etiquettesLabel.setText("Barcodes für " + customerNr.getText());
 
             } catch (NumberFormatException | IOException | DocumentException e) {
-                e.printStackTrace();
+                LOG.error("Failed to create bar codes file", e);
             }
         } else if (actionEvent.getSource() == etiquettes) {
             try {
@@ -158,7 +153,7 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
 
                 etiquettesLabel.setText("Etiketten für " + customerNr.getText());
             } catch (DocumentException | IOException e) {
-                e.printStackTrace();
+                LOG.error("Failed to create labels file", e);
             }
         }
 

@@ -19,6 +19,7 @@ import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
@@ -29,7 +30,12 @@ import com.itextpdf.text.DocumentException;
 import de.obfusco.secondhand.sale.service.StorageService;
 import de.obfusco.secondhand.storage.model.ReservedItem;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class CheckOutDialog extends JDialog implements ActionListener {
+
+    private final static Logger LOG = LoggerFactory.getLogger(CheckOutDialog.class);
 
     private static final long serialVersionUID = -9004809235134991240L;
 
@@ -275,7 +281,10 @@ public class CheckOutDialog extends JDialog implements ActionListener {
                         Double.parseDouble(frame.getPrice().replace(",", ".")), bar, getChange());
                 Desktop.getDesktop().open(pdfFile);
             } catch (DocumentException | IOException ex) {
-                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Fehler",
+                        "Es trat ein Fehler beim Erstellen der Rechnung auf.",
+                        JOptionPane.ERROR_MESSAGE);
+                LOG.error("Error while creating receipt", ex);
             }
         }
     }
