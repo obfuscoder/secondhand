@@ -20,7 +20,7 @@ public class ReservedItem extends AbstractEntity {
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     Date sold;
 
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     Date refunded;
 
     public String getCode() {

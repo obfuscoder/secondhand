@@ -22,6 +22,7 @@ import de.obfusco.secondhand.barcodefilegenerator.BarCodeGeneratorGui;
 import de.obfusco.secondhand.payoff.gui.PayOffGui;
 import de.obfusco.secondhand.postcode.gui.PostCodeGui;
 import de.obfusco.secondhand.receipt.file.ReceiptFile;
+import de.obfusco.secondhand.refund.gui.RefundGui;
 import de.obfusco.secondhand.sale.gui.CashBoxGui;
 import de.obfusco.secondhand.testscan.gui.TestScanGui;
 
@@ -40,6 +41,9 @@ public class MainGui extends JFrame {
 
     @Autowired
     CashBoxGui cashBoxGui;
+
+    @Autowired
+    RefundGui refundGui;
 
     @Autowired
     TestScanGui testScanGui;
@@ -85,7 +89,7 @@ public class MainGui extends JFrame {
         fc = new JFileChooser();
 
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(3, 2, 10, 10));
+        panel.setLayout(new GridLayout(7, 1, 10, 10));
 
         sale = new JButton("Verkauf");
         sale.addActionListener(new ActionListener() {
@@ -96,6 +100,16 @@ public class MainGui extends JFrame {
             }
         });
         sale.setFont(sale.getFont().deriveFont(BUTTON_FONT_SIZE));
+
+        JButton refund = new JButton("Storno");
+        refund.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                refundGui.setVisible(true);
+            }
+        });
+        refund.setFont(refund.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         plzOverview = new JButton("PLZ Übersicht");
         plzOverview.addActionListener(new ActionListener() {
@@ -153,6 +167,7 @@ public class MainGui extends JFrame {
         createSellerReceipt.setFont(createSellerReceipt.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         panel.add(sale);
+        panel.add(refund);
         panel.add(plzOverview);
         panel.add(billgenerator);
         panel.add(barcodegenerator);

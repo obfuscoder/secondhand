@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -36,24 +37,31 @@ class FileSync {
 
     void start(String path) {
         List<ReservedItem> soldItemsInDatabase = reservedItemRepository.findBySoldNotNull();
-        synchronizePathWithItemsInDatabase(path, new SoldFilenameFilter(), soldItemsInDatabase, new SoldAction());
+        synchronizePathWithItemsInDatabase(Paths.get(path, "sold").toString(), soldItemsInDatabase, new SoldAction());
 
         List<ReservedItem> refundedItemsInDatabase = reservedItemRepository.findByRefundedNotNull();
-        synchronizePathWithItemsInDatabase(path, new RefundedFilenameFilter(), refundedItemsInDatabase, new RefundedAction());
+        synchronizePathWithItemsInDatabase(Paths.get(path, "refunded").toString(), refundedItemsInDatabase, new RefundedAction());
     }
 
     private void synchronizePathWithItemsInDatabase(
-            String path, FilenameFilter filter, List<ReservedItem> itemsInDatabase, Action action) {
+            String path, List<ReservedItem> itemsInDatabase, Action action) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         File syncFolder = new File(path);
         syncFolder.mkdirs();
         Set<String> filesToRead = new HashSet<>();
-        filesToRead.addAll(Arrays.asList(syncFolder.list(filter)));
-        System.out.println("Found " + filesToRead.size() + " files in sync folder");
-        System.out.println("Found " + itemsInDatabase.size() + " items in database");
+        filesToRead.addAll(Arrays.asList(syncFolder.list(new FilenameFilter() {
+
+            @Override
+            public boolean accept(File dir, String name) {
+                return name != null && name.length() == 8 && Pattern.matches("\\d{8}", name);
+            }
+        })));
+        LOG.info("Found {} files in folder {}", filesToRead.size(), path);
+        LOG.info("Found {} items in database", itemsInDatabase.size());
         for (ReservedItem reservedItem : itemsInDatabase) {
             String code = reservedItem.getCode();
             if (!filesToRead.contains(code)) {
+                LOG.info("Creting new file sold date on item with code {}", code);
                 File newFile = new File(syncFolder, code);
                 try (PrintWriter printWriter = new PrintWriter(newFile)) {
                     printWriter.print(dateFormat.format(action.getDate(reservedItem)));
@@ -72,8 +80,11 @@ class FileSync {
                 line = lines.get(0);
                 Date parsedDate = dateFormat.parse(line);
                 ReservedItem reservedItem = reservedItemRepository.findByCode(code);
-                action.execute(reservedItem, parsedDate);
-                reservedItemRepository.save(reservedItem);
+                if (reservedItem != null) {
+                    LOG.info("Setting date on item with code {}", code);
+                    action.execute(reservedItem, parsedDate);
+                    reservedItemRepository.save(reservedItem);
+                }
             } catch (IOException ex) {
                 LOG.error("Could not read content of file " + fileToRead, ex);
             } catch (ParseException ex) {
@@ -93,14 +104,6 @@ class FileSync {
         @Override
         public boolean accept(File dir, String name) {
             return name != null && name.length() == 8 && Pattern.matches("\\d{8}", name);
-        }
-    }
-
-    private static class RefundedFilenameFilter implements FilenameFilter {
-
-        @Override
-        public boolean accept(File dir, String name) {
-            return name != null && name.length() == 8 && Pattern.matches("\\d{8}.refunded", name);
         }
     }
 
