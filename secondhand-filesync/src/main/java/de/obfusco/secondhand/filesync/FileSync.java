@@ -61,7 +61,7 @@ class FileSync {
         for (ReservedItem reservedItem : itemsInDatabase) {
             String code = reservedItem.getCode();
             if (!filesToRead.contains(code)) {
-                LOG.info("Creting new file sold date on item with code {}", code);
+                LOG.info("Creating new file in {} with code {}", path, code);
                 File newFile = new File(syncFolder, code);
                 try (PrintWriter printWriter = new PrintWriter(newFile)) {
                     printWriter.print(dateFormat.format(action.getDate(reservedItem)));
@@ -71,7 +71,7 @@ class FileSync {
             }
             filesToRead.remove(code);
         }
-        System.out.println("After matching " + filesToRead.size() + " files remain to be read");
+        LOG.info("After matching {} files remain to be read", filesToRead.size());
         for (String code : filesToRead.toArray(new String[0])) {
             File fileToRead = new File(syncFolder, code);
             String line = null;
