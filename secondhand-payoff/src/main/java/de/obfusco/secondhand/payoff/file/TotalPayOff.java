@@ -41,7 +41,7 @@ public class TotalPayOff extends BasePayOff {
         PdfWriter writer = PdfWriter.getInstance(document,
                 new FileOutputStream(fullPath.toFile()));
         document.open();
-        addHeader(document);
+        addHeader(document, event);
         document.add(createTotalTable(event));
         document.close();
         return fullPath.toFile();

@@ -20,5 +20,7 @@ public interface ReservedItemRepository extends CrudRepository<ReservedItem, Int
 
     List<ReservedItem> findByReservationEventAndSoldNotNull(Event event);
 
-    public List<ReservedItem> findBySoldNotNull();
+    List<ReservedItem> findBySoldNotNull();
+
+    List<ReservedItem> findByRefundedNotNull();
 }

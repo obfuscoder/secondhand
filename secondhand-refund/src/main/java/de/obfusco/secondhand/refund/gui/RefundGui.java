@@ -1,4 +1,4 @@
-package de.obfusco.secondhand.sale.gui;
+package de.obfusco.secondhand.refund.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -21,7 +21,6 @@ import java.util.Locale;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -32,37 +31,35 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import de.obfusco.secondhand.sale.service.StorageService;
 import de.obfusco.secondhand.storage.model.ReservedItem;
+import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CashBoxGui extends JFrame implements ActionListener, TableModelListener {
-
-    private static final long serialVersionUID = -698049510249510666L;
+public class RefundGui extends JFrame implements ActionListener, TableModelListener {
 
     protected NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
     JTextField itemNr;
-    CashTableModel tablemodel;
+    ItemTableModel tableModel;
     JLabel errorLabel;
     JLabel priceLabel;
-    JTable cashTable;
+    JTable itemTable;
     String sum;
 
     @Autowired
-    StorageService storageService;
+    ReservedItemRepository itemRepository;
 
     JButton readyButton = new JButton("Fertig");
-    JButton newButton = new JButton("Neuer Kunde");
+    JButton newButton = new JButton("Neue Rückgabe");
 
     CheckOutDialog checkout = null;
     private JLabel countLabel;
 
-    public CashBoxGui() {
-        super("Flohmarkt Verkauf");
+    public RefundGui() {
+        super("Storno");
         setSize(1000, 800);
         addComponentsToPane(getContentPane());
         setLocationRelativeTo(null);
@@ -71,7 +68,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
     private void addComponentsToPane(Container pane) {
         pane.setFont(pane.getFont().deriveFont(20f));
 
-        JLabel title = new JLabel("Flohmarkt Verkauf");
+        JLabel title = new JLabel("Flohmarkt Storno");
         title.setFont(title.getFont().deriveFont(40.0f));
         title.setHorizontalAlignment(SwingConstants.CENTER);
         pane.add(title, BorderLayout.NORTH);
@@ -81,12 +78,12 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         errorLabel.setFont(errorLabel.getFont().deriveFont(30f));
         errorLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        tablemodel = new CashTableModel();
+        tableModel = new ItemTableModel();
 
-        cashTable = new JTable(tablemodel);
-        cashTable.setFont(pane.getFont());
-        cashTable.setRowHeight(30);
-        cashTable.addKeyListener(new KeyListener() {
+        itemTable = new JTable(tableModel);
+        itemTable.setFont(pane.getFont());
+        itemTable.setRowHeight(30);
+        itemTable.addKeyListener(new KeyListener() {
 
             @Override
             public void keyTyped(KeyEvent arg0) {
@@ -103,14 +100,14 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
                 }
             }
         });
-        tablemodel.addTableModelListener(this);
+        tableModel.addTableModelListener(this);
 
         DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
         rightRenderer.setHorizontalAlignment(DefaultTableCellRenderer.RIGHT);
-        cashTable.getColumnModel().getColumn(0).setPreferredWidth(100);
-        cashTable.getColumnModel().getColumn(1).setPreferredWidth(100);
-        cashTable.getColumnModel().getColumn(2).setPreferredWidth(300);
-        cashTable.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
+        itemTable.getColumnModel().getColumn(0).setPreferredWidth(100);
+        itemTable.getColumnModel().getColumn(1).setPreferredWidth(100);
+        itemTable.getColumnModel().getColumn(2).setPreferredWidth(300);
+        itemTable.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
 
         itemNr = new JTextField();
         itemNr.setFont(itemNr.getFont().deriveFont(20f));
@@ -130,7 +127,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String itemText = itemNr.getText();
                     if (itemText.length() == 0
-                            && cashTable.getModel().getRowCount() > 0) {
+                            && itemTable.getModel().getRowCount() > 0) {
                         itemNr.setText("");
                         openDialog();
                         return;
@@ -141,7 +138,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
                         return;
                     }
 
-                    if (tablemodel.findItemNr(itemNr.getText())) {
+                    if (tableModel.findItemNr(itemNr.getText())) {
                         setErrorText("Artikelnummer " + itemNr.getText()
                                 + " bereits eingescannt!");
                         itemNr.setText("");
@@ -154,9 +151,9 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
             }
         });
 
-        cashTable.addComponentListener(new ComponentAdapter() {
+        itemTable.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) {
-                cashTable.scrollRectToVisible(cashTable.getCellRect(cashTable.getRowCount() - 1, 0, true));
+                itemTable.scrollRectToVisible(itemTable.getCellRect(itemTable.getRowCount() - 1, 0, true));
             }
         });
 
@@ -166,7 +163,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         itemPanel.add(topPanel, BorderLayout.NORTH);
         topPanel.add(itemNr, BorderLayout.NORTH);
         topPanel.add(errorLabel, BorderLayout.SOUTH);
-        itemPanel.add(new JScrollPane(cashTable), BorderLayout.CENTER);
+        itemPanel.add(new JScrollPane(itemTable), BorderLayout.CENTER);
 
         JLabel countDescLabel = new JLabel("Artikel: ");
         countLabel = new JLabel("0");
@@ -245,8 +242,8 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         pane.add(southPanel, BorderLayout.SOUTH);
     }
 
-    public StorageService getStorageService() {
-        return storageService;
+    public ReservedItemRepository getItemRepository() {
+        return itemRepository;
     }
 
     public String getPrice() {
@@ -266,7 +263,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
     }
 
     public JTable getCashTable() {
-        return cashTable;
+        return itemTable;
     }
 
     @Override
@@ -287,12 +284,12 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         newButton.setEnabled(false);
         readyButton.setEnabled(true);
         itemNr.setEnabled(true);
-        cashTable.setEnabled(true);
+        itemTable.setEnabled(true);
 
         itemNr.setText("");
-        int rowCount = tablemodel.getRowCount();
+        int rowCount = tableModel.getRowCount();
         for (int i = 0; i < rowCount; i++) {
-            tablemodel.delRow(0);
+            tableModel.delRow(0);
         }
 
         priceLabel.setText("0,00");
@@ -316,10 +313,10 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
     }
 
     private void calcTotalPriceAndCount() {
-        int rowCount = tablemodel.getRowCount();
+        int rowCount = tableModel.getRowCount();
         double totalPrice = 0;
         for (int i = 0; i < rowCount; i++) {
-            BigDecimal price = tablemodel.getData().get(i).getItem().getPrice();
+            BigDecimal price = tableModel.getData().get(i).getItem().getPrice();
             totalPrice += price.doubleValue();
         }
         priceLabel.setText(String.format("%.2f", totalPrice).replace('.', ','));
@@ -327,7 +324,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
     }
 
     List<ReservedItem> getTableData() {
-        return tablemodel.getData();
+        return tableModel.getData();
     }
 
     private static class App {
@@ -336,7 +333,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         }
     }
 
-    class CashTableModel extends AbstractTableModel {
+    class ItemTableModel extends AbstractTableModel {
 
         private List<String> columnNames = new ArrayList<>(Arrays.asList(
                 "ArtNr", "Kategorie", "Bezeichnung", "Groesse", "Preis"));
@@ -410,22 +407,22 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         String code = itemNr.getText();
         itemNr.setText("");
         setErrorText("");
-        ReservedItem reservedItem = storageService.getReservedItem(code);
+        ReservedItem reservedItem = itemRepository.findByCode(code);
         if (reservedItem == null) {
             setErrorText("Artikel mit Nummer \"" + code + "\" existiert nicht!");
             return;
         }
+        if (!reservedItem.isSold()) {
+            setErrorText("Artikel mit Nummer \"" + code
+                    + "\" wurde noch nicht verkauft!");
+            return;
+        }
         if (reservedItem.isRefunded()) {
             setErrorText("Artikel mit Nummer \"" + code
-                    + "\" wurde bereits verkauft und storniert!");
+                    + "\" wurde bereits storniert!");
             return;
         }
-        if (reservedItem.isSold()) {
-            setErrorText("Artikel mit Nummer \"" + code
-                    + "\" wurde bereits verkauft!");
-            return;
-        }
-        tablemodel.addRow(reservedItem);
+        tableModel.addRow(reservedItem);
     }
 
     public void setErrorText(String text) {
@@ -436,19 +433,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
     }
 
     public void deleteSelectedRow() {
-        int n = JOptionPane.showConfirmDialog(
-                this,
-                "Möchten sie den Artikel \""
-                + tablemodel.getValueAt(cashTable.getSelectedRow(), 0)
-                + "\" wirklich löschen?", "Artikel löschen",
-                JOptionPane.YES_NO_OPTION);
-
-        if (n == JOptionPane.YES_OPTION) {
-            tablemodel.delRow(cashTable.getSelectedRow());
-        }
-
+        tableModel.delRow(itemTable.getSelectedRow());
         itemNr.requestFocus();
-
     }
-
 }

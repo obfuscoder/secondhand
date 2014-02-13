@@ -35,26 +35,28 @@ class FileSync {
     ReservedItemRepository reservedItemRepository;
 
     void start(String path) {
+        List<ReservedItem> soldItemsInDatabase = reservedItemRepository.findBySoldNotNull();
+        synchronizePathWithItemsInDatabase(path, new SoldFilenameFilter(), soldItemsInDatabase, new SoldAction());
+
+        List<ReservedItem> refundedItemsInDatabase = reservedItemRepository.findByRefundedNotNull();
+        synchronizePathWithItemsInDatabase(path, new RefundedFilenameFilter(), refundedItemsInDatabase, new RefundedAction());
+    }
+
+    private void synchronizePathWithItemsInDatabase(
+            String path, FilenameFilter filter, List<ReservedItem> itemsInDatabase, Action action) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         File syncFolder = new File(path);
         syncFolder.mkdirs();
         Set<String> filesToRead = new HashSet<>();
-        filesToRead.addAll(Arrays.asList(syncFolder.list(new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String name) {
-                return name != null && name.length() == 8 && Pattern.matches("\\d{8}", name);
-            }
-        })));
+        filesToRead.addAll(Arrays.asList(syncFolder.list(filter)));
         System.out.println("Found " + filesToRead.size() + " files in sync folder");
-        List<ReservedItem> soldItems = reservedItemRepository.findBySoldNotNull();
-        System.out.println("Found " + soldItems.size() + " sold items in database");
-        for (ReservedItem reservedItem : soldItems) {
+        System.out.println("Found " + itemsInDatabase.size() + " items in database");
+        for (ReservedItem reservedItem : itemsInDatabase) {
             String code = reservedItem.getCode();
             if (!filesToRead.contains(code)) {
                 File newFile = new File(syncFolder, code);
                 try (PrintWriter printWriter = new PrintWriter(newFile)) {
-                    printWriter.print(dateFormat.format(reservedItem.getSold()));
+                    printWriter.print(dateFormat.format(action.getDate(reservedItem)));
                 } catch (FileNotFoundException ex) {
                     LOG.error("File {} could not be opened for writing!", newFile);
                 }
@@ -70,7 +72,7 @@ class FileSync {
                 line = lines.get(0);
                 Date parsedDate = dateFormat.parse(line);
                 ReservedItem reservedItem = reservedItemRepository.findByCode(code);
-                reservedItem.setSold(parsedDate);
+                action.execute(reservedItem, parsedDate);
                 reservedItemRepository.save(reservedItem);
             } catch (IOException ex) {
                 LOG.error("Could not read content of file " + fileToRead, ex);
@@ -84,5 +86,54 @@ class FileSync {
         ApplicationContext applicationContext = new AnnotationConfigApplicationContext(FileSyncConfig.class);
         FileSync sync = applicationContext.getBean(FileSync.class);
         sync.start("data/sync");
+    }
+
+    private static class SoldFilenameFilter implements FilenameFilter {
+
+        @Override
+        public boolean accept(File dir, String name) {
+            return name != null && name.length() == 8 && Pattern.matches("\\d{8}", name);
+        }
+    }
+
+    private static class RefundedFilenameFilter implements FilenameFilter {
+
+        @Override
+        public boolean accept(File dir, String name) {
+            return name != null && name.length() == 8 && Pattern.matches("\\d{8}.refunded", name);
+        }
+    }
+
+    private interface Action {
+
+        void execute(ReservedItem item, Date date);
+
+        Date getDate(ReservedItem item);
+    }
+
+    private static class SoldAction implements Action {
+
+        @Override
+        public void execute(ReservedItem item, Date date) {
+            item.setSold(date);
+        }
+
+        @Override
+        public Date getDate(ReservedItem item) {
+            return item.getSold();
+        }
+    }
+
+    private static class RefundedAction implements Action {
+
+        @Override
+        public void execute(ReservedItem item, Date date) {
+            item.setRefunded(date);
+        }
+
+        @Override
+        public Date getDate(ReservedItem item) {
+            return item.getRefunded();
+        }
     }
 }

@@ -16,6 +16,7 @@
         <module>secondhand-testscan</module>
         <module>secoundhand-receipt</module>
         <module>secondhand-filesync</module>
+        <module>secondhand-refund</module>
     </modules>
     <properties>
         <maven.compiler.source>1.7</maven.compiler.source>
