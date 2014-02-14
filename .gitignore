@@ -5,3 +5,4 @@ target
 .classpath
 data
 log
+dependency-reduced-pom.xml

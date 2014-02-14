@@ -67,6 +67,7 @@ public class MainGui extends JFrame {
     public JButton plzOverview;
     public JButton testScan;
     public JButton createSellerReceipt;
+    public JButton createSellerResultReceipt;
     JFileChooser fc;
 
     public MainGui() {
@@ -89,7 +90,7 @@ public class MainGui extends JFrame {
         fc = new JFileChooser();
 
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(7, 1, 10, 10));
+        panel.setLayout(new GridLayout(4, 2, 10, 10));
 
         sale = new JButton("Verkauf");
         sale.addActionListener(new ActionListener() {
@@ -157,7 +158,8 @@ public class MainGui extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    Desktop.getDesktop().open(receiptFile.createFile(Paths.get("data/pdfs/receipts")));
+                    Desktop.getDesktop().open(receiptFile.createFile(Paths.get("data/pdfs/receipts"), "Annahme Flohmarkt",
+                            "Mit meiner Unterschrift bestaetige ich die Teilnahmebedingungen."));
 
                 } catch (IOException | DocumentException e1) {
                     LOG.error("Failed to create and open receipts file", e1);
@@ -166,6 +168,22 @@ public class MainGui extends JFrame {
         });
         createSellerReceipt.setFont(createSellerReceipt.getFont().deriveFont(BUTTON_FONT_SIZE));
 
+        createSellerResultReceipt = new JButton("Rückgabe Verkäuferliste");
+        createSellerResultReceipt.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Desktop.getDesktop().open(receiptFile.createFile(Paths.get("data/pdfs/receipts"), "Rückgabe Verkäufer",
+                            "Mit meiner Unterschrift bestätige ich den Erhalt meiner nicht verkauften Artikel sowie meines Gewinnanteils der verkauften Artikel."));
+
+                } catch (IOException | DocumentException e1) {
+                    LOG.error("Failed to create and open receipts file", e1);
+                }
+            }
+        });
+        createSellerResultReceipt.setFont(createSellerResultReceipt.getFont().deriveFont(BUTTON_FONT_SIZE));
+
         panel.add(sale);
         panel.add(refund);
         panel.add(plzOverview);
@@ -173,6 +191,7 @@ public class MainGui extends JFrame {
         panel.add(barcodegenerator);
         panel.add(testScan);
         panel.add(createSellerReceipt);
+        panel.add(createSellerResultReceipt);
 
         pane.add(panel, BorderLayout.SOUTH);
     }
