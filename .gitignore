@@ -6,3 +6,6 @@ target
 data
 log
 dependency-reduced-pom.xml
+.idea
+*.iml
+*.db
