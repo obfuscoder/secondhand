@@ -4,11 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.file.Paths;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -72,6 +74,8 @@ public class MainGui extends JFrame {
 
     public MainGui() {
         super("Flohmarkt");
+        Image image = new ImageIcon("favicon.ico").getImage();
+        setIconImage(image);
         setSize(800, 800);
         setLocation(200, 10);
         addComponentsToPane(getContentPane());

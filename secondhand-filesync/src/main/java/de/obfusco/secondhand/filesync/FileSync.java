@@ -99,14 +99,6 @@ class FileSync {
         sync.start("data/sync");
     }
 
-    private static class SoldFilenameFilter implements FilenameFilter {
-
-        @Override
-        public boolean accept(File dir, String name) {
-            return name != null && name.length() == 8 && Pattern.matches("\\d{8}", name);
-        }
-    }
-
     private interface Action {
 
         void execute(ReservedItem item, Date date);

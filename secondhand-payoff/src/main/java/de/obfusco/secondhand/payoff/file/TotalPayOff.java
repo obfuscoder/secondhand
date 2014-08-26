@@ -12,7 +12,6 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.PageSize;
-import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
@@ -38,7 +37,7 @@ public class TotalPayOff extends BasePayOff {
         Files.createDirectories(basePath);
         Path fullPath = Paths.get(basePath.toString(), "payoff.pdf");
         Document document = new Document(PageSize.A4, 80, 50, 50, 30);
-        PdfWriter writer = PdfWriter.getInstance(document,
+        PdfWriter.getInstance(document,
                 new FileOutputStream(fullPath.toFile()));
         document.open();
         addHeader(document, event);
@@ -55,7 +54,6 @@ public class TotalPayOff extends BasePayOff {
 
         PdfPTable table = new PdfPTable(5);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
-        PdfPCell cell;
 
         double sum = 0;
         for (ReservedItem item : soldItems) {

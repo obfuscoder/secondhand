@@ -330,12 +330,6 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         return tablemodel.getData();
     }
 
-    private static class App {
-
-        public App() {
-        }
-    }
-
     class CashTableModel extends AbstractTableModel {
 
         private List<String> columnNames = new ArrayList<>(Arrays.asList(

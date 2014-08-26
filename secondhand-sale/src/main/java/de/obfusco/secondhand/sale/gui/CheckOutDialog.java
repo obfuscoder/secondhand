@@ -107,14 +107,10 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 
             @Override
             public void keyTyped(KeyEvent arg0) {
-                // TODO Auto-generated method stub
-
             }
 
             @Override
             public void keyReleased(KeyEvent arg0) {
-                // TODO Auto-generated method stub
-
             }
 
             @Override
@@ -139,14 +135,10 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 
             @Override
             public void keyTyped(KeyEvent arg0) {
-                // TODO Auto-generated method stub
-
             }
 
             @Override
             public void keyReleased(KeyEvent arg0) {
-                // TODO Auto-generated method stub
-
             }
 
             @Override
@@ -207,14 +199,10 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 
             @Override
             public void keyTyped(KeyEvent e) {
-                // TODO Auto-generated method stub
-
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                // TODO Auto-generated method stub
-
             }
 
             @Override

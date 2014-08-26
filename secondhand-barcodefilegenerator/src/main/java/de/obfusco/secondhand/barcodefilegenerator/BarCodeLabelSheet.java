@@ -36,16 +36,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class BarCodeLabelSheet {
 
-    public static final int NUMBER_OF_ROWS = 5;
     public static final int NUMBER_OF_COLUMNS = 3;
+    public static final int NUMBER_OF_ROWS = 5;
+
+    List<ReservedItem> items;
 
     @Autowired
     ReservedItemRepository reservedItemRepository;
-
-    @SuppressWarnings("unchecked")
-    public BarCodeLabelSheet() {
-
-    }
 
     public Path createPdf(Path targetPath) throws DocumentException, IOException {
 
@@ -76,17 +73,12 @@ public class BarCodeLabelSheet {
         return filePath;
     }
 
-    private PdfPTable createTableLine() {
-        PdfPTable table = new PdfPTable(NUMBER_OF_COLUMNS);
-        table.setWidthPercentage(100);
-        return table;
-    }
-
-    private PdfPCell createTableCell(PdfWriter writer, ReservedItem item) {
-        PdfPCell cell = new PdfPCell(new Paragraph(""));
-        cell.setBorderColor(BaseColor.WHITE);
-        cell.addElement(createCellContent(writer, item));
-        return cell;
+    public Path createPDFFile(Path basePath, Reservation reservation) throws DocumentException, FileNotFoundException, IOException {
+        String customer = new DecimalFormat("000").format(reservation.getNumber());
+        Path targetPath = Paths.get(basePath.toString(), customer);
+        Files.createDirectories(targetPath);
+        items = reservedItemRepository.findByReservation(reservation);
+        return createPdf(targetPath);
     }
 
     private Element createCellContent(PdfWriter writer, ReservedItem item) {
@@ -178,14 +170,17 @@ public class BarCodeLabelSheet {
         return table;
     }
 
-    List<ReservedItem> items;
+    private PdfPCell createTableCell(PdfWriter writer, ReservedItem item) {
+        PdfPCell cell = new PdfPCell(new Paragraph(""));
+        cell.setBorderColor(BaseColor.WHITE);
+        cell.addElement(createCellContent(writer, item));
+        return cell;
+    }
 
-    public Path createPDFFile(Path basePath, Reservation reservation) throws DocumentException, FileNotFoundException, IOException {
-        String customer = new DecimalFormat("000").format(reservation.getNumber());
-        Path targetPath = Paths.get(basePath.toString(), customer);
-        Files.createDirectories(targetPath);
-        items = reservedItemRepository.findByReservation(reservation);
-        return createPdf(targetPath);
+    private PdfPTable createTableLine() {
+        PdfPTable table = new PdfPTable(NUMBER_OF_COLUMNS);
+        table.setWidthPercentage(100);
+        return table;
     }
 
 }

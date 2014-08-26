@@ -2,10 +2,10 @@ package de.obfusco.secondhand.storage;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -22,19 +22,19 @@ public class StorageConfiguration {
 
     @Bean
     DataSource dataSource() {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        dataSource.setUrl("jdbc:mysql://localhost:3306/floh");
-        dataSource.setUsername("root");
-        dataSource.setPassword("");
+        BasicDataSource dataSource = new BasicDataSource();
+        dataSource.setDriverClassName("org.h2.Driver");
+        dataSource.setUrl("jdbc:h2:floh;CIPHER=AES");
+        dataSource.setUsername("sa");
+        dataSource.setPassword("abcd1234 xyz");
         return new TransactionAwareDataSourceProxy(dataSource);
     }
 
     @Bean
     JpaVendorAdapter vendorAdapter() {
         HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
-        adapter.setDatabase(Database.MYSQL);
-        adapter.setDatabasePlatform("org.hibernate.dialect.MySQL5Dialect");
+        adapter.setDatabase(Database.H2);
+        adapter.setDatabasePlatform("org.hibernate.dialect.H2Dialect");
         adapter.setShowSql(false);
         adapter.setGenerateDdl(false);
         return adapter;
@@ -46,6 +46,7 @@ public class StorageConfiguration {
         factory.setJpaVendorAdapter(vendorAdapter());
         factory.setPackagesToScan(getClass().getPackage().getName());
         factory.setDataSource(dataSource());
+        factory.afterPropertiesSet();
         return factory;
     }
 

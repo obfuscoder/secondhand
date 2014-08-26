@@ -35,7 +35,7 @@ public class RefundPDFCreator {
         Path targetPath = Paths.get(basePath.toString(), "refund.pdf");
 
         Document document = new Document();// new Rectangle(250, 1000));
-        PdfWriter writer = PdfWriter.getInstance(document,
+        PdfWriter.getInstance(document,
                 new FileOutputStream(targetPath.toFile()));
         document.open();
 

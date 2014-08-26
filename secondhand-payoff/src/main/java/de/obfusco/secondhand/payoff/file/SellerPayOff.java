@@ -147,7 +147,7 @@ public class SellerPayOff extends BasePayOff {
 
     private Document createPdfDocument(Path fullPath) throws FileNotFoundException, DocumentException {
         Document document = new Document(PageSize.A4, 50, 50, 50, 40);
-        PdfWriter writer = PdfWriter.getInstance(document,
+        PdfWriter.getInstance(document,
                 new FileOutputStream(fullPath.toFile()));
         document.open();
         return document;

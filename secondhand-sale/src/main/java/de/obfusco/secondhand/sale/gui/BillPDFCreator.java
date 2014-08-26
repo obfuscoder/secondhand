@@ -35,7 +35,7 @@ public class BillPDFCreator {
         Path targetPath = Paths.get(basePath.toString(), "sale.pdf");
 
         Document document = new Document();// new Rectangle(250, 1000));
-        PdfWriter writer = PdfWriter.getInstance(document,
+        PdfWriter.getInstance(document,
                 new FileOutputStream(targetPath.toFile()));
         document.open();
 

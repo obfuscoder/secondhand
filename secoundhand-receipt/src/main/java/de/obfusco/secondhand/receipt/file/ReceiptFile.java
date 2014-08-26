@@ -25,8 +25,10 @@ import de.obfusco.secondhand.storage.repository.ReservationRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@Transactional
 public class ReceiptFile {
 
     public static final int EVENT_ID = 1;
@@ -42,14 +44,13 @@ public class ReceiptFile {
         Path fullPath = Paths.get(basePath.toString(), "receipt.pdf");
         Document document = new Document(PageSize.A4, 80, 50, 50, 30);
 
-        PdfWriter writer = PdfWriter.getInstance(document,
+        PdfWriter.getInstance(document,
                 new FileOutputStream(fullPath.toFile()));
 
         document.open();
         addHeader(document, title);
 
-        List<Reservation> reservations = reservationRepository
-                .findByEvent(eventRepository.findOne(EVENT_ID));
+        List<Reservation> reservations = reservationRepository.findByEvent(eventRepository.findOne(EVENT_ID));
 
         String[] columnNames = {"ResNr", "Name", "Unterschrift"};
         float[] widths = new float[]{12f, 40f, 40f};

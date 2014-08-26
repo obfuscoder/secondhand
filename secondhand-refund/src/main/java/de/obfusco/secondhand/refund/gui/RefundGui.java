@@ -327,12 +327,6 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
         return tableModel.getData();
     }
 
-    private static class App {
-
-        public App() {
-        }
-    }
-
     class ItemTableModel extends AbstractTableModel {
 
         private List<String> columnNames = new ArrayList<>(Arrays.asList(

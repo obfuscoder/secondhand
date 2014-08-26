@@ -40,11 +40,6 @@ public class BarCodeSheet {
 
     public static final int NUMBER_OF_COLUMNS = 4;
 
-    @SuppressWarnings("unchecked")
-    public BarCodeSheet() {
-
-    }
-
     public Path createPdf(Path targetPath) throws IOException,
             DocumentException {
 

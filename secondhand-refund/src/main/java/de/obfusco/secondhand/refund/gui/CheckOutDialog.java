@@ -114,14 +114,10 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 
             @Override
             public void keyTyped(KeyEvent e) {
-                // TODO Auto-generated method stub
-
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                // TODO Auto-generated method stub
-
             }
 
             @Override
@@ -181,22 +177,6 @@ public class CheckOutDialog extends JDialog implements ActionListener {
         frame.getCashTable().setEnabled(false);
 
         this.dispose();
-    }
-
-    private void calculateChange() {
-
-        if (barTextField.getText() == null || barTextField.getText().equals("")) {
-            return;
-        }
-        Double bar = Double.parseDouble(barTextField.getText().replace(",", "."));
-        Double price = Double.parseDouble(priceLabel.getText().replace(",", "."));
-        change = bar - price;
-        if (change == null) {
-            change = 0.0;
-        }
-
-        String back = String.format("%.2f", change);
-        changeBarlabel.setText(back);
     }
 
     public String getBarString() {
