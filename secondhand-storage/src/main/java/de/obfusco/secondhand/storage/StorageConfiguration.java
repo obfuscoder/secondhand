@@ -24,9 +24,9 @@ public class StorageConfiguration {
     DataSource dataSource() {
         BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
-        dataSource.setUrl("jdbc:h2:floh;CIPHER=AES");
+        dataSource.setUrl("jdbc:h2:floh"); //";CIPHER=AES");
         dataSource.setUsername("sa");
-        dataSource.setPassword("abcd1234 xyz");
+        dataSource.setPassword(""); //abcd1234 xyz");
         return new TransactionAwareDataSourceProxy(dataSource);
     }
 
