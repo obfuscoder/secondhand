@@ -130,7 +130,7 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        final Event event = eventRepository.findOne(1);
+        final Event event = eventRepository.find();
         if (actionEvent.getSource() == justBarcode) {
             try {
                 targetPath = barCodeSheet.createPDFFile(basePath,

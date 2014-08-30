@@ -27,6 +27,7 @@ import com.itextpdf.text.DocumentException;
 import de.obfusco.secondhand.payoff.file.PdfFileCreator;
 import de.obfusco.secondhand.payoff.file.SellerPayOff;
 import de.obfusco.secondhand.payoff.file.TotalPayOff;
+import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.Reservation;
 import de.obfusco.secondhand.storage.repository.EventRepository;
 import de.obfusco.secondhand.storage.repository.ReservationRepository;
@@ -39,8 +40,6 @@ import org.springframework.stereotype.Component;
 public class PayOffGui extends JFrame {
 
     private final static org.slf4j.Logger LOG = LoggerFactory.getLogger(PayOffGui.class);
-
-    public static final int EVENT_ID = 1;
 
     public JLabel totalPayoff;
 
@@ -83,15 +82,15 @@ public class PayOffGui extends JFrame {
         hint.setHorizontalAlignment(SwingConstants.CENTER);
         pane.add(hint);
 
+        final Event event = eventRepository.find();
         final PdfFileCreator totalPayoffCreator = new PdfFileCreator() {
             @Override
             public File create() throws DocumentException, IOException {
-                return totalPayOff.createTotalPayoffFile(basePath,
-                        eventRepository.findOne(EVENT_ID));
+                return totalPayOff.createTotalPayoffFile(basePath, event);
             }
         };
 
-        final List<Reservation> reservations = reservationRepository.findByEvent(eventRepository.findOne(EVENT_ID));
+        final List<Reservation> reservations = reservationRepository.findByEvent(event);
 
         final PdfFileCreator allSellerPayoffCreator = new PdfFileCreator() {
             @Override

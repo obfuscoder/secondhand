@@ -444,5 +444,4 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         itemNr.requestFocus();
 
     }
-
 }

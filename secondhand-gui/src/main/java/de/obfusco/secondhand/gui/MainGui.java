@@ -22,7 +22,6 @@ import com.itextpdf.text.DocumentException;
 
 import de.obfusco.secondhand.barcodefilegenerator.BarCodeGeneratorGui;
 import de.obfusco.secondhand.payoff.gui.PayOffGui;
-import de.obfusco.secondhand.postcode.gui.PostCodeGui;
 import de.obfusco.secondhand.receipt.file.ReceiptFile;
 import de.obfusco.secondhand.refund.gui.RefundGui;
 import de.obfusco.secondhand.sale.gui.CashBoxGui;
@@ -37,9 +36,6 @@ import org.springframework.stereotype.Component;
 public class MainGui extends JFrame {
 
     private final static Logger LOG = LoggerFactory.getLogger(MainGui.class);
-
-    @Autowired
-    PostCodeGui postCodeGui;
 
     @Autowired
     CashBoxGui cashBoxGui;
@@ -66,7 +62,6 @@ public class MainGui extends JFrame {
     public JButton sale;
     public JButton billgenerator;
     public JButton barcodegenerator;
-    public JButton plzOverview;
     public JButton testScan;
     public JButton createSellerReceipt;
     public JButton createSellerResultReceipt;
@@ -76,8 +71,6 @@ public class MainGui extends JFrame {
         super("Flohmarkt");
         Image image = new ImageIcon("favicon.ico").getImage();
         setIconImage(image);
-        setSize(800, 800);
-        setLocation(200, 10);
         addComponentsToPane(getContentPane());
         pack();
         setLocationRelativeTo(null);
@@ -94,7 +87,7 @@ public class MainGui extends JFrame {
         fc = new JFileChooser();
 
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(4, 2, 10, 10));
+        panel.setLayout(new GridLayout(7, 1, 10, 10));
 
         sale = new JButton("Verkauf");
         sale.addActionListener(new ActionListener() {
@@ -115,16 +108,6 @@ public class MainGui extends JFrame {
             }
         });
         refund.setFont(refund.getFont().deriveFont(BUTTON_FONT_SIZE));
-
-        plzOverview = new JButton("PLZ Übersicht");
-        plzOverview.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                postCodeGui.setVisible(true);
-            }
-        });
-        plzOverview.setFont(plzOverview.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         billgenerator = new JButton("Abrechnung");
         billgenerator.addActionListener(new ActionListener() {
@@ -190,12 +173,11 @@ public class MainGui extends JFrame {
 
         panel.add(sale);
         panel.add(refund);
-        panel.add(plzOverview);
-        panel.add(billgenerator);
-        panel.add(barcodegenerator);
-        panel.add(testScan);
         panel.add(createSellerReceipt);
         panel.add(createSellerResultReceipt);
+        panel.add(barcodegenerator);
+        panel.add(testScan);
+        panel.add(billgenerator);
 
         pane.add(panel, BorderLayout.SOUTH);
     }

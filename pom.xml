@@ -11,7 +11,6 @@
         <module>secondhand-gui</module>
         <module>secondhand-barcodefilegenerator</module>
         <module>secondhand-payoff</module>
-        <module>secondhand-postcode</module>
         <module>secondhand-sale</module>
         <module>secondhand-testscan</module>
         <module>secondhand-receipt</module>

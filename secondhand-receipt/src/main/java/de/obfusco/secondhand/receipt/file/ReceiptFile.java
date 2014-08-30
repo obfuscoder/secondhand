@@ -50,7 +50,7 @@ public class ReceiptFile {
         document.open();
         addHeader(document, title);
 
-        List<Reservation> reservations = reservationRepository.findByEvent(eventRepository.findOne(EVENT_ID));
+        List<Reservation> reservations = reservationRepository.findByEvent(eventRepository.find());
 
         String[] columnNames = {"ResNr", "Name", "Unterschrift"};
         float[] widths = new float[]{12f, 40f, 40f};

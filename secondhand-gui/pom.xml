@@ -50,11 +50,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>secondhand-postcode</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>secondhand-sale</artifactId>
             <version>${project.version}</version>
         </dependency>
