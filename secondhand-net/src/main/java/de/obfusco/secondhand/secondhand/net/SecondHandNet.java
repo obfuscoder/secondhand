@@ -2,7 +2,7 @@ package de.obfusco.secondhand.secondhand.net;
 
 import java.io.IOException;
 
-public class App {
+public class SecondHandNet {
 
     public static void main(String[] args) throws InterruptedException {
         try (Discovery discovery = new Discovery(31337)) {

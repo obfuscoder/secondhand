@@ -2,53 +2,31 @@ package de.obfusco.secondhand.secondhand.net;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.Collections;
 
 class DiscoveryAnnouncer extends Thread implements Closeable {
 
-    private volatile DatagramSocket datagramSocket;
+    private volatile MulticastSocket socket;
+    private InetAddress multicastAddress;
 
-    public DiscoveryAnnouncer(DatagramSocket datagramSocket) throws SocketException {
-        this.datagramSocket = datagramSocket;
-        datagramSocket.setBroadcast(true);
+    public DiscoveryAnnouncer(MulticastSocket socket, InetAddress multicastAddress) throws SocketException {
+        this.socket = socket;
+        this.multicastAddress = multicastAddress;
     }
 
     @Override
     public void run() {
         int counter = 0;
-        final InetAddress broadcastAddress;
-        try {
-            broadcastAddress = InetAddress.getByName("255.255.255.255");
-        } catch (UnknownHostException ex) {
-            System.out.println("Broadcast address unknown. Cannot send broadcast. Exiting.");
-            return;
-        }
         while (true) {
-            if (datagramSocket == null) {
+            if (socket == null) {
                 System.out.println("Terminating announcing.");
                 System.out.println("Sent " + counter + " packets");
                 return;
             }
             try {
-                sendAnnouncement(broadcastAddress);
-                for (NetworkInterface networkInterface : Collections.list(NetworkInterface.getNetworkInterfaces())) {
-                    if (networkInterface.isLoopback() || !networkInterface.isUp()) {
-                        continue;
-                    }
-                    for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
-                        if (interfaceAddress.getBroadcast() == null) {
-                            continue;
-                        }
-                        sendAnnouncement(interfaceAddress.getBroadcast());
-                    }
-                }
+                sendAnnouncement();
+                counter++;
             } catch (IOException ex) {
                 System.out.println("Send failed!");
                 ex.printStackTrace();
@@ -62,16 +40,16 @@ class DiscoveryAnnouncer extends Thread implements Closeable {
         }
     }
 
-    private void sendAnnouncement(final InetAddress broadcastAddress) throws IOException {
+    private void sendAnnouncement() throws IOException {
         byte[] buffer = "HELLO".getBytes();
         DatagramPacket datagramPacket;
-        datagramPacket = new DatagramPacket(buffer, buffer.length, broadcastAddress, datagramSocket.getLocalPort());
-        datagramSocket.send(datagramPacket);
-        System.out.println("Sent announcement to " + broadcastAddress);
+        datagramPacket = new DatagramPacket(buffer, buffer.length, multicastAddress, socket.getLocalPort());
+        socket.send(datagramPacket);
+        System.out.println("Sent announcement");
     }
 
     @Override
     public void close() throws IOException {
-        datagramSocket = null;
+        socket = null;
     }
 }
