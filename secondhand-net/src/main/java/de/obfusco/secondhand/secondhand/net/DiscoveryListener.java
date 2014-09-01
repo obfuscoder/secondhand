@@ -2,37 +2,39 @@ package de.obfusco.secondhand.secondhand.net;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.*;
-import java.util.Arrays;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
+import java.net.SocketException;
 
 class DiscoveryListener extends Thread implements Closeable {
 
     private volatile MulticastSocket socket;
+    private DiscoveryObserver observer;
 
-    public DiscoveryListener(MulticastSocket socket) throws SocketException {
+    public DiscoveryListener(MulticastSocket socket, DiscoveryObserver observer) throws SocketException {
         this.socket = socket;
+        this.observer = observer;
     }
 
     @Override
     public void run() {
         int counter = 0;
-        byte[] buffer = new byte[4096];
-        DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length);
         while (true) {
             if (socket == null) {
-                System.out.println("Terminating listener.");
-                System.out.println("Received " + counter + " packets");
+                System.out.println("DISCO - Terminating listener.");
+                System.out.println("DISCO - Received " + counter + " packets");
                 return;
             }
             try {
-                System.out.println("Waiting for incoming data ...");
+                byte[] buffer = new byte[4096];
+                DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length);
                 socket.receive(datagramPacket);
                 counter++;
-                System.out.println("Received " + new String(datagramPacket.getData(), 0, datagramPacket.getLength()) + " from " + datagramPacket.getAddress().getHostAddress());
-            } catch (SocketTimeoutException ex) {
-                // expected to occur after 1 sec of waiting for packets
+                System.out.println("DISCO - Received " + new String(datagramPacket.getData(), 0, datagramPacket.getLength()) + " from " + datagramPacket.getAddress().getHostAddress());
+                observer.peerDiscovered(datagramPacket.getAddress().getHostAddress());
             } catch (IOException ex) {
-                System.out.println("receive failed!");
+                System.out.println("DISCO - Receive failed!");
                 ex.printStackTrace();
             }
         }
@@ -40,6 +42,7 @@ class DiscoveryListener extends Thread implements Closeable {
 
     @Override
     public void close() throws IOException {
+        socket.close();
         socket = null;
     }
 }

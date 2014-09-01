@@ -2,8 +2,10 @@ package de.obfusco.secondhand.secondhand.net;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.*;
-import java.util.Collections;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
+import java.net.SocketException;
 
 class DiscoveryAnnouncer extends Thread implements Closeable {
 
@@ -20,36 +22,36 @@ class DiscoveryAnnouncer extends Thread implements Closeable {
         int counter = 0;
         while (true) {
             if (socket == null) {
-                System.out.println("Terminating announcing.");
-                System.out.println("Sent " + counter + " packets");
+                System.out.println("DISCO - Terminating announcement.");
+                System.out.println("DISCO - Sent " + counter + " packets");
                 return;
             }
             try {
                 sendAnnouncement();
                 counter++;
             } catch (IOException ex) {
-                System.out.println("Send failed!");
+                System.out.println("DISCO - Send failed!");
                 ex.printStackTrace();
             }
             try {
-                sleep(1000);
+                sleep(5000);
             } catch (InterruptedException ex) {
-                System.out.println("Interrupted. Exiting.");
+                System.out.println("DISCO - Interrupted. Exiting.");
                 return;
             }
         }
     }
 
     private void sendAnnouncement() throws IOException {
-        byte[] buffer = "HELLO".getBytes();
+        byte[] buffer = ("HELLO " + System.currentTimeMillis()).getBytes();
         DatagramPacket datagramPacket;
         datagramPacket = new DatagramPacket(buffer, buffer.length, multicastAddress, socket.getLocalPort());
         socket.send(datagramPacket);
-        System.out.println("Sent announcement");
     }
 
     @Override
     public void close() throws IOException {
+        socket.close();
         socket = null;
     }
 }
