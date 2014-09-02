@@ -1,5 +1,8 @@
 package de.obfusco.secondhand.secondhand.net;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
@@ -8,6 +11,9 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class PeerClient implements Closeable {
+
+    private final static Logger LOG = LoggerFactory.getLogger(PeerClient.class);
+
     private final PrintWriter out;
     private final BufferedReader in;
     private Socket socket;
@@ -24,13 +30,13 @@ public class PeerClient implements Closeable {
         try {
             socket.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.warn("Could not close socket", e);
         }
         out.close();
         try {
             in.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.warn("Could not close input reader", e);
         }
     }
 

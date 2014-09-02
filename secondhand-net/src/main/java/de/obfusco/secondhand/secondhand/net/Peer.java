@@ -1,5 +1,8 @@
 package de.obfusco.secondhand.secondhand.net;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
@@ -8,6 +11,9 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class Peer extends Thread implements Closeable {
+
+    private final static Logger LOG = LoggerFactory.getLogger(Peer.class);
+
     private final PrintWriter sender;
     private final BufferedReader receiver;
     private Socket socket;
@@ -20,7 +26,7 @@ public class Peer extends Thread implements Closeable {
                 new PrintWriter(socket.getOutputStream(), true);
         receiver = new BufferedReader(
                 new InputStreamReader(socket.getInputStream()));
-        log("Connection established.");
+        LOG.info("Connection established");
     }
 
     @Override
@@ -30,35 +36,31 @@ public class Peer extends Thread implements Closeable {
             try {
                 line = receiver.readLine();
                 if (line == null) {
-                    log("Connection closed by peer.");
+                    LOG.info("Connection closed by peer.");
                     peerServer.peerDisconnected(socket.getInetAddress().getHostAddress());
                     return;
                 }
                 peerServer.packetReceived(this, line);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.error("Error while communication with peer " + socket.getInetAddress().getHostAddress(), e);
                 peerServer.peerError(socket.getInetAddress().getHostAddress());
             }
         }
     }
 
-    private void log(String message) {
-        System.out.println("PEER " + socket.getInetAddress().getHostAddress() + " - " + message);
-    }
-
     @Override
     public void close() {
-        log("Closing.");
+        LOG.info("Closing connection");
         sender.close();
         try {
             receiver.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.warn("Could not close receiver", e);
         }
         try {
             socket.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.warn("Could not close socket", e);
         }
     }
 

@@ -1,5 +1,8 @@
 package de.obfusco.secondhand.secondhand.net;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -9,6 +12,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class PeerServer extends Thread implements Closeable {
+
+    private final static Logger LOG = LoggerFactory.getLogger(PeerServer.class);
+
     private ServerSocket serverSocket;
     private Map<String,Peer> peers = new HashMap<>();
     private MessageBroker broker;
@@ -16,7 +22,7 @@ public class PeerServer extends Thread implements Closeable {
     public PeerServer(int port, MessageBroker broker) throws IOException {
         serverSocket = new ServerSocket(port);
         this.broker = broker;
-        System.out.println("Listening on port " + port);
+        LOG.info("Listening on port " + port);
     }
 
     @Override
@@ -25,7 +31,7 @@ public class PeerServer extends Thread implements Closeable {
             try {
                 Socket socket = serverSocket.accept();
                 String hostAddress = socket.getInetAddress().getHostAddress();
-                System.out.println("Peering request from " + hostAddress);
+                LOG.info("Peering request from " + hostAddress);
                 if (isPeered(hostAddress)) {
                     socket.getOutputStream().write("ERROR! Already peered. Closing connection.\n".getBytes());
                     socket.close();
@@ -35,18 +41,18 @@ public class PeerServer extends Thread implements Closeable {
                     peers.put(hostAddress, peer);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.error("Communication error", e);
             }
         }
     }
 
     @Override
     public void close() {
-        System.out.println("Closing server socket");
+        LOG.info("Closing server socket");
         try {
             serverSocket.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.warn("Could not close server socket", e);
         }
         for(Iterator<Map.Entry<String,Peer>> it = peers.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<String, Peer> entry = it.next();
@@ -60,13 +66,13 @@ public class PeerServer extends Thread implements Closeable {
     }
 
     public void peerError(String hostAddress) {
-        System.out.println("Error with peer " + hostAddress);
+        LOG.error("Error with peer " + hostAddress);
         Peer erroneousPeer = peers.remove(hostAddress);
         if (erroneousPeer != null) erroneousPeer.close();
     }
 
     public void peerDisconnected(String hostAddress) {
-        System.out.println("Peer disconnected: " + hostAddress);
+        LOG.warn("Peer disconnected: " + hostAddress);
         Peer peer = peers.remove(hostAddress);
         peer.close();
     }

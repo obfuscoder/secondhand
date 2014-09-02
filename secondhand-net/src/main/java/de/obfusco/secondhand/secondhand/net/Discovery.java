@@ -1,11 +1,16 @@
 package de.obfusco.secondhand.secondhand.net;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 
 public class Discovery implements Closeable {
+
+    private final static Logger LOG = LoggerFactory.getLogger(Discovery.class);
 
     private DiscoveryListener discoveryListener;
     private DiscoveryAnnouncer discoveryAnnouncer;
@@ -27,16 +32,12 @@ public class Discovery implements Closeable {
 
     @Override
     public void close() throws IOException {
-        log("Closing discovery.");
+        LOG.info("Closing discovery");
         if (discoveryListener != null) {
             discoveryListener.close();
         }
         if (discoveryAnnouncer != null) {
             discoveryAnnouncer.close();
         }
-    }
-
-    private void log(String message) {
-        System.out.println("DISCO - " + message);
     }
 }

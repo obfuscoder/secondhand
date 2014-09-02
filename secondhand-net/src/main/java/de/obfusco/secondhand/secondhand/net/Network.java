@@ -1,5 +1,8 @@
 package de.obfusco.secondhand.secondhand.net;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -13,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 
 public class Network implements Closeable,DiscoveryObserver {
+
+    private final static Logger LOG = LoggerFactory.getLogger(Network.class);
+
     private Discovery discovery;
     private PeerServer server;
     private int port;
@@ -47,10 +53,11 @@ public class Network implements Closeable,DiscoveryObserver {
 
     public void peerDiscovered(String hostAddress) {
         if (!isLocalAddress(hostAddress) && !isPeered(hostAddress)) {
+            LOG.info("Received announcement from + {}", hostAddress);
             try {
                 peers.put(hostAddress, new PeerClient(hostAddress, port));
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.error("Could not create peer client to host " + hostAddress, e);
             }
         }
     }
@@ -67,7 +74,7 @@ public class Network implements Closeable,DiscoveryObserver {
             try {
                 responses.add(entry.getValue().send(request));
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.error("Could not send data to a peer", e);
                 it.remove();
             }
         }

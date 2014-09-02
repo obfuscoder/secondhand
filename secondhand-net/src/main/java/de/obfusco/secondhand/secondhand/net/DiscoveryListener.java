@@ -1,5 +1,8 @@
 package de.obfusco.secondhand.secondhand.net;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -8,6 +11,8 @@ import java.net.MulticastSocket;
 import java.net.SocketException;
 
 class DiscoveryListener extends Thread implements Closeable {
+
+    private final static Logger LOG = LoggerFactory.getLogger(DiscoveryListener.class);
 
     private volatile MulticastSocket socket;
     private DiscoveryObserver observer;
@@ -22,8 +27,7 @@ class DiscoveryListener extends Thread implements Closeable {
         int counter = 0;
         while (true) {
             if (socket == null) {
-                System.out.println("DISCO - Terminating listener.");
-                System.out.println("DISCO - Received " + counter + " packets");
+                LOG.info("Terminating listener. Received " + counter + " packets");
                 return;
             }
             try {
@@ -31,11 +35,9 @@ class DiscoveryListener extends Thread implements Closeable {
                 DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length);
                 socket.receive(datagramPacket);
                 counter++;
-                System.out.println("DISCO - Received " + new String(datagramPacket.getData(), 0, datagramPacket.getLength()) + " from " + datagramPacket.getAddress().getHostAddress());
                 observer.peerDiscovered(datagramPacket.getAddress().getHostAddress());
             } catch (IOException ex) {
-                System.out.println("DISCO - Receive failed!");
-                ex.printStackTrace();
+                LOG.error("Receive failed", ex);
             }
         }
     }

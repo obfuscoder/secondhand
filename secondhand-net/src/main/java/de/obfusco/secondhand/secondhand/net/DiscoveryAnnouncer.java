@@ -1,5 +1,8 @@
 package de.obfusco.secondhand.secondhand.net;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -8,6 +11,8 @@ import java.net.MulticastSocket;
 import java.net.SocketException;
 
 class DiscoveryAnnouncer extends Thread implements Closeable {
+
+    private final static Logger LOG = LoggerFactory.getLogger(DiscoveryAnnouncer.class);
 
     private volatile MulticastSocket socket;
     private InetAddress multicastAddress;
@@ -22,21 +27,19 @@ class DiscoveryAnnouncer extends Thread implements Closeable {
         int counter = 0;
         while (true) {
             if (socket == null) {
-                System.out.println("DISCO - Terminating announcement.");
-                System.out.println("DISCO - Sent " + counter + " packets");
+                LOG.info("Terminating announcement. Sent " + counter + " packets");
                 return;
             }
             try {
                 sendAnnouncement();
                 counter++;
             } catch (IOException ex) {
-                System.out.println("DISCO - Send failed!");
-                ex.printStackTrace();
+                LOG.error("Failed to send announcement", ex);
             }
             try {
                 sleep(5000);
             } catch (InterruptedException ex) {
-                System.out.println("DISCO - Interrupted. Exiting.");
+                LOG.warn("Interruped", ex);
                 return;
             }
         }
