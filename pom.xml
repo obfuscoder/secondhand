@@ -14,7 +14,6 @@
         <module>secondhand-sale</module>
         <module>secondhand-testscan</module>
         <module>secondhand-receipt</module>
-        <module>secondhand-filesync</module>
         <module>secondhand-refund</module>
         <module>secondhand-net</module>
     </modules>
