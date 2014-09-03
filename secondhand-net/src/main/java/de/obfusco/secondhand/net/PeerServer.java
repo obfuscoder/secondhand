@@ -1,4 +1,4 @@
-package de.obfusco.secondhand.secondhand.net;
+package de.obfusco.secondhand.net;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

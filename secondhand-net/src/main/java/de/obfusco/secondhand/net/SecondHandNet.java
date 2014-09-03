@@ -1,4 +1,4 @@
-package de.obfusco.secondhand.secondhand.net;
+package de.obfusco.secondhand.net;
 
 import java.io.BufferedReader;
 import java.io.IOException;

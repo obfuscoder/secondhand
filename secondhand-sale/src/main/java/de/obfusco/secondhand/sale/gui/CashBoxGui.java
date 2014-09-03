@@ -32,9 +32,10 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import de.obfusco.secondhand.sale.service.StorageService;
+import de.obfusco.secondhand.storage.service.StorageService;
 import de.obfusco.secondhand.storage.model.ReservedItem;
 
+import de.obfusco.secondhand.storage.model.TransactionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -54,6 +55,9 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
 
     @Autowired
     StorageService storageService;
+
+    @Autowired
+    TransactionListener transactionListener;
 
     JButton readyButton = new JButton("Fertig");
     JButton newButton = new JButton("Neuer Kunde");
@@ -305,7 +309,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
     private void openDialog() {
         errorLabel.setText("");
 
-        checkout = new CheckOutDialog(this);
+        checkout = new CheckOutDialog(this, transactionListener);
         checkout.setLocationRelativeTo(this);
         checkout.setVisible(true);
     }

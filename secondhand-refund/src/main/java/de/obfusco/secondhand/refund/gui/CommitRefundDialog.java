@@ -29,19 +29,20 @@ import javax.swing.SwingConstants;
 import com.itextpdf.text.DocumentException;
 
 import de.obfusco.secondhand.storage.model.ReservedItem;
+import de.obfusco.secondhand.storage.model.Transaction;
+import de.obfusco.secondhand.storage.model.TransactionListener;
 import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
 
+import de.obfusco.secondhand.storage.service.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CheckOutDialog extends JDialog implements ActionListener {
+public class CommitRefundDialog extends JDialog implements ActionListener {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CheckOutDialog.class);
+    private final static Logger LOG = LoggerFactory.getLogger(CommitRefundDialog.class);
 
     JLabel priceLabel;
-    JLabel changeBarlabel;
     JTextField barTextField;
-    JFormattedTextField postCodeTextField;
     Double change;
     JLabel errorLabel;
 
@@ -53,19 +54,22 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 
     RefundGui frame;
 
+    StorageService storageService;
     ReservedItemRepository itemRepository;
     List<ReservedItem> items;
 
-    int postCode = 0;
     private Path basePath = Paths.get("data/pdfs/refund");
+    private TransactionListener transactionListener;
 
-    public CheckOutDialog(JFrame parentFrame) {
+    public CommitRefundDialog(JFrame parentFrame, TransactionListener transactionListener) {
 
         super(parentFrame, "Storno abschließen", true);
         setSize(400, 300);
 
         frame = (RefundGui) parentFrame;
         itemRepository = frame.getItemRepository();
+        this.storageService = frame.getStorageService();
+        this.transactionListener = transactionListener;
         this.items = frame.getTableData();
         errorLabel = new JLabel(" ");
         errorLabel.setForeground(new Color(255, 0, 0, 255));
@@ -165,11 +169,9 @@ public class CheckOutDialog extends JDialog implements ActionListener {
     }
 
     private void completeRefund() {
-        Date refundDate = new Date();
-        for (ReservedItem item : items) {
-            item.setRefunded(refundDate);
-        }
-        itemRepository.save(items);
+
+        Transaction transaction = storageService.storeRefundInformation(items);
+        transactionListener.notify(transaction);
 
         frame.getNewButton().setEnabled(true);
         frame.getReadyButton().setEnabled(false);

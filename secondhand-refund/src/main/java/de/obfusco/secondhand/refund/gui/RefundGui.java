@@ -32,8 +32,10 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import de.obfusco.secondhand.storage.model.ReservedItem;
+import de.obfusco.secondhand.storage.model.TransactionListener;
 import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
 
+import de.obfusco.secondhand.storage.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,10 +54,16 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
     @Autowired
     ReservedItemRepository itemRepository;
 
+    @Autowired
+    StorageService storageService;
+
+    @Autowired
+    TransactionListener transactionListener;
+
     JButton readyButton = new JButton("Fertig");
     JButton newButton = new JButton("Neue Rückgabe");
 
-    CheckOutDialog checkout = null;
+    CommitRefundDialog checkout = null;
     private JLabel countLabel;
 
     public RefundGui() {
@@ -302,7 +310,7 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
     private void openDialog() {
         errorLabel.setText("");
 
-        checkout = new CheckOutDialog(this);
+        checkout = new CommitRefundDialog(this, transactionListener);
         checkout.setLocationRelativeTo(this);
         checkout.setVisible(true);
     }
@@ -325,6 +333,10 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
 
     List<ReservedItem> getTableData() {
         return tableModel.getData();
+    }
+
+    public StorageService getStorageService() {
+        return storageService;
     }
 
     class ItemTableModel extends AbstractTableModel {

@@ -1,5 +1,8 @@
 package de.obfusco.secondhand.storage.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -7,21 +10,18 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 
 @Entity(name = "reserved_items")
-public class ReservedItem extends AbstractEntity {
+@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
+public class ReservedItem extends AbstractEntityWithId {
 
     @ManyToOne
-    Item item;
-
+    private Item item;
     @ManyToOne
-    Reservation reservation;
-
-    String code;
-
+    private Reservation reservation;
+    private String code;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    Date sold;
-
+    private Date sold;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    Date refunded;
+    private Date refunded;
 
     public String getCode() {
         return code;

@@ -5,16 +5,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 @Entity(name = "reservations")
-public class Reservation extends AbstractEntity {
+public class Reservation extends AbstractEntityWithId {
 
-    Integer number;
-
+    private Integer number;
     @ManyToOne
     @JoinColumn(name = "event_id")
-    Event event;
-
+    private Event event;
     @ManyToOne
-    Seller seller;
+    private Seller seller;
 
     public Integer getNumber() {
         return number;

@@ -4,7 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 
 @Entity(name = "sellers")
-public class Seller extends AbstractEntity {
+public class Seller extends AbstractEntityWithId {
 
     @Column(name = "first_name")
     private String firstName;

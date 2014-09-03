@@ -6,17 +6,14 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 
 @Entity(name = "items")
-public class Item extends AbstractEntity {
+public class Item extends AbstractEntityWithId {
 
     @ManyToOne
-    Category category;
-
+    private Category category;
     private String description;
-
     private String size;
-    BigDecimal price;
+    private BigDecimal price;
 
-    //private Currency price;
     public String getDescription() {
         return description;
     }

@@ -1,38 +1,25 @@
 package de.obfusco.secondhand.storage.model;
 
-import java.io.Serializable;
-import java.util.Date;
-
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import javax.persistence.Temporal;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import javax.persistence.MappedSuperclass;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Temporal;
+import java.io.Serializable;
+import java.util.Date;
+
 @MappedSuperclass
-abstract class AbstractEntity implements Serializable {
-
-    @Id
-    @GeneratedValue
-    private Integer id;
-
+public class AbstractEntity implements Serializable {
     @CreatedDate
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date created;
-
     @LastModifiedDate
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date modified;
-
-    public Integer getId() {
-        return id;
-    }
 
     public Date getCreated() {
         return created;
@@ -48,12 +35,12 @@ abstract class AbstractEntity implements Serializable {
     }
 
     @PrePersist
-    private void prePersist() {
+    protected void prePersist() {
         created = modified = new Date();
     }
 
     @PreUpdate
-    private void preUpdate() {
+    protected void preUpdate() {
         modified = new Date();
     }
 }

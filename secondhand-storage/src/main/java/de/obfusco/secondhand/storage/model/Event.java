@@ -6,7 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.Temporal;
 
 @Entity(name = "events")
-public class Event extends AbstractEntity {
+public class Event extends AbstractEntityWithId {
 
     private String name;
     @Temporal(javax.persistence.TemporalType.DATE)

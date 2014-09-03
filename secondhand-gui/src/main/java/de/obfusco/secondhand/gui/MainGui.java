@@ -1,41 +1,38 @@
 package de.obfusco.secondhand.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Desktop;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.nio.file.Paths;
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.itextpdf.text.DocumentException;
-
 import de.obfusco.secondhand.barcodefilegenerator.BarCodeGeneratorGui;
+import de.obfusco.secondhand.net.MessageBroker;
+import de.obfusco.secondhand.net.Network;
 import de.obfusco.secondhand.payoff.gui.PayOffGui;
 import de.obfusco.secondhand.receipt.file.ReceiptFile;
 import de.obfusco.secondhand.refund.gui.RefundGui;
 import de.obfusco.secondhand.sale.gui.CashBoxGui;
+import de.obfusco.secondhand.storage.model.TransactionListener;
+import de.obfusco.secondhand.storage.model.ReservedItem;
+import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.testscan.gui.TestScanGui;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.file.Paths;
+
 @Component
-public class MainGui extends JFrame {
+public class MainGui extends JFrame implements MessageBroker, TransactionListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(MainGui.class);
+
+    Network network;
 
     @Autowired
     CashBoxGui cashBoxGui;
@@ -60,15 +57,18 @@ public class MainGui extends JFrame {
     public static final float BUTTON_FONT_SIZE = 25.0f;
 
     public JButton sale;
-    public JButton billgenerator;
-    public JButton barcodegenerator;
+    public JButton billGenerator;
+    public JButton barcodeGenerator;
     public JButton testScan;
     public JButton createSellerReceipt;
     public JButton createSellerResultReceipt;
     JFileChooser fc;
 
     public MainGui() {
-        super("Flohmarkt");
+        super("Flohmarkt Kassensystem");
+
+        if (!initializeNetwork()) return;
+
         Image image = new ImageIcon("favicon.ico").getImage();
         setIconImage(image);
         addComponentsToPane(getContentPane());
@@ -76,6 +76,22 @@ public class MainGui extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
+    }
+
+    private boolean initializeNetwork() {
+        try {
+            network = new Network(31337, this);
+            network.start();
+        } catch (IOException e) {
+            LOG.error("Error while starting network stack!", e);
+            return (JOptionPane.showConfirmDialog(null, "Fehler beim Starten der Netzwerkkommunikation.\n" +
+                            "Eine Synchronisierung mit anderen Kassen ist nicht möglich.\n" +
+                            "Details finden Sie in der Protokolldatei.\n\n" +
+                            "Wollen Sie das Programm ohne Netzwerkkommunikation benutzen?",
+                    "Netzwerkkommunikation gestört",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION);
+        }
+        return true;
     }
 
     private void addComponentsToPane(Container pane) {
@@ -109,25 +125,25 @@ public class MainGui extends JFrame {
         });
         refund.setFont(refund.getFont().deriveFont(BUTTON_FONT_SIZE));
 
-        billgenerator = new JButton("Abrechnung");
-        billgenerator.addActionListener(new ActionListener() {
+        billGenerator = new JButton("Abrechnung");
+        billGenerator.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 payOffGui.open();
             }
         });
-        billgenerator.setFont(billgenerator.getFont().deriveFont(BUTTON_FONT_SIZE));
+        billGenerator.setFont(billGenerator.getFont().deriveFont(BUTTON_FONT_SIZE));
 
-        barcodegenerator = new JButton("Barcodes drucken");
-        barcodegenerator.addActionListener(new ActionListener() {
+        barcodeGenerator = new JButton("Barcodes drucken");
+        barcodeGenerator.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 barCodeGeneratorGui.setVisible(true);
             }
         });
-        barcodegenerator.setFont(barcodegenerator.getFont().deriveFont(BUTTON_FONT_SIZE));
+        barcodeGenerator.setFont(barcodeGenerator.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         testScan = new JButton("Barcode- Test");
         testScan.addActionListener(new ActionListener() {
@@ -175,10 +191,41 @@ public class MainGui extends JFrame {
         panel.add(refund);
         panel.add(createSellerReceipt);
         panel.add(createSellerResultReceipt);
-        panel.add(barcodegenerator);
+        panel.add(barcodeGenerator);
         panel.add(testScan);
-        panel.add(billgenerator);
+        panel.add(billGenerator);
 
         pane.add(panel, BorderLayout.SOUTH);
+    }
+
+    @Override
+    public String message(String requestMessage) {
+        return requestMessage;
+    }
+
+    @Override
+    public void notify(Transaction transaction) {
+        try {
+            JsonFactory jsonFactory = new JsonFactory();
+            StringWriter stringWriter = new StringWriter();
+            JsonGenerator generator = jsonFactory.createGenerator(stringWriter);
+            generator.writeStartObject();
+            generator.writeObjectField("id", transaction.getId());
+            generator.writeObjectField("type", transaction.getType().toString());
+            generator.writeObjectField("created", transaction.getCreated().getTime());
+            generator.writeObjectField("zip_code", transaction.getZipCode());
+            generator.writeArrayFieldStart("reserved_item_ids");
+            for(ReservedItem reservedItem : transaction.getReservedItems()) {
+                generator.writeNumber(reservedItem.getId());
+            }
+            generator.writeEndArray();
+            generator.writeEndObject();
+            generator.close();
+            String json = stringWriter.toString();
+            LOG.warn("TRANSACTION: " + json);
+            network.send("TRANSACTION: " + json);
+        } catch (IOException ex) {
+            LOG.error("Could not create json", ex);
+        }
     }
 }

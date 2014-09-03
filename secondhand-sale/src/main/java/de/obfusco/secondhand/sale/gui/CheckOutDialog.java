@@ -27,9 +27,11 @@ import javax.swing.SwingConstants;
 
 import com.itextpdf.text.DocumentException;
 
-import de.obfusco.secondhand.sale.service.StorageService;
+import de.obfusco.secondhand.storage.service.StorageService;
+import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.model.ReservedItem;
 
+import de.obfusco.secondhand.storage.model.TransactionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,10 +61,12 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 
     int postCode = 0;
     private Path basePath = Paths.get("data/pdfs/sale");
+    private TransactionListener transactionListener;
 
-    public CheckOutDialog(JFrame parentFrame) {
+    public CheckOutDialog(JFrame parentFrame, TransactionListener orderListener) {
 
         super(parentFrame, "Verkauf abschließen", true);
+        this.transactionListener = orderListener;
         setSize(400, 300);
 
         frame = (CashBoxGui) parentFrame;
@@ -288,7 +292,8 @@ public class CheckOutDialog extends JDialog implements ActionListener {
         if (!postcodeOK) {
             return;
         }
-        storageService.storeSoldInformation(items, postCode);
+        Transaction transaction = storageService.storeSoldInformation(items, postCode);
+        transactionListener.notify(transaction);
 
         frame.getNewButton().setEnabled(true);
         frame.getReadyButton().setEnabled(false);
