@@ -36,11 +36,19 @@ public class AbstractEntity implements Serializable {
 
     @PrePersist
     protected void prePersist() {
-        created = modified = new Date();
+        Date now = new Date();
+        if (created == null) {
+            created = now;
+        }
+        modified = now;
     }
 
     @PreUpdate
     protected void preUpdate() {
         modified = new Date();
+    }
+
+    protected void setCreated(Date created) {
+        this.created = created;
     }
 }

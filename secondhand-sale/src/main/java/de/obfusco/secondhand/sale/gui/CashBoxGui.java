@@ -413,11 +413,6 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
             setErrorText("Artikel mit Nummer \"" + code + "\" existiert nicht!");
             return;
         }
-        if (reservedItem.isRefunded()) {
-            setErrorText("Artikel mit Nummer \"" + code
-                    + "\" wurde bereits verkauft und storniert!");
-            return;
-        }
         if (reservedItem.isSold()) {
             setErrorText("Artikel mit Nummer \"" + code
                     + "\" wurde bereits verkauft!");

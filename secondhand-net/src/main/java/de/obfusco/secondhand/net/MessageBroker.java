@@ -1,5 +1,6 @@
 package de.obfusco.secondhand.net;
 
 public interface MessageBroker {
-    String message(String requestMessage);
+    void messageReceived(Peer peer, String message);
+    void connected(Peer peer);
 }

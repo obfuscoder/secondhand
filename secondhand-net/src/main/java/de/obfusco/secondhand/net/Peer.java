@@ -17,33 +17,33 @@ public class Peer extends Thread implements Closeable {
     private final PrintWriter sender;
     private final BufferedReader receiver;
     private Socket socket;
-    private PeerServer peerServer;
+    private PeerObserver peerObserver;
 
-    public Peer(Socket socket, PeerServer peerServer) throws IOException {
+    public Peer(Socket socket, PeerObserver peerObserver) throws IOException {
         this.socket = socket;
-        this.peerServer = peerServer;
+        this.peerObserver = peerObserver;
         sender =
                 new PrintWriter(socket.getOutputStream(), true);
         receiver = new BufferedReader(
                 new InputStreamReader(socket.getInputStream()));
-        LOG.info("Connection established");
+
     }
 
     @Override
     public void run() {
+        peerObserver.connected(this);
         while (!socket.isClosed()) {
-            String line = null;
             try {
-                line = receiver.readLine();
+                String line = receiver.readLine();
                 if (line == null) {
                     LOG.info("Connection closed by peer.");
-                    peerServer.peerDisconnected(socket.getInetAddress().getHostAddress());
+                    peerObserver.disconnected(this);
                     return;
                 }
-                peerServer.packetReceived(this, line);
+                peerObserver.messageReceived(this, line);
             } catch (IOException e) {
                 LOG.error("Error while communication with peer " + socket.getInetAddress().getHostAddress(), e);
-                peerServer.peerError(socket.getInetAddress().getHostAddress());
+                peerObserver.errorOccurred(this);
             }
         }
     }
@@ -62,6 +62,10 @@ public class Peer extends Thread implements Closeable {
         } catch (IOException e) {
             LOG.warn("Could not close socket", e);
         }
+    }
+
+    public String getAddress() {
+        return socket.getInetAddress().getHostAddress();
     }
 
     public void send(String message) {

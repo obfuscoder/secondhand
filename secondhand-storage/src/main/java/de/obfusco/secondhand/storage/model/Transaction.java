@@ -3,22 +3,21 @@ package de.obfusco.secondhand.storage.model;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import java.util.Date;
 import java.util.List;
 
 @Entity(name = "transactions")
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
 public class Transaction extends AbstractEntityWithUuid {
-
-    public List<ReservedItem> getReservedItems() {
-        return reservedItems;
-    }
 
     public static enum Type {
         PURCHASE,
@@ -29,7 +28,7 @@ public class Transaction extends AbstractEntityWithUuid {
     private Integer zipCode;
     @Enumerated(EnumType.STRING)
     private Type type;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(name="transaction_items",
             joinColumns={@JoinColumn(name = "transaction_id", referencedColumnName = "id")},
             inverseJoinColumns ={@JoinColumn(name = "reserved_item_id", referencedColumnName = "id")}
@@ -44,6 +43,11 @@ public class Transaction extends AbstractEntityWithUuid {
         return type;
     }
 
+    public List<ReservedItem> getReservedItems() {
+        return reservedItems;
+    }
+
+
     public static Transaction create(Type type, List<ReservedItem> reservedItems, Integer zipCode) {
         Transaction transaction = new Transaction();
         transaction.type = type;
@@ -51,4 +55,12 @@ public class Transaction extends AbstractEntityWithUuid {
         transaction.reservedItems = reservedItems;
         return transaction;
     }
+
+    public static Transaction create(String id, Date date, Type type, List<ReservedItem> reservedItems, Integer zipCode) {
+        Transaction transaction = create(type, reservedItems, zipCode);
+        transaction.setId(id);
+        transaction.setCreated(date);
+        return transaction;
+    }
+
 }

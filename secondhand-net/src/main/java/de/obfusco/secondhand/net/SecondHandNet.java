@@ -22,8 +22,12 @@ public class SecondHandNet implements MessageBroker {
     }
 
     @Override
-    public String message(String requestMessage) {
-        System.out.println("REQUEST from peer: " + requestMessage);
-        return requestMessage;
+    public void messageReceived(Peer peer, String message) {
+        System.out.println("MESSAGE from peer " + peer.getAddress() + ": " + message);
+    }
+
+    @Override
+    public void connected(Peer peer) {
+        System.out.println("CONNECTED with peer " + peer.getAddress());
     }
 }

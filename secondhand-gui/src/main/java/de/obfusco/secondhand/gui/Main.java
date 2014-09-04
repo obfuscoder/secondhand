@@ -1,13 +1,14 @@
 package de.obfusco.secondhand.gui;
 
 import de.obfusco.secondhand.net.MessageBroker;
+import de.obfusco.secondhand.net.Peer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import javax.swing.*;
 
-public class Main implements MessageBroker {
+public class Main {
 
     private Main() {
         LOG.info("Starting application");
@@ -28,10 +29,5 @@ public class Main implements MessageBroker {
 
     public static void main(String args[]) {
         new Main();
-    }
-
-    @Override
-    public String message(String requestMessage) {
-        return null;
     }
 }

@@ -1,31 +1,47 @@
 package de.obfusco.secondhand.gui;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.itextpdf.text.DocumentException;
 import de.obfusco.secondhand.barcodefilegenerator.BarCodeGeneratorGui;
 import de.obfusco.secondhand.net.MessageBroker;
 import de.obfusco.secondhand.net.Network;
+import de.obfusco.secondhand.net.Peer;
 import de.obfusco.secondhand.payoff.gui.PayOffGui;
 import de.obfusco.secondhand.receipt.file.ReceiptFile;
 import de.obfusco.secondhand.refund.gui.RefundGui;
 import de.obfusco.secondhand.sale.gui.CashBoxGui;
-import de.obfusco.secondhand.storage.model.TransactionListener;
 import de.obfusco.secondhand.storage.model.ReservedItem;
 import de.obfusco.secondhand.storage.model.Transaction;
+import de.obfusco.secondhand.storage.model.TransactionListener;
+import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
+import de.obfusco.secondhand.storage.repository.TransactionRepository;
 import de.obfusco.secondhand.testscan.gui.TestScanGui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Desktop;
+import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Component
 public class MainGui extends JFrame implements MessageBroker, TransactionListener {
@@ -51,6 +67,12 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
     @Autowired
     ReceiptFile receiptFile;
+
+    @Autowired
+    TransactionRepository transactionRepository;
+
+    @Autowired
+    ReservedItemRepository reservedItemRepository;
 
     private static final long serialVersionUID = 4961295225628108431L;
 
@@ -199,33 +221,72 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     }
 
     @Override
-    public String message(String requestMessage) {
-        return requestMessage;
+    public void messageReceived(Peer peer, String message) {
+        Transaction transaction = parseTransaction(message);
+        if (!transactionRepository.exists(transaction.getId())) {
+            transactionRepository.save(transaction);
+        }
+    }
+
+    private Transaction parseTransaction(String message) {
+        String[] messageParts = message.split(";");
+        String id = messageParts[0];
+        Transaction.Type type = Transaction.Type.valueOf(messageParts[1]);
+        Date date = new Date(Long.parseLong(messageParts[2]));
+        Integer zipCode = null;
+        try { zipCode = Integer.parseInt(messageParts[3]); } catch (NumberFormatException ex) {}
+        List<ReservedItem> reservedItems = new ArrayList<>();
+        for (String itemId : messageParts[4].split(",")) {
+            ReservedItem item = reservedItemRepository.findOne(Integer.parseInt(itemId));
+            if (item == null) {
+                continue;
+            }
+            switch (type) {
+                case PURCHASE:
+                    item.setSold(date);
+                    break;
+                case REFUND:
+                    item.setSold(null);
+                    break;
+            }
+            reservedItems.add(item);
+        }
+        return Transaction.create(id, date, type, reservedItems, zipCode);
+    }
+
+    @Override
+    public void connected(Peer peer) {
+        for(Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
+            try {
+                peer.send(createMessageFromTransaction(transaction));
+            } catch (IOException e) {
+                LOG.error("could not create and send json", e);
+            }
+        }
     }
 
     @Override
     public void notify(Transaction transaction) {
         try {
-            JsonFactory jsonFactory = new JsonFactory();
-            StringWriter stringWriter = new StringWriter();
-            JsonGenerator generator = jsonFactory.createGenerator(stringWriter);
-            generator.writeStartObject();
-            generator.writeObjectField("id", transaction.getId());
-            generator.writeObjectField("type", transaction.getType().toString());
-            generator.writeObjectField("created", transaction.getCreated().getTime());
-            generator.writeObjectField("zip_code", transaction.getZipCode());
-            generator.writeArrayFieldStart("reserved_item_ids");
-            for(ReservedItem reservedItem : transaction.getReservedItems()) {
-                generator.writeNumber(reservedItem.getId());
-            }
-            generator.writeEndArray();
-            generator.writeEndObject();
-            generator.close();
-            String json = stringWriter.toString();
-            LOG.warn("TRANSACTION: " + json);
-            network.send("TRANSACTION: " + json);
+            String json = createMessageFromTransaction(transaction);
+            network.send(json);
         } catch (IOException ex) {
-            LOG.error("Could not create json", ex);
+            LOG.error("Could not create or send json", ex);
         }
+    }
+
+    private String createMessageFromTransaction(Transaction transaction) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder
+                .append(transaction.getId()).append(";")
+                .append(transaction.getType()).append(";")
+                .append(transaction.getCreated().getTime()).append(";")
+                .append(transaction.getZipCode()).append(";");
+        List<Integer> ids = new ArrayList<>();
+        for(ReservedItem reservedItem : transaction.getReservedItems()) {
+            ids.add(reservedItem.getId());
+        }
+        stringBuilder.append(StringUtils.arrayToCommaDelimitedString(ids.toArray()));
+        return stringBuilder.toString();
     }
 }

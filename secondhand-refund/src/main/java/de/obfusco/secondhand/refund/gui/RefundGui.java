@@ -423,11 +423,6 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
                     + "\" wurde noch nicht verkauft!");
             return;
         }
-        if (reservedItem.isRefunded()) {
-            setErrorText("Artikel mit Nummer \"" + code
-                    + "\" wurde bereits storniert!");
-            return;
-        }
         tableModel.addRow(reservedItem);
     }
 
