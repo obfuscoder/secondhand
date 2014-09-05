@@ -88,7 +88,9 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
     public MainGui() {
         super("Flohmarkt Kassensystem");
+    }
 
+    public void start() {
         if (!initializeNetwork()) return;
 
         Image image = new ImageIcon("favicon.ico").getImage();
@@ -222,14 +224,21 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
     @Override
     public void messageReceived(Peer peer, String message) {
-        Transaction transaction = parseTransaction(message);
-        if (!transactionRepository.exists(transaction.getId())) {
-            transactionRepository.save(transaction);
+        LOG.info("Received message from peer " + peer.getAddress() + ": " + message);
+        try {
+            Transaction transaction = parseTransaction(message);
+            if (!transactionRepository.exists(transaction.getId())) {
+                transactionRepository.save(transaction);
+            }
+        }
+        catch (IllegalArgumentException ex) {
+            LOG.error("Invalid message <" + message + ">. Reason: " + ex.getMessage());
         }
     }
 
     private Transaction parseTransaction(String message) {
         String[] messageParts = message.split(";");
+        if (messageParts.length != 5) throw new IllegalArgumentException("Message does not contain 5 segments separated by ';'");
         String id = messageParts[0];
         Transaction.Type type = Transaction.Type.valueOf(messageParts[1]);
         Date date = new Date(Long.parseLong(messageParts[2]));
@@ -255,18 +264,27 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     }
 
     @Override
-    public void connected(Peer peer) {
-        for(Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
-            try {
-                peer.send(createMessageFromTransaction(transaction));
-            } catch (IOException e) {
-                LOG.error("could not create and send json", e);
+    public void connected(final Peer peer) {
+        LOG.warn("Connected with peer " + peer.getAddress());
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                for(Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
+                    try {
+                        LOG.info("Synching transaction " + transaction.getId() + " with peer " + peer.getAddress());
+                        peer.send(createMessageFromTransaction(transaction));
+                    } catch (IOException e) {
+                        LOG.error("could not create and send json", e);
+                    }
+                }
             }
-        }
+        }).run();
     }
 
     @Override
     public void notify(Transaction transaction) {
+        LOG.info("Notifying all peers about transaction " + transaction.getId());
         try {
             String json = createMessageFromTransaction(transaction);
             network.send(json);

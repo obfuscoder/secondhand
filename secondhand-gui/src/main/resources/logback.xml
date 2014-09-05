@@ -17,7 +17,7 @@
         </encoder>
     </appender>
 
-    <logger name="de.obfusco.secondhand.gui" level="INFO" />
+    <logger name="de.obfusco.secondhand" level="INFO" />
 
     <root level="WARN">
         <appender-ref ref="STDOUT" />

@@ -35,7 +35,7 @@ public class StorageConfiguration {
         HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
         adapter.setDatabase(Database.H2);
         adapter.setDatabasePlatform("org.hibernate.dialect.H2Dialect");
-        adapter.setShowSql(true);
+        adapter.setShowSql(false);
         adapter.setGenerateDdl(true);
         return adapter;
     }

@@ -195,6 +195,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         sumPanel.add(euroLabel);
         pane.add(itemPanel, BorderLayout.CENTER);
 
+        readyButton.setEnabled(false);
         newButton.setEnabled(false);
         JPanel buttonPanel = new JPanel(new GridLayout(0, 2, 5, 5));
         readyButton.setFont(pane.getFont().deriveFont(30f));
@@ -289,7 +290,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
     private void newCustomer() {
         checkout = null;
         newButton.setEnabled(false);
-        readyButton.setEnabled(true);
+        readyButton.setEnabled(false);
         itemNr.setEnabled(true);
         cashTable.setEnabled(true);
 
@@ -321,6 +322,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
 
     private void calcTotalPriceAndCount() {
         int rowCount = tablemodel.getRowCount();
+        readyButton.setEnabled(rowCount > 0);
         double totalPrice = 0;
         for (int i = 0; i < rowCount; i++) {
             BigDecimal price = tablemodel.getData().get(i).getItem().getPrice();

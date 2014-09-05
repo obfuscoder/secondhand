@@ -292,6 +292,7 @@ public class CheckOutDialog extends JDialog implements ActionListener {
         if (!postcodeOK) {
             return;
         }
+
         Transaction transaction = storageService.storeSoldInformation(items, postCode);
         transactionListener.notify(transaction);
 

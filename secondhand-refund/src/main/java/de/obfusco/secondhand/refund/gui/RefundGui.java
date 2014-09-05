@@ -197,6 +197,7 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
         pane.add(itemPanel, BorderLayout.CENTER);
 
         newButton.setEnabled(false);
+        readyButton.setEnabled(false);
         JPanel buttonPanel = new JPanel(new GridLayout(0, 2, 5, 5));
         readyButton.setFont(pane.getFont().deriveFont(30f));
         newButton.setFont(pane.getFont().deriveFont(30f));
@@ -290,7 +291,7 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
     private void newCustomer() {
         checkout = null;
         newButton.setEnabled(false);
-        readyButton.setEnabled(true);
+        readyButton.setEnabled(false);
         itemNr.setEnabled(true);
         itemTable.setEnabled(true);
 
@@ -322,6 +323,7 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
 
     private void calcTotalPriceAndCount() {
         int rowCount = tableModel.getRowCount();
+        readyButton.setEnabled(rowCount > 0);
         double totalPrice = 0;
         for (int i = 0; i < rowCount; i++) {
             BigDecimal price = tableModel.getData().get(i).getItem().getPrice();

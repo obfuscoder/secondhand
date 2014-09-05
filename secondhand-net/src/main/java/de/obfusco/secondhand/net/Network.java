@@ -56,9 +56,11 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
 
     public void peerDiscovered(String hostAddress) {
         if (!isLocalAddress(hostAddress) && !isPeered(hostAddress)) {
-            LOG.info("Received announcement from + {}", hostAddress);
+            LOG.info("Received announcement from {}", hostAddress);
             try {
-                peers.put(hostAddress, new Peer(new Socket(hostAddress, port), this));
+                Peer peer = new Peer(new Socket(hostAddress, port), this);
+                peer.start();
+                peers.put(hostAddress, peer);
             } catch (IOException e) {
                 LOG.error("Could not create peer client to host " + hostAddress, e);
             }

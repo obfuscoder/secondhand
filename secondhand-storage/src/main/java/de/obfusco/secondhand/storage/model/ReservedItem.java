@@ -1,16 +1,11 @@
 package de.obfusco.secondhand.storage.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-
-import java.util.Date;
-
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
+import java.util.Date;
 
 @Entity(name = "reserved_items")
-@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
 public class ReservedItem extends AbstractEntityWithId {
 
     @ManyToOne
