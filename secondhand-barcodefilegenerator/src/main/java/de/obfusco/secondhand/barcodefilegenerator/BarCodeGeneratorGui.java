@@ -75,10 +75,10 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
 
         JPanel panel = new JPanel();
 
-        customerNrLabel = new JLabel("Kundennr:");
+        customerNrLabel = new JLabel("Verkäufer:");
         customerNr = new JTextField();
 
-        justBarcode = new JButton("Nur BarCodes");
+        justBarcode = new JButton("Nur Barcodes");
         justBarcode.addActionListener(this);
         etiquettes = new JButton("Etiketten erzeugen");
         etiquettes.addActionListener(this);

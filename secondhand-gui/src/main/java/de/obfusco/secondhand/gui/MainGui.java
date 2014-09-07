@@ -66,6 +66,9 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     PayOffGui payOffGui;
 
     @Autowired
+    SearchGui searchGui;
+
+    @Autowired
     ReceiptFile receiptFile;
 
     @Autowired
@@ -127,7 +130,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         fc = new JFileChooser();
 
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(7, 1, 10, 10));
+        panel.setLayout(new GridLayout(8, 1, 10, 10));
 
         sale = new JButton("Verkauf");
         sale.addActionListener(new ActionListener() {
@@ -148,6 +151,16 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             }
         });
         refund.setFont(refund.getFont().deriveFont(BUTTON_FONT_SIZE));
+
+        JButton search = new JButton("Artikelsuche");
+        search.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                searchGui.open();
+            }
+        });
+        search.setFont(search.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         billGenerator = new JButton("Abrechnung");
         billGenerator.addActionListener(new ActionListener() {
@@ -213,6 +226,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
         panel.add(sale);
         panel.add(refund);
+        panel.add(search);
         panel.add(createSellerReceipt);
         panel.add(createSellerResultReceipt);
         panel.add(barcodeGenerator);
