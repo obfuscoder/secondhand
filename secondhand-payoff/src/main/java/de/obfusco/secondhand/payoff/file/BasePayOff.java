@@ -26,12 +26,12 @@ abstract public class BasePayOff {
     protected NumberFormat percent = NumberFormat.getPercentInstance(Locale.GERMANY);
 
     protected void addTotalLine(PdfPTable table, String label, String value, boolean bold) {
-        Font font = FontFactory.getFont((bold) ? FontFactory.HELVETICA_BOLD : FontFactory.HELVETICA, 12);
+        Font font = FontFactory.getFont((bold) ? FontFactory.HELVETICA_BOLD : FontFactory.HELVETICA, 10);
         PdfPCell cell;
         cell = new PdfPCell(new Phrase(new Chunk(label, font)));
         cell.setBorder(Rectangle.TOP | Rectangle.BOTTOM);
         cell.setBorderWidth(1);
-        cell.setColspan(4);
+        cell.setColspan(5);
         table.addCell(cell);
         cell = new PdfPCell(new Phrase(new Chunk(value, font)));
         cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -41,10 +41,10 @@ abstract public class BasePayOff {
     }
 
     protected void addHeader(Document document, Event event) throws DocumentException {
-        document.add(new Phrase("Abrechnung Flohmarkt", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 24)));
-        document.add(new Phrase("\n" + event.getName() + "\n", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+        document.add(new Phrase("Abrechnung Flohmarkt", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
+        document.add(new Phrase("\n" + event.getName() + "\n", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
         document.add(new Phrase(
                 SimpleDateFormat.getDateInstance(0, Locale.GERMAN).format(event.getDate()),
-                FontFactory.getFont(FontFactory.HELVETICA, 12)));
+                FontFactory.getFont(FontFactory.HELVETICA, 10)));
     }
 }

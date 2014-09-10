@@ -88,6 +88,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     public JButton createSellerReceipt;
     public JButton createSellerResultReceipt;
     JFileChooser fc;
+    JLabel statusLine;
 
     public MainGui() {
         super("Flohmarkt Kassensystem");
@@ -130,7 +131,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         fc = new JFileChooser();
 
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(8, 1, 10, 10));
+        panel.setLayout(new GridLayout(9, 1, 10, 10));
 
         sale = new JButton("Verkauf");
         sale.addActionListener(new ActionListener() {
@@ -233,6 +234,10 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         panel.add(testScan);
         panel.add(billGenerator);
 
+        statusLine = new JLabel("", SwingConstants.CENTER);
+        updateStatusLine();
+        panel.add(statusLine);
+
         pane.add(panel, BorderLayout.SOUTH);
     }
 
@@ -279,6 +284,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
     @Override
     public void connected(final Peer peer) {
+        updateStatusLine();
         LOG.warn("Connected with peer " + peer.getAddress());
         new Thread(new Runnable() {
 
@@ -294,6 +300,18 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
                 }
             }
         }).run();
+    }
+
+    @Override
+    public void disconnected() {
+        updateStatusLine();
+    }
+
+    private void updateStatusLine() {
+        String status = (network.getNumberOfPeers() == 0) ?
+                "Keine Verbindungen mit anderen Systemen" :
+                "Verbunden mit " + network.getNumberOfPeers() + " anderen System(en)";
+        statusLine.setText(status);
     }
 
     @Override

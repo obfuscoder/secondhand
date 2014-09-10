@@ -30,4 +30,9 @@ public class SecondHandNet implements MessageBroker {
     public void connected(Peer peer) {
         System.out.println("CONNECTED with peer " + peer.getAddress());
     }
+
+    @Override
+    public void disconnected() {
+        System.out.println("DISCONNECTED");
+    }
 }

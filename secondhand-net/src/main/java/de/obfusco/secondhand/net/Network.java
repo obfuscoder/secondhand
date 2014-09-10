@@ -26,6 +26,7 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
     private Map<String,Peer> peers = new HashMap<>();
     private List<String> localHostAddresses;
     private MessageBroker broker;
+    private String numberOfPeers;
 
     public Network(int port, MessageBroker broker) throws IOException {
         this.broker = broker;
@@ -104,6 +105,7 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
         LOG.warn("Peer disconnected: " + peer.getAddress());
         peers.remove(peer.getAddress());
         peer.close();
+        broker.disconnected();
     }
 
     @Override
@@ -138,5 +140,9 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
                 LOG.error("Error while peering with " + hostAddress, e);
             }
         }
+    }
+
+    public int getNumberOfPeers() {
+        return peers.size();
     }
 }
