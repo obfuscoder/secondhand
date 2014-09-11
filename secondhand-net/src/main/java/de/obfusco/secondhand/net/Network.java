@@ -26,7 +26,6 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
     private Map<String,Peer> peers = new HashMap<>();
     private List<String> localHostAddresses;
     private MessageBroker broker;
-    private String numberOfPeers;
 
     public Network(int port, MessageBroker broker) throws IOException {
         this.broker = broker;
@@ -57,7 +56,7 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
 
     public void peerDiscovered(String hostAddress) {
         if (!isLocalAddress(hostAddress) && !isPeered(hostAddress)) {
-            LOG.info("Received announcement from {}", hostAddress);
+            LOG.info("Accepted announcement from {}", hostAddress);
             try {
                 Peer peer = new Peer(new Socket(hostAddress, port), this);
                 peer.start();
@@ -102,17 +101,20 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
 
     @Override
     public void disconnected(Peer peer) {
-        LOG.warn("Peer disconnected: " + peer.getAddress());
-        peers.remove(peer.getAddress());
-        peer.close();
-        broker.disconnected();
+        LOG.info("Peer disconnected: " + peer.getAddress());
+        removeAndClosePeer(peer);
     }
 
     @Override
     public void errorOccurred(Peer peer) {
         LOG.error("Error with peer " + peer.getAddress());
+        removeAndClosePeer(peer);
+    }
+
+    private void removeAndClosePeer(Peer peer) {
         peers.remove(peer.getAddress());
         peer.close();
+        broker.disconnected();
     }
 
     @Override
@@ -126,6 +128,7 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
         LOG.info("Peering request from " + hostAddress);
         if (isPeered(hostAddress)) {
             try {
+                LOG.warn("Already peered with this host");
                 socket.getOutputStream().write("ERROR! Already peered. Closing connection.\n".getBytes());
                 socket.close();
             } catch (IOException e) {

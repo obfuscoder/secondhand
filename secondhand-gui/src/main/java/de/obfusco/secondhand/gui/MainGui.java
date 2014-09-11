@@ -284,8 +284,8 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
     @Override
     public void connected(final Peer peer) {
+        LOG.info("Connected with peer " + peer.getAddress());
         updateStatusLine();
-        LOG.warn("Connected with peer " + peer.getAddress());
         new Thread(new Runnable() {
 
             @Override
@@ -304,6 +304,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
     @Override
     public void disconnected() {
+        LOG.info("Disconnected from a peer");
         updateStatusLine();
     }
 
@@ -311,7 +312,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         String status = (network.getNumberOfPeers() == 0) ?
                 "Keine Verbindungen mit anderen Systemen" :
                 "Verbunden mit " + network.getNumberOfPeers() + " anderen System(en)";
-        statusLine.setText(status);
+        if (statusLine != null) statusLine.setText(status);
     }
 
     @Override

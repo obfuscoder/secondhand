@@ -37,9 +37,9 @@ class DiscoveryAnnouncer extends Thread implements Closeable {
                 LOG.error("Failed to send announcement", ex);
             }
             try {
-                sleep(5000);
+                sleep(10000);
             } catch (InterruptedException ex) {
-                LOG.warn("Interruped", ex);
+                LOG.warn("Interrupted", ex);
                 return;
             }
         }
