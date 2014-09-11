@@ -183,7 +183,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         });
         barcodeGenerator.setFont(barcodeGenerator.getFont().deriveFont(BUTTON_FONT_SIZE));
 
-        testScan = new JButton("Barcode- Test");
+        testScan = new JButton("Barcode-Test");
         testScan.addActionListener(new ActionListener() {
 
             @Override

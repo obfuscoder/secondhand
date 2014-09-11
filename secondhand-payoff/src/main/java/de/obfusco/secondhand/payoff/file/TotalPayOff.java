@@ -52,7 +52,7 @@ public class TotalPayOff extends BasePayOff {
         List<ReservedItem> soldItems
                 = reservedItemRepository.findByReservationEventAndSoldNotNull(event);
 
-        PdfPTable table = new PdfPTable(5);
+        PdfPTable table = new PdfPTable(6);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
 
         double sum = 0;
@@ -64,12 +64,12 @@ public class TotalPayOff extends BasePayOff {
         double totalEntryFees = ENTRY_FEE * reservations.size();
         double totalSum = kitaSum + totalEntryFees;
 
-        addTotalLine(table, "Anzahl verkaufter Artikel", Integer.toString(soldItems.size()), true);
-        addTotalLine(table, "Summe verkaufter Artikel", currency.format(sum), true);
-        addTotalLine(table, "Anteil Kitas (" + percent.format(CHILDCARE_SHARE) + ")", currency.format(kitaSum), false);
-        addTotalLine(table, "Teilnahmegebühren für " + reservations.size() + " Teilnehmer", currency.format(totalEntryFees), false);
-        addTotalLine(table, "Gewinn insgesamt", currency.format(totalSum), true);
-        addTotalLine(table, "Gewinn je Kita", currency.format(totalSum / 2), true);
+        addTotalLine(table, "Anzahl verkaufter Artikel", Integer.toString(soldItems.size()), true, 12);
+        addTotalLine(table, "Summe verkaufter Artikel", currency.format(sum), true, 12);
+        addTotalLine(table, "Anteil Kitas (" + percent.format(CHILDCARE_SHARE) + ")", currency.format(kitaSum), false, 12);
+        addTotalLine(table, "Teilnahmegebühren für " + reservations.size() + " Teilnehmer", currency.format(totalEntryFees), false, 12);
+        addTotalLine(table, "Gewinn insgesamt", currency.format(totalSum), true, 14);
+        addTotalLine(table, "Gewinn je Kita", currency.format(totalSum / 2), true, 14);
 
         return table;
     }

@@ -54,11 +54,13 @@ public class SellerPayOff extends BasePayOff {
         document.add(new Phrase("\n\n"));
 
         Seller seller = reservation.getSeller();
-        document.add(new Phrase(seller.getName() + "\n", FontFactory.getFont(FontFactory.HELVETICA, 10)));
-        document.add(new Phrase(seller.getStreet() + "\n", FontFactory.getFont(FontFactory.HELVETICA, 10)));
-        document.add(new Phrase(seller.getZipCode() + " " + seller.getCity() + "\n\n", FontFactory.getFont(FontFactory.HELVETICA, 10)));
+        document.add(new Phrase(seller.getName() + "\n", FontFactory.getFont(FontFactory.HELVETICA, 12)));
+        document.add(new Phrase(seller.getStreet() + "\n", FontFactory.getFont(FontFactory.HELVETICA, 12)));
+        document.add(new Phrase(seller.getZipCode() + " " + seller.getCity() + "\n\n",
+                FontFactory.getFont(FontFactory.HELVETICA, 12)));
 
-        document.add(new Phrase("Reservierungsnummer: " + reservation.getNumber() + "\n\n"));
+        document.add(new Phrase("Reservierungsnummer: " + reservation.getNumber() + "\n\n",
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
         List<ReservedItem> soldItems = reservedItemRepository.findByReservationAndSoldNotNull(reservation);
 
         document.add(new Phrase(new Chunk(soldItems.size() + " Artikel wurde(n) verkauft",
@@ -73,10 +75,10 @@ public class SellerPayOff extends BasePayOff {
         double totalSum = totalPrice - (kitaSum + ENTRY_FEE);
 
         PdfPTable table = createItemTable(soldItems);
-        addTotalLine(table, "Summe", currency.format(totalPrice), true);
-        addTotalLine(table, "Erlös Kita (" + percent.format(CHILDCARE_SHARE) + " auf 10 Cent aufgerundet)", currency.format(-kitaSum), false);
-        addTotalLine(table, "Reservierungsgebühr", currency.format(-ENTRY_FEE), false);
-        addTotalLine(table, "Gewinn", currency.format(totalSum), true);
+        addTotalLine(table, "Summe", currency.format(totalPrice), true, 12);
+        addTotalLine(table, "Erlös Kita (" + percent.format(CHILDCARE_SHARE) + " auf 10 Cent aufgerundet)", currency.format(-kitaSum), false, 10);
+        addTotalLine(table, "Reservierungsgebühr", currency.format(-ENTRY_FEE), false, 10);
+        addTotalLine(table, "Auszuzahlender Betrag", currency.format(totalSum), true, 14);
         document.add(table);
         document.add(new Phrase("\n"));
 
@@ -89,7 +91,6 @@ public class SellerPayOff extends BasePayOff {
             totalPrice += item.getItem().getPrice().doubleValue();
         }
         table = createItemTable(unsoldItems);
-        addTotalLine(table, "Summe", currency.format(totalPrice), true);
         document.add(table);
     }
 

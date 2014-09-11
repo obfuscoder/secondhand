@@ -25,8 +25,8 @@ abstract public class BasePayOff {
     protected NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
     protected NumberFormat percent = NumberFormat.getPercentInstance(Locale.GERMANY);
 
-    protected void addTotalLine(PdfPTable table, String label, String value, boolean bold) {
-        Font font = FontFactory.getFont((bold) ? FontFactory.HELVETICA_BOLD : FontFactory.HELVETICA, 10);
+    protected void addTotalLine(PdfPTable table, String label, String value, boolean bold, int size) {
+        Font font = FontFactory.getFont((bold) ? FontFactory.HELVETICA_BOLD : FontFactory.HELVETICA, size);
         PdfPCell cell;
         cell = new PdfPCell(new Phrase(new Chunk(label, font)));
         cell.setBorder(Rectangle.TOP | Rectangle.BOTTOM);
