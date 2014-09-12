@@ -1,6 +1,6 @@
 [Files]
 Source: "C:\Users\Asi\Desktop\sechond\bin\secondhand-gui-2.0.0.jar"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "C:\Users\Asi\Desktop\sechond\floh.mv.db"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Asi\Desktop\sechond\floh.mv.db"; DestDir: "{userappdata}\Flohmarkt"; Flags: ignoreversion
 Source: "C:\Users\Asi\Desktop\sechond\java\COPYRIGHT"; DestDir: "{app}\java"; Flags: ignoreversion
 Source: "C:\Users\Asi\Desktop\sechond\java\LICENSE"; DestDir: "{app}\java"; Flags: ignoreversion
 Source: "C:\Users\Asi\Desktop\sechond\java\README.txt"; DestDir: "{app}\java"; Flags: ignoreversion
@@ -676,11 +676,10 @@ Name: "{app}\java\lib\zi\Europe"
 Name: "{app}\java\lib\zi\Indian"
 Name: "{app}\java\lib\zi\Pacific"
 Name: "{app}\java\lib\zi\SystemV"
-Name: "{app}\log"; Permissions: users-modify
 
 [Icons]
-Name: "{group}\Flohmarkt Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.0.0.jar"""
-Name: "{userdesktop}\Flohmarkt Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.0.0.jar"""
+Name: "{group}\Flohmarkt Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{userappdata}\Flohmarkt"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.0.0.jar"""
+Name: "{userdesktop}\Flohmarkt Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{userappdata}\Flohmarkt"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.0.0.jar"""
 
 [Setup]
 DisableReadyPage=True
