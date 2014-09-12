@@ -676,10 +676,11 @@ Name: "{app}\java\lib\zi\Europe"
 Name: "{app}\java\lib\zi\Indian"
 Name: "{app}\java\lib\zi\Pacific"
 Name: "{app}\java\lib\zi\SystemV"
+Name: "{app}\log"; Permissions: users-modify
 
 [Icons]
 Name: "{group}\Flohmarkt Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.0.0.jar"""
-Name: "{userdesktop}\Flohmarkt Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.0.0.jar"""; Components: createDesktopIcon
+Name: "{userdesktop}\Flohmarkt Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.0.0.jar"""
 
 [Setup]
 DisableReadyPage=True
@@ -691,12 +692,14 @@ AppCopyright=2013-2014 Kai und Anne Lehmann
 PrivilegesRequired=poweruser
 AppId={{FB40361A-0C2A-4AE4-98A8-1F6A435B45BB}
 ShowLanguageDialog=auto
-DefaultGroupName=Flohmarkt
-DefaultDirName={pf}\Flohmarkt
+DefaultGroupName=Flohmarkt Kassensystem
+DefaultDirName={pf}\Flohmarkt Kassensystem
 AlwaysShowComponentsList=False
-
-[Components]
-Name: "createDesktopIcon"; Description: "Desktop Icon erstellen"; Types: custom compact full
+OutputBaseFilename=flohmarkt-setup
+DisableDirPage=auto
+DisableProgramGroupPage=auto
+Compression=lzma2/ultra
+InternalCompressLevel=ultra
 
 [Languages]
 Name: "german"; MessagesFile: "compiler:Languages\German.isl"
