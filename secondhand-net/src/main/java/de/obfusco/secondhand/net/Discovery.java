@@ -15,7 +15,7 @@ public class Discovery implements Closeable {
     private DiscoveryListener discoveryListener;
     private DiscoveryAnnouncer discoveryAnnouncer;
     private MulticastSocket socket;
-    private InetAddress multicastAddress = InetAddress.getByName("224.0.0.1");
+    private InetAddress multicastAddress = InetAddress.getByName("239.42.13.37");
 
     public Discovery(int port, DiscoveryObserver observer) throws IOException {
         socket = new MulticastSocket(port);

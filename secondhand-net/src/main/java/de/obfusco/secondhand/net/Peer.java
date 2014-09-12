@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 
 public class Peer extends Thread implements Closeable {
 
@@ -19,7 +18,7 @@ public class Peer extends Thread implements Closeable {
     private final BufferedReader receiver;
     private Socket socket;
     private PeerObserver peerObserver;
-    private Thread ping;
+    private Ping ping;
 
     public Peer(Socket socket, PeerObserver peerObserver) throws IOException {
         this.socket = socket;
@@ -34,12 +33,11 @@ public class Peer extends Thread implements Closeable {
     public void run() {
         try {
             LOG.info("Peer starting");
-            peerObserver.connected(this);
             ping = new Ping(this);
             ping.start();
             while (isConnected()) {
                 try {
-                    socket.setSoTimeout(10000);
+                    socket.setSoTimeout(30000);
                     String line = receiver.readLine();
                     if (line == null) {
                         LOG.info("Connection closed by peer.");
@@ -66,6 +64,7 @@ public class Peer extends Thread implements Closeable {
     @Override
     public void close() {
         LOG.info("Closing connection");
+        ping.quit();
         sender.close();
         try {
             receiver.close();
@@ -83,12 +82,13 @@ public class Peer extends Thread implements Closeable {
         return socket.getInetAddress().getHostAddress();
     }
 
-    public void send(String message) {
-        sender.println(message);
+    public synchronized void send(String message) {
+        if (isConnected()) sender.println(message);
     }
 
     private class Ping extends Thread {
         private Peer peer;
+        private volatile boolean running;
 
         public Ping(Peer peer) {
             this.peer = peer;
@@ -96,7 +96,9 @@ public class Peer extends Thread implements Closeable {
 
         @Override
         public void run() {
-            while(peer.isConnected()) {
+            LOG.info("Ping running");
+            running = true;
+            while(running && peer.isConnected()) {
                 try {
                     synchronized (this) {
                         wait(5000);
@@ -105,8 +107,13 @@ public class Peer extends Thread implements Closeable {
                     LOG.error("Caught exception while waiting for next ping", ex);
                     return;
                 }
+                if (!running) break;
                 peer.send("PING");
             }
+        }
+
+        public void quit() {
+            running = false;
         }
     }
 }

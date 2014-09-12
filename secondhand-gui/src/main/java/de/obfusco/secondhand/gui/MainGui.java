@@ -246,8 +246,10 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         LOG.info("Received message from peer " + peer.getAddress() + ": " + message);
         try {
             Transaction transaction = parseTransaction(message);
-            if (!transactionRepository.exists(transaction.getId())) {
-                transactionRepository.save(transaction);
+            synchronized(transactionRepository) {
+                if (!transactionRepository.exists(transaction.getId())) {
+                    transactionRepository.save(transaction);
+                }
             }
         }
         catch (IllegalArgumentException ex) {
@@ -292,7 +294,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             public void run() {
                 for(Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
                     try {
-                        LOG.info("Synching transaction " + transaction.getId() + " with peer " + peer.getAddress());
+                        LOG.info("Syncing transaction " + transaction.getId() + " with peer " + peer.getAddress());
                         peer.send(createMessageFromTransaction(transaction));
                     } catch (IOException e) {
                         LOG.error("could not create and send json", e);
@@ -309,7 +311,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     }
 
     private void updateStatusLine() {
-        String status = (network.getNumberOfPeers() == 0) ?
+        String status = (network == null || network.getNumberOfPeers() == 0) ?
                 "Keine Verbindungen mit anderen Systemen" :
                 "Verbunden mit " + network.getNumberOfPeers() + " anderen System(en)";
         if (statusLine != null) statusLine.setText(status);

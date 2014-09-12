@@ -9,6 +9,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
+import java.util.Random;
 
 class DiscoveryAnnouncer extends Thread implements Closeable {
 
@@ -24,6 +25,7 @@ class DiscoveryAnnouncer extends Thread implements Closeable {
 
     @Override
     public void run() {
+        Random random = new Random();
         int counter = 0;
         while (true) {
             if (socket == null) {
@@ -37,7 +39,7 @@ class DiscoveryAnnouncer extends Thread implements Closeable {
                 LOG.error("Failed to send announcement", ex);
             }
             try {
-                sleep(10000);
+                sleep(random.nextInt(10000)+8000);
             } catch (InterruptedException ex) {
                 LOG.warn("Interrupted", ex);
                 return;

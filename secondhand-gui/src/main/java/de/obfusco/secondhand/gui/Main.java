@@ -1,13 +1,11 @@
 package de.obfusco.secondhand.gui;
 
-import de.obfusco.secondhand.net.MessageBroker;
-import de.obfusco.secondhand.net.Peer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
 
 public class Main {
 
