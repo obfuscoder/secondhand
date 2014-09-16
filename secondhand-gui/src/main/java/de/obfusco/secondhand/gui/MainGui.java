@@ -8,6 +8,7 @@ import de.obfusco.secondhand.net.Peer;
 import de.obfusco.secondhand.payoff.gui.PayOffGui;
 import de.obfusco.secondhand.receipt.file.ReceiptFile;
 import de.obfusco.secondhand.refund.gui.RefundGui;
+import de.obfusco.secondhand.reports.ReportsGui;
 import de.obfusco.secondhand.sale.gui.CashBoxGui;
 import de.obfusco.secondhand.storage.model.ReservedItem;
 import de.obfusco.secondhand.storage.model.Transaction;
@@ -69,6 +70,9 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     SearchGui searchGui;
 
     @Autowired
+    ReportsGui reportsGui;
+
+    @Autowired
     ReceiptFile receiptFile;
 
     @Autowired
@@ -87,6 +91,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     public JButton testScan;
     public JButton createSellerReceipt;
     public JButton createSellerResultReceipt;
+    public JButton reportsButton;
     JFileChooser fc;
     JLabel statusLine;
 
@@ -131,7 +136,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         fc = new JFileChooser();
 
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(9, 1, 10, 10));
+        panel.setLayout(new GridLayout(0, 1, 10, 10));
 
         sale = new JButton("Verkauf");
         sale.addActionListener(new ActionListener() {
@@ -225,6 +230,16 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         });
         createSellerResultReceipt.setFont(createSellerResultReceipt.getFont().deriveFont(BUTTON_FONT_SIZE));
 
+        reportsButton = new JButton("Statistiken");
+        reportsButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                reportsGui.setVisible(true);
+            }
+        });
+        reportsButton.setFont(reportsButton.getFont().deriveFont(BUTTON_FONT_SIZE));
+
         panel.add(sale);
         panel.add(refund);
         panel.add(search);
@@ -233,6 +248,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         panel.add(barcodeGenerator);
         panel.add(testScan);
         panel.add(billGenerator);
+        panel.add(reportsButton);
 
         statusLine = new JLabel("", SwingConstants.CENTER);
         updateStatusLine();
@@ -249,6 +265,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             synchronized(transactionRepository) {
                 if (!transactionRepository.exists(transaction.getId())) {
                     transactionRepository.save(transaction);
+                    reportsGui.update();
                 }
             }
         }
@@ -326,6 +343,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         } catch (IOException ex) {
             LOG.error("Could not create or send json", ex);
         }
+        reportsGui.update();
     }
 
     private String createMessageFromTransaction(Transaction transaction) throws IOException {

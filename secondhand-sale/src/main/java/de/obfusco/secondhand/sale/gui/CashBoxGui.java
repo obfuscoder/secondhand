@@ -1,5 +1,24 @@
 package de.obfusco.secondhand.sale.gui;
 
+import de.obfusco.secondhand.storage.model.ReservedItem;
+import de.obfusco.secondhand.storage.model.TransactionListener;
+import de.obfusco.secondhand.storage.service.StorageService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
@@ -18,27 +37,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-
-import de.obfusco.secondhand.storage.service.StorageService;
-import de.obfusco.secondhand.storage.model.ReservedItem;
-
-import de.obfusco.secondhand.storage.model.TransactionListener;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 @Component
 public class CashBoxGui extends JFrame implements ActionListener, TableModelListener {
 
@@ -51,7 +49,6 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
     JLabel errorLabel;
     JLabel priceLabel;
     JTable cashTable;
-    String sum;
 
     @Autowired
     StorageService storageService;

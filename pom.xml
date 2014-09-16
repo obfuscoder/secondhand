@@ -16,6 +16,7 @@
         <module>secondhand-receipt</module>
         <module>secondhand-refund</module>
         <module>secondhand-net</module>
+        <module>secondhand-reports</module>
     </modules>
     <properties>
         <maven.compiler.source>1.7</maven.compiler.source>

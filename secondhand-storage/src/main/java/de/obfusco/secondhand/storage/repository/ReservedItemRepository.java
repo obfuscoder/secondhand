@@ -20,6 +20,10 @@ public interface ReservedItemRepository extends CrudRepository<ReservedItem, Int
 
     List<ReservedItem> findByReservationEventAndSoldNotNull(Event event);
 
+    long countBySoldNotNull();
+    @Query("select sum(i.price) from reserved_items ri join ri.item i where ri.sold is not null")
+    double sumOfSoldItems();
+
     @Query("select ri from reserved_items ri join ri.item i join i.category c " +
             "where (lower(ri.code) like lower(?1) or lower(i.description) like lower(?1) or lower(i.size) like lower(?1) or lower(c.name) like lower(?1))")
     List<ReservedItem> findByKeywords(String keyword);
