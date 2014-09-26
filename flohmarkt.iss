@@ -678,8 +678,8 @@ Name: "{app}\java\lib\zi\Pacific"
 Name: "{app}\java\lib\zi\SystemV"
 
 [Icons]
-Name: "{group}\Flohmarkt Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{userappdata}\Flohmarkt"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.1.0.jar"""
-Name: "{userdesktop}\Flohmarkt Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{userappdata}\Flohmarkt"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.1.0.jar"""
+Name: "{group}\Flohmarkt Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.1.0.jar"""
+Name: "{userdesktop}\Flohmarkt Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.1.0.jar"""
 
 [Setup]
 DisableReadyPage=True
