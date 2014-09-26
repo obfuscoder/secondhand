@@ -1,6 +1,6 @@
 [Files]
-Source: "bin\secondhand-gui-2.1.0.jar"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "floh.mv.db"; DestDir: "{userappdata}\Flohmarkt"; Flags: ignoreversion
+Source: "secondhand-gui\target\secondhand-gui-2.1.0.jar"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "floh.mv.db"; DestDir: "{app}"; Flags: ignoreversion
 Source: "java\COPYRIGHT"; DestDir: "{app}\java"; Flags: ignoreversion
 Source: "java\LICENSE"; DestDir: "{app}\java"; Flags: ignoreversion
 Source: "java\README.txt"; DestDir: "{app}\java"; Flags: ignoreversion
@@ -688,17 +688,23 @@ ShowComponentSizes=False
 AppName=Flohmarkt Kassensystem
 AppVersion=2.1.0
 AppCopyright=2013-2014 Kai und Anne Lehmann
-PrivilegesRequired=poweruser
+PrivilegesRequired=none
 AppId={{FB40361A-0C2A-4AE4-98A8-1F6A435B45BB}
 ShowLanguageDialog=auto
 DefaultGroupName=Flohmarkt Kassensystem
-DefaultDirName={pf}\Flohmarkt Kassensystem
+DefaultDirName={userappdata}\Flohmarkt Kassensystem
 AlwaysShowComponentsList=False
 OutputBaseFilename=flohmarkt-setup
-DisableDirPage=auto
 DisableProgramGroupPage=auto
 Compression=lzma2/ultra
 InternalCompressLevel=ultra
+UsePreviousGroup=False
+AlwaysUsePersonalGroup=True
+AppPublisherURL=http://www.obfusco.de
+VersionInfoVersion=2.1.0
+VersionInfoCopyright=Kai und Anne Lehmann
+VersionInfoProductName=Flohmarkt Kassensystem
+VersionInfoProductVersion=2.1.0
 
 [Languages]
 Name: "german"; MessagesFile: "compiler:Languages\German.isl"
