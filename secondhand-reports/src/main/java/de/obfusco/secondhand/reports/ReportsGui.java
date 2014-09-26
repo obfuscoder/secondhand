@@ -60,7 +60,9 @@ public class ReportsGui extends JFrame {
         itemCount.setText("" + reservedItemRepository.count());
         transactionCount.setText("" + transactionRepository.count());
         soldCount.setText("" + reservedItemRepository.countBySoldNotNull());
-        soldSum.setText(currencyFormat.format(reservedItemRepository.sumOfSoldItems()));
+        Double sumOfSoldItems = reservedItemRepository.sumOfSoldItems();
+        if (sumOfSoldItems == null) sumOfSoldItems = 0.0;
+        soldSum.setText(currencyFormat.format(sumOfSoldItems));
     }
 
     @Override
