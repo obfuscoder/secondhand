@@ -12,11 +12,11 @@ public interface ReservedItemRepository extends CrudRepository<ReservedItem, Int
 
     ReservedItem findByCode(String code);
 
-    List<ReservedItem> findByReservationOrderByCodeAsc(Reservation reservation);
+    List<ReservedItem> findByReservationOrderByNumberAsc(Reservation reservation);
 
-    List<ReservedItem> findByReservationAndSoldNotNull(Reservation reservation);
+    List<ReservedItem> findByReservationAndSoldNotNullOrderByNumberAsc(Reservation reservation);
 
-    List<ReservedItem> findByReservationAndSoldNull(Reservation reservation);
+    List<ReservedItem> findByReservationAndSoldNullOrderByNumberAsc(Reservation reservation);
 
     List<ReservedItem> findByReservationEventAndSoldNotNull(Event event);
 

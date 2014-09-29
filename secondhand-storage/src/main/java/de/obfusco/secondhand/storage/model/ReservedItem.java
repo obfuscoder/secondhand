@@ -15,6 +15,7 @@ public class ReservedItem extends AbstractEntityWithId {
     private String code;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date sold;
+    private int number;
 
     public String getCode() {
         return code;
@@ -38,5 +39,9 @@ public class ReservedItem extends AbstractEntityWithId {
 
     public void setSold(Date sold) {
         this.sold = sold;
+    }
+
+    public int getNumber() {
+        return number;
     }
 }

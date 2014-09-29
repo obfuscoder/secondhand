@@ -56,12 +56,12 @@ public class SellerPayOff extends BasePayOff {
         Seller seller = reservation.getSeller();
         document.add(new Phrase(seller.getName() + "\n", FontFactory.getFont(FontFactory.HELVETICA, 12)));
         document.add(new Phrase(seller.getStreet() + "\n", FontFactory.getFont(FontFactory.HELVETICA, 12)));
-        document.add(new Phrase(seller.getZipCode() + " " + seller.getCity() + "\n\n",
+        document.add(new Phrase(seller.getZipCode() + " " + seller.getCity() + "\n",
                 FontFactory.getFont(FontFactory.HELVETICA, 12)));
 
         document.add(new Phrase("Reservierungsnummer: " + reservation.getNumber() + "\n\n",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
-        List<ReservedItem> soldItems = reservedItemRepository.findByReservationAndSoldNotNull(reservation);
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
+        List<ReservedItem> soldItems = reservedItemRepository.findByReservationAndSoldNotNullOrderByNumberAsc(reservation);
 
         document.add(new Phrase(new Chunk(soldItems.size() + " Artikel wurde(n) verkauft",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
@@ -75,14 +75,14 @@ public class SellerPayOff extends BasePayOff {
         double totalSum = totalPrice - (kitaSum + ENTRY_FEE);
 
         PdfPTable table = createItemTable(soldItems);
-        addTotalLine(table, "Summe", currency.format(totalPrice), true, 12);
+        addTotalLine(table, "Summe", currency.format(totalPrice), true, 10);
         addTotalLine(table, "Erlös Kita (" + percent.format(CHILDCARE_SHARE) + " auf 10 Cent aufgerundet)", currency.format(-kitaSum), false, 10);
         addTotalLine(table, "Reservierungsgebühr", currency.format(-ENTRY_FEE), false, 10);
-        addTotalLine(table, "Auszuzahlender Betrag", currency.format(totalSum), true, 14);
+        addTotalLine(table, "Auszuzahlender Betrag", currency.format(totalSum), true, 12);
         document.add(table);
         document.add(new Phrase("\n"));
 
-        List<ReservedItem> unsoldItems = reservedItemRepository.findByReservationAndSoldNull(reservation);
+        List<ReservedItem> unsoldItems = reservedItemRepository.findByReservationAndSoldNullOrderByNumberAsc(reservation);
         document.add(new Phrase(new Chunk(unsoldItems.size() + " Artikel wurde(n) nicht verkauft",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
 
@@ -95,26 +95,27 @@ public class SellerPayOff extends BasePayOff {
     }
 
     private PdfPTable createItemTable(List<ReservedItem> items) throws DocumentException {
-        PdfPTable table = new PdfPTable(NUMBER_OF_COLUMNS*NUMBER_OF_ITEMS_PER_LINE);
+        PdfPTable table = new PdfPTable(NUMBER_OF_COLUMNS * NUMBER_OF_ITEMS_PER_LINE);
         table.setWidthPercentage(100f);
-        table.setWidths(new int[]{1, 2, 1, 1, 2, 1});
+        table.setWidths(new int[]{1, 8, 3, 1, 8, 3});
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
         if (!items.isEmpty()) {
             addItemHeader(table);
         }
 
         for (int i = 0; i < items.size(); i++) {
-            ReservedItem item = items.get(i);
-            for (int col = 0; col < NUMBER_OF_COLUMNS; col++) {
-                PdfPCell cell = new PdfPCell(new Phrase(getColText(item, i, col),
+            ReservedItem item = items.get((i % 2 == 0) ? i / 2 : i / 2 + (items.size() + 1) / 2);
+            for (int column = 0; column < NUMBER_OF_COLUMNS; column++) {
+                PdfPCell cell = new PdfPCell(new Phrase(getColumnText(item, column),
                         FontFactory.getFont(FontFactory.HELVETICA, 10)));
-                cell.setBorder(isFirstCellInLine(i, col) ? 0 : Rectangle.LEFT);
+                cell.setBorder(isFirstCellInLine(i, column) ? 0 : Rectangle.LEFT);
                 cell.setBorderWidth(1);
+                cell.setHorizontalAlignment(getColumnAlignment(column));
                 table.addCell(cell);
             }
         }
         int linePosition = NUMBER_OF_ITEMS_PER_LINE - items.size() % NUMBER_OF_ITEMS_PER_LINE;
-        for (int i=linePosition; i<NUMBER_OF_ITEMS_PER_LINE; i++) {
+        for (int i = linePosition; i < NUMBER_OF_ITEMS_PER_LINE; i++) {
             for (int col = 0; col < NUMBER_OF_COLUMNS; col++) {
                 PdfPCell cell = new PdfPCell(new Phrase("", FontFactory.getFont(FontFactory.HELVETICA, 10)));
                 cell.setBorder(isFirstCellInLine(i, col) ? 0 : Rectangle.LEFT);
@@ -125,13 +126,13 @@ public class SellerPayOff extends BasePayOff {
         return table;
     }
 
-    private boolean isFirstCellInLine(int item, int col) {
-        return col == 0 && item %NUMBER_OF_ITEMS_PER_LINE == 0;
+    private boolean isFirstCellInLine(int item, int column) {
+        return column == 0 && item % NUMBER_OF_ITEMS_PER_LINE == 0;
     }
 
     private void addItemHeader(PdfPTable table) {
-        String[] columnNames = {"Pos", "ArtNr", "Preis"};
-        for (int c=0; c<NUMBER_OF_ITEMS_PER_LINE; c++) {
+        String[] columnNames = {"Nr.", "Beschreibung", "Preis"};
+        for (int c = 0; c < NUMBER_OF_ITEMS_PER_LINE; c++) {
             for (int i = 0; i < columnNames.length; i++) {
                 String columnName = columnNames[i];
                 PdfPCell cell = new PdfPCell(new Phrase(new Chunk(columnName,
@@ -165,12 +166,22 @@ public class SellerPayOff extends BasePayOff {
         return document;
     }
 
-    private String getColText(ReservedItem item, int i, int col) {
-        switch (col) {
+    private int getColumnAlignment(int column) {
+        switch (column) {
             case 0:
-                return Integer.toString(i + 1);
+            case 2:
+                return Element.ALIGN_RIGHT;
+            default:
+                return Element.ALIGN_LEFT;
+        }
+    }
+
+    private String getColumnText(ReservedItem item, int column) {
+        switch (column) {
+            case 0:
+                return Integer.toString(item.getNumber());
             case 1:
-                return item.getCode();
+                return item.getItem().getDescription();
             case 2:
                 return currency.format(item.getItem().getPrice());
             default:

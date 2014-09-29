@@ -97,7 +97,7 @@ public class BarCodeLabelSheet {
         String customer = new DecimalFormat("000").format(reservation.getNumber());
         Path targetPath = Paths.get(basePath.toString(), customer);
         Files.createDirectories(targetPath);
-        items = reservedItemRepository.findByReservationOrderByCodeAsc(reservation);
+        items = reservedItemRepository.findByReservationOrderByNumberAsc(reservation);
         return createPdf(targetPath);
     }
 
