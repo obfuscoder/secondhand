@@ -1,0 +1,5 @@
+2. 2x Fokus auf Eingabezeile verloren, Artikelscan klappte dann nicht mehr
+3. Fenster zu groß, so dass Buttons unten nicht mehr sichtbar waren
+4. Etikett fehlte, Artikelsuche hat teilweise helfen können
+5. artikel storno - zurück in verkauf zeigte noch einen artikel an
+6. defektes fahrrad, kunde wollte wissen, ob preis die defekte bremse berücksichtigte, Verkäuferkontakt über telnr wurde versucht

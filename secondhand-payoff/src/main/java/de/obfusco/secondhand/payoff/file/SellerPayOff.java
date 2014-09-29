@@ -58,6 +58,7 @@ public class SellerPayOff extends BasePayOff {
         document.add(new Phrase(seller.getStreet() + "\n", FontFactory.getFont(FontFactory.HELVETICA, 12)));
         document.add(new Phrase(seller.getZipCode() + " " + seller.getCity() + "\n",
                 FontFactory.getFont(FontFactory.HELVETICA, 12)));
+        document.add(new Phrase("Tel.: " + seller.getPhone() + "\n", FontFactory.getFont(FontFactory.HELVETICA, 12)));
 
         document.add(new Phrase("Reservierungsnummer: " + reservation.getNumber() + "\n\n",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
