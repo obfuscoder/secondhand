@@ -23,14 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Desktop;
@@ -38,16 +31,23 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 @Component
 public class MainGui extends JFrame implements MessageBroker, TransactionListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(MainGui.class);
+
+    private Properties properties = new Properties();
 
     Network network;
 
@@ -92,11 +92,31 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     public JButton createSellerReceipt;
     public JButton createSellerResultReceipt;
     public JButton reportsButton;
+    public JToggleButton helpButton;
     JFileChooser fc;
     JLabel statusLine;
 
     public MainGui() {
         super("Flohmarkt Kassensystem");
+        loadProperties();
+    }
+
+    private void loadProperties() {
+        InputStream input = null;
+        try {
+            input = new FileInputStream("config.properties");
+            properties.load(input);
+        } catch (IOException ex) {
+            LOG.warn("Could not load properties", ex);
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    LOG.error("Could not close properties file", e);
+                }
+            }
+        }
     }
 
     public void start() {
@@ -115,6 +135,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         try {
             network = new Network(31337, this);
             network.start();
+            reportsGui.setNetwork(network);
         } catch (IOException e) {
             LOG.error("Error while starting network stack!", e);
             return (JOptionPane.showConfirmDialog(null, "Fehler beim Starten der Netzwerkkommunikation.\n" +
@@ -240,15 +261,30 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         });
         reportsButton.setFont(reportsButton.getFont().deriveFont(BUTTON_FONT_SIZE));
 
+        helpButton = new JToggleButton("Hilfe");
+        helpButton.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent itemEvent) {
+                helpNeeded(itemEvent.getStateChange() == ItemEvent.SELECTED);
+            }
+        });
+        helpButton.setFont(helpButton.getFont().deriveFont(BUTTON_FONT_SIZE));
+
         panel.add(sale);
         panel.add(refund);
         panel.add(search);
-        panel.add(createSellerReceipt);
-        panel.add(createSellerResultReceipt);
-        panel.add(barcodeGenerator);
-        panel.add(testScan);
-        panel.add(billGenerator);
-        panel.add(reportsButton);
+
+        boolean showAllButtons = properties.getProperty("buttons.all").equals("true");
+        if (showAllButtons) {
+            panel.add(createSellerReceipt);
+            panel.add(createSellerResultReceipt);
+            panel.add(barcodeGenerator);
+            panel.add(testScan);
+            panel.add(billGenerator);
+            panel.add(reportsButton);
+        }
+        panel.add(helpButton);
 
         statusLine = new JLabel("", SwingConstants.CENTER);
         updateStatusLine();
@@ -257,21 +293,34 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         pane.add(panel, BorderLayout.SOUTH);
     }
 
+    private void helpNeeded(boolean isNeeded) {
+        network.send("HELP-" + (isNeeded ? "ON":"OFF"));
+    }
+
     @Override
     public void messageReceived(Peer peer, String message) {
         LOG.info("Received message from peer " + peer.getAddress() + ": " + message);
         try {
-            Transaction transaction = parseTransaction(message);
-            synchronized(transactionRepository) {
-                if (!transactionRepository.exists(transaction.getId())) {
-                    transactionRepository.save(transaction);
-                    reportsGui.update();
+            if (message.startsWith("HELP")) {
+                parseHelpMessage(peer, message);
+            } else {
+                Transaction transaction = parseTransaction(message);
+                synchronized (transactionRepository) {
+                    if (!transactionRepository.exists(transaction.getId())) {
+                        transactionRepository.save(transaction);
+                        reportsGui.update();
+                    }
                 }
             }
         }
         catch (IllegalArgumentException ex) {
             LOG.error("Invalid message <" + message + ">. Reason: " + ex.getMessage());
         }
+    }
+
+    private void parseHelpMessage(Peer peer, String message) {
+        String[] parts = message.split("-");
+        reportsGui.helpNeeded(peer, parts.length == 2 && parts[1].equals("ON"));
     }
 
     private Transaction parseTransaction(String message) {
@@ -305,6 +354,8 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     public void connected(final Peer peer) {
         LOG.info("Connected with peer " + peer.getAddress());
         updateStatusLine();
+        reportsGui.update();
+        peer.send("HELP-" + (helpButton.isSelected() ? "ON" : "OFF"));
         new Thread(new Runnable() {
 
             @Override
@@ -325,6 +376,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     public void disconnected() {
         LOG.info("Disconnected from a peer");
         updateStatusLine();
+        reportsGui.update();
     }
 
     private void updateStatusLine() {
@@ -338,8 +390,8 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     public void notify(Transaction transaction) {
         LOG.info("Notifying all peers about transaction " + transaction.getId());
         try {
-            String json = createMessageFromTransaction(transaction);
-            network.send(json);
+            String message = createMessageFromTransaction(transaction);
+            network.send(message);
         } catch (IOException ex) {
             LOG.error("Could not create or send json", ex);
         }

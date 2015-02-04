@@ -6,17 +6,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.swing.BoxLayout;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
-import java.awt.Container;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
@@ -47,23 +41,15 @@ public class SearchGui extends JFrame {
     }
 
     private void addComponentsToPane(Container pane) {
-        pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
+        JButton searchButton = new JButton("Suchen");
         JLabel hint = new JLabel("Geben Sie ein bis drei Suchwörter ein");
-        pane.add(hint);
         searchText = new JTextField();
-        searchText.getDocument().addDocumentListener(new DocumentListener() {
+        JPanel topPanel = new JPanel(new BorderLayout(2, 2));
+        topPanel.add(hint, BorderLayout.NORTH);
+        topPanel.add(searchText, BorderLayout.CENTER);
+        searchButton.addActionListener(new ActionListener() {
             @Override
-            public void insertUpdate(DocumentEvent documentEvent) {
-                changedUpdate(documentEvent);
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent documentEvent) {
-                changedUpdate(documentEvent);
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent documentEvent) {
+            public void actionPerformed(ActionEvent actionEvent) {
                 String[] keywords = searchText.getText().split(" ");
                 List<ReservedItem> results = null;
                 switch (keywords.length) {
@@ -86,8 +72,9 @@ public class SearchGui extends JFrame {
                 return '%' + keyword + '%';
             }
         });
-        searchText.setHorizontalAlignment(SwingConstants.CENTER);
-        pane.add(searchText);
+        topPanel.add(searchButton, BorderLayout.LINE_END);
+        pane.add(topPanel, BorderLayout.NORTH);
+        getRootPane().setDefaultButton(searchButton);
         resultTable = new JTable(new ResultsModel(null));
         pane.add(new JScrollPane(resultTable));
     }

@@ -1,6 +1,7 @@
 package de.obfusco.secondhand.reports;
 
-import de.obfusco.secondhand.storage.model.Transaction;
+import de.obfusco.secondhand.net.Network;
+import de.obfusco.secondhand.net.Peer;
 import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
 import de.obfusco.secondhand.storage.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,9 @@ import javax.swing.border.Border;
 import java.awt.Container;
 import java.awt.GridLayout;
 import java.text.NumberFormat;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 @Component
 public class ReportsGui extends JFrame {
@@ -29,8 +32,12 @@ public class ReportsGui extends JFrame {
     private JLabel transactionCount;
     private JLabel soldCount;
     private JLabel soldSum;
+    private JLabel connections;
+
+    private Network network;
 
     private NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.GERMANY);
+    private Set<Peer> peersNeedingHelp = new HashSet<>();
 
     public ReportsGui() {
         super("Flohmarkt Reports");
@@ -52,6 +59,8 @@ public class ReportsGui extends JFrame {
         panel.add(soldCount = new JLabel());
         panel.add(new JLabel("Summe verkaufter Artikel:"));
         panel.add(soldSum = new JLabel());
+        panel.add(new JLabel("Verbunden mit:"));
+        panel.add(connections = new JLabel());
         contentPane.add(panel);
         pack();
     }
@@ -63,11 +72,38 @@ public class ReportsGui extends JFrame {
         Double sumOfSoldItems = reservedItemRepository.sumOfSoldItems();
         if (sumOfSoldItems == null) sumOfSoldItems = 0.0;
         soldSum.setText(currencyFormat.format(sumOfSoldItems));
+
+        StringBuilder sb = new StringBuilder();
+        if (network != null) {
+            sb.append("<html>");
+            for (Peer peer: network.getPeers()) {
+                boolean needsHelp = peersNeedingHelp.contains(peer);
+                if (needsHelp) sb.append("<font color=\"red\">");
+                sb.append(peer.getAddress());
+                if (needsHelp) sb.append("</font>");
+                sb.append("<br/>");
+            }
+            sb.append("</html>");
+        }
+        connections.setText(sb.toString());
     }
 
     @Override
     public void setVisible(boolean show) {
         if (show) update();
         super.setVisible(show);
+    }
+
+    public void setNetwork(Network network) {
+        this.network = network;
+    }
+
+    public void helpNeeded(Peer peer, boolean isHelpNeeded) {
+        if (isHelpNeeded) {
+            peersNeedingHelp.add(peer);
+        } else {
+            peersNeedingHelp.remove(peer);
+        }
+        update();
     }
 }

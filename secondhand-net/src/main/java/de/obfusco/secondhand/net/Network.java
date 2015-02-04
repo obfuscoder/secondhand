@@ -9,12 +9,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Network implements Closeable,DiscoveryObserver,PeerObserver, ConnectionObserver {
 
@@ -150,5 +145,9 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
 
     public int getNumberOfPeers() {
         return peers.size();
+    }
+
+    public Collection<Peer> getPeers() {
+        return peers.values();
     }
 }
