@@ -1,5 +1,5 @@
 [Files]
-Source: "secondhand-gui\target\secondhand-gui-2.1.0.jar"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "secondhand-gui\target\secondhand-gui-2.2.0.jar"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "floh.mv.db"; DestDir: "{app}"; Flags: ignoreversion
 Source: "java\COPYRIGHT"; DestDir: "{app}\java"; Flags: ignoreversion
 Source: "java\LICENSE"; DestDir: "{app}\java"; Flags: ignoreversion
@@ -678,15 +678,15 @@ Name: "{app}\java\lib\zi\Pacific"
 Name: "{app}\java\lib\zi\SystemV"
 
 [Icons]
-Name: "{group}\Flohmarkt Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.1.0.jar"""
-Name: "{userdesktop}\Flohmarkt Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.1.0.jar"""
+Name: "{group}\Flohmarkt Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.2.0.jar"""
+Name: "{userdesktop}\Flohmarkt Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.2.0.jar"""
 
 [Setup]
 DisableReadyPage=True
 DisableReadyMemo=True
 ShowComponentSizes=False
 AppName=Flohmarkt Kassensystem
-AppVersion=2.1.0
+AppVersion=2.2.0
 AppCopyright=2013-2014 Kai und Anne Lehmann
 PrivilegesRequired=none
 AppId={{FB40361A-0C2A-4AE4-98A8-1F6A435B45BB}
@@ -700,11 +700,11 @@ Compression=lzma2/ultra
 InternalCompressLevel=ultra
 UsePreviousGroup=False
 AlwaysUsePersonalGroup=True
-AppPublisherURL=http://www.obfusco.de
-VersionInfoVersion=2.1.0
+AppPublisherURL=http://www.flohmarkthelfer.de
+VersionInfoVersion=2.2.0
 VersionInfoCopyright=Kai und Anne Lehmann
 VersionInfoProductName=Flohmarkt Kassensystem
-VersionInfoProductVersion=2.1.0
+VersionInfoProductVersion=2.2.0
 
 [Languages]
 Name: "german"; MessagesFile: "compiler:Languages\German.isl"

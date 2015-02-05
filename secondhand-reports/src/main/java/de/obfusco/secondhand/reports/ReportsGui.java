@@ -7,13 +7,9 @@ import de.obfusco.secondhand.storage.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.Border;
-import java.awt.Container;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.text.NumberFormat;
 import java.util.HashSet;
 import java.util.Locale;
