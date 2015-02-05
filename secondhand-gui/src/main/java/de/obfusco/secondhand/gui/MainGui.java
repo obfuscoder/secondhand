@@ -275,7 +275,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         panel.add(refund);
         panel.add(search);
 
-        boolean showAllButtons = properties.getProperty("buttons.all").equals("true");
+        boolean showAllButtons = "true".equals(properties.getProperty("buttons.all"));
         if (showAllButtons) {
             panel.add(createSellerReceipt);
             panel.add(createSellerResultReceipt);
