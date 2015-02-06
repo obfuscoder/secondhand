@@ -77,7 +77,7 @@ public class SellerPayOff extends BasePayOff {
 
         PdfPTable table = createItemTable(soldItems);
         addTotalLine(table, "Summe", currency.format(totalPrice), true, 10);
-        addTotalLine(table, "Erlös Kita (" + percent.format(CHILDCARE_SHARE) + " auf 10 Cent aufgerundet)", currency.format(-kitaSum), false, 10);
+        addTotalLine(table, "Kommissionsanteil (" + percent.format(CHILDCARE_SHARE) + " auf 10 Cent aufgerundet)", currency.format(-kitaSum), false, 10);
         addTotalLine(table, "Reservierungsgebühr", currency.format(-ENTRY_FEE), false, 10);
         addTotalLine(table, "Auszuzahlender Betrag", currency.format(totalSum), true, 12);
         document.add(table);

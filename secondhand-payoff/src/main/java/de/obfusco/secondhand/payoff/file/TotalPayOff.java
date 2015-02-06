@@ -66,10 +66,9 @@ public class TotalPayOff extends BasePayOff {
 
         addTotalLine(table, "Anzahl verkaufter Artikel", Integer.toString(soldItems.size()), true, 12);
         addTotalLine(table, "Summe verkaufter Artikel", currency.format(sum), true, 12);
-        addTotalLine(table, "Anteil Kitas (" + percent.format(CHILDCARE_SHARE) + ")", currency.format(kitaSum), false, 12);
+        addTotalLine(table, "Kommissionsanteil (" + percent.format(CHILDCARE_SHARE) + ")", currency.format(kitaSum), false, 12);
         addTotalLine(table, "Teilnahmegebühren für " + reservations.size() + " Teilnehmer", currency.format(totalEntryFees), false, 12);
         addTotalLine(table, "Gewinn insgesamt", currency.format(totalSum), true, 14);
-        addTotalLine(table, "Gewinn je Kita", currency.format(totalSum / 2), true, 14);
 
         return table;
     }
