@@ -51,7 +51,7 @@ public class SearchGui extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 String[] keywords = searchText.getText().split(" ");
-                List<ReservedItem> results = null;
+                List<ReservedItem> results;
                 switch (keywords.length) {
                     case 0:
                         return;

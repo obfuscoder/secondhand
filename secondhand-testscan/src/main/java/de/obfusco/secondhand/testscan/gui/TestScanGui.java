@@ -102,16 +102,6 @@ public class TestScanGui extends JFrame implements ActionListener {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    String itemText = itemNr.getText();
-                    if (itemText.length() != 8) {
-                        setErrorText("Artikelnummer "
-                                + itemNr.getText()
-                                + " ist falsch! Die Nummer muss 8 Zeichen lang sein!");
-
-                        itemNr.setText("");
-                        return;
-                    }
-
                     if (tablemodel.findItemNr(itemNr.getText())) {
                         setErrorText("Artikelnummer " + itemNr.getText()
                                 + " bereits eingescannt!");
@@ -129,7 +119,6 @@ public class TestScanGui extends JFrame implements ActionListener {
         itemPanel.setLayout(new BorderLayout());
         itemPanel.add(itemNr, BorderLayout.NORTH);
         itemPanel.add(new JScrollPane(cashTable), BorderLayout.CENTER);
-        // itemPanel.add(removeButton, BorderLayout.EAST);
         itemPanel.add(errorLabel, BorderLayout.SOUTH);
 
         pane.add(itemPanel, BorderLayout.CENTER);
@@ -164,25 +153,10 @@ public class TestScanGui extends JFrame implements ActionListener {
 
     class CashTableModel extends AbstractTableModel {
 
-        private List<String> columnNames = new ArrayList<String>(Arrays.asList(
+        private List<String> columnNames = new ArrayList<>(Arrays.asList(
                 "ArtNr", "Kategorie", "Bezeichnung", "Groesse", "Preis"));
 
         private List<ReservedItem> data = new ArrayList<>();
-
-        public List<ReservedItem> getData() {
-            return data;
-        }
-
-        public List<Object> getColumnData(int col) {
-            List<Object> columnData = new ArrayList<Object>();
-            for (int i = 0; i < data.size(); i++) {
-                ReservedItem item = data.get(i);
-                String columnValue = getItemValueForColumn(item, col);
-                columnData.add(columnValue);
-            }
-
-            return columnData;
-        }
 
         private String getItemValueForColumn(ReservedItem item, int col) {
             String columnValue = "";
@@ -229,8 +203,6 @@ public class TestScanGui extends JFrame implements ActionListener {
         public Boolean findItemNr(String nr) {
 
             for (int i = 0; i < getRowCount(); i++) {
-                // System.out.println("Value at " + i + " 0 = \"" +
-                // getValueAt(i, 0) + "\"" + " == \"" + nr + "\"");
                 if (getValueAt(i, 0).equals(nr)) {
                     return true;
                 }
