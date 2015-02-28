@@ -140,11 +140,6 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
                         openDialog();
                         return;
                     }
-                    if (itemText.length() != 8 || !itemText.matches("\\d{8}")) {
-                        setErrorText("Artikelnummer " + itemNr.getText() + " ist falsch.");
-                        itemNr.setText("");
-                        return;
-                    }
 
                     if (tableModel.findItemNr(itemNr.getText())) {
                         setErrorText("Artikelnummer " + itemNr.getText()

@@ -136,11 +136,6 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
                         openDialog();
                         return;
                     }
-                    if (itemText.length() != 8 || !itemText.matches("\\d{8}")) {
-                        setErrorText("Artikelnummer " + itemNr.getText() + " ist falsch.");
-                        itemNr.setText("");
-                        return;
-                    }
 
                     if (tablemodel.findItemNr(itemNr.getText())) {
                         setErrorText("Artikelnummer " + itemNr.getText()
