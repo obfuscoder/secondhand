@@ -282,8 +282,8 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             panel.add(barcodeGenerator);
             panel.add(testScan);
             panel.add(billGenerator);
-            panel.add(reportsButton);
         }
+        panel.add(reportsButton);
         panel.add(helpButton);
 
         statusLine = new JLabel("", SwingConstants.CENTER);
