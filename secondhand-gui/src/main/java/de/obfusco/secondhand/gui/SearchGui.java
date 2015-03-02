@@ -9,8 +9,12 @@ import org.springframework.stereotype.Component;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
@@ -42,7 +46,7 @@ public class SearchGui extends JFrame {
 
     private void addComponentsToPane(Container pane) {
         JButton searchButton = new JButton("Suchen");
-        JLabel hint = new JLabel("Geben Sie ein bis drei Suchwörter ein");
+        JLabel hint = new JLabel("Geben Sie ein bis drei Suchwörter ein.");
         searchText = new JTextField();
         JPanel topPanel = new JPanel(new BorderLayout(2, 2));
         topPanel.add(hint, BorderLayout.NORTH);
@@ -76,7 +80,37 @@ public class SearchGui extends JFrame {
         pane.add(topPanel, BorderLayout.NORTH);
         getRootPane().setDefaultButton(searchButton);
         resultTable = new JTable(new ResultsModel(null));
+        resultTable.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent mouseEvent) {
+                if (mouseEvent.getClickCount() == 2) {
+                    int row = resultTable.rowAtPoint(mouseEvent.getPoint());
+                    String code = (String) resultTable.getModel().getValueAt(row, 0);
+                    StringSelection selection = new StringSelection(code);
+                    Toolkit toolkit = Toolkit.getDefaultToolkit();
+                    Clipboard clipboard = toolkit.getSystemClipboard();
+                    clipboard.setContents(selection, selection);
+                }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent mouseEvent) {
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent mouseEvent) {
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent mouseEvent) {
+            }
+
+            @Override
+            public void mouseExited(MouseEvent mouseEvent) {
+            }
+        });
         pane.add(new JScrollPane(resultTable));
+        pane.add(new JLabel("Doppelklick zum Kopieren der Artikelnummer"), BorderLayout.SOUTH);
     }
 
     private static class ResultsModel extends AbstractTableModel {

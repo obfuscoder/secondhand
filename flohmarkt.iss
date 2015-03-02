@@ -1,6 +1,7 @@
 [Files]
-Source: "secondhand-gui\target\secondhand-gui-2.3.0.jar"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "floh.mv.db"; DestDir: "{app}"; Flags: ignoreversion
+Source: "secondhand-gui\target\secondhand-gui-2.4.0.jar"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "config.properties"; DestDir: "{app}"; Flags: ignoreversion
+Source: "db\floh.mv.db"; DestDir: "{app}"; Flags: ignoreversion
 Source: "java\COPYRIGHT"; DestDir: "{app}\java"; Flags: ignoreversion
 Source: "java\LICENSE"; DestDir: "{app}\java"; Flags: ignoreversion
 Source: "java\README.txt"; DestDir: "{app}\java"; Flags: ignoreversion
@@ -678,15 +679,15 @@ Name: "{app}\java\lib\zi\Pacific"
 Name: "{app}\java\lib\zi\SystemV"
 
 [Icons]
-Name: "{group}\Flohmarkthelfer Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.3.0.jar"""
-Name: "{userdesktop}\Flohmarkthelfer Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.3.0.jar"""
+Name: "{group}\Flohmarkthelfer Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.4.0.jar"""
+Name: "{userdesktop}\Flohmarkthelfer Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-2.4.0.jar"""
 
 [Setup]
 DisableReadyPage=True
 DisableReadyMemo=True
 ShowComponentSizes=False
 AppName=Flohmarkthelfer Kassensystem
-AppVersion=2.3.0
+AppVersion=2.4.0
 AppCopyright=2013-2015 Kai und Anne Lehmann
 PrivilegesRequired=none
 AppId={{FB40361A-0C2A-4AE4-98A8-1F6A435B45BB}
@@ -701,10 +702,10 @@ InternalCompressLevel=ultra
 UsePreviousGroup=False
 AlwaysUsePersonalGroup=True
 AppPublisherURL=http://www.flohmarkthelfer.de
-VersionInfoVersion=2.3.0
+VersionInfoVersion=2.4.0
 VersionInfoCopyright=2013-2015 Kai und Anne Lehmann
 VersionInfoProductName=Flohmarkthelfer Kassensystem
-VersionInfoProductVersion=2.3.0
+VersionInfoProductVersion=2.4.0
 
 [Languages]
 Name: "german"; MessagesFile: "compiler:Languages\German.isl"

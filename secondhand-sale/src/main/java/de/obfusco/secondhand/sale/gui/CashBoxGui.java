@@ -57,14 +57,13 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
     TransactionListener transactionListener;
 
     JButton readyButton = new JButton("Fertig");
-    JButton newButton = new JButton("Neuer Kunde");
 
     CheckOutDialog checkout = null;
     private JLabel countLabel;
 
     public CashBoxGui() {
         super("Flohmarkt Verkauf");
-        setSize(1000, 800);
+        setSize(1000, 700);
         addComponentsToPane(getContentPane());
         setLocationRelativeTo(null);
     }
@@ -188,13 +187,10 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         pane.add(itemPanel, BorderLayout.CENTER);
 
         readyButton.setEnabled(false);
-        newButton.setEnabled(false);
-        JPanel buttonPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+        JPanel buttonPanel = new JPanel(new GridLayout(0, 1, 5, 5));
         readyButton.setFont(pane.getFont().deriveFont(30f));
-        newButton.setFont(pane.getFont().deriveFont(30f));
 
         buttonPanel.add(readyButton);
-        buttonPanel.add(newButton);
 
         readyButton.addActionListener(this);
         readyButton.addKeyListener(new KeyListener() {
@@ -214,25 +210,6 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
                 }
             }
         });
-        newButton.addActionListener(this);
-        newButton.addKeyListener(new KeyListener() {
-
-            @Override
-            public void keyTyped(KeyEvent arg0) {
-            }
-
-            @Override
-            public void keyReleased(KeyEvent arg0) {
-            }
-
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    newCustomer();
-                }
-
-            }
-        });
 
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new GridLayout(2, 0));
@@ -248,10 +225,6 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
 
     public String getPrice() {
         return priceLabel.getText();
-    }
-
-    public JButton getNewButton() {
-        return newButton;
     }
 
     public JButton getReadyButton() {
@@ -272,16 +245,11 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         if (event.getSource() == readyButton) {
 
             openDialog();
-
-        } else if (event.getSource() == newButton) {
-
-            newCustomer();
         }
     }
 
     private void newCustomer() {
         checkout = null;
-        newButton.setEnabled(false);
         readyButton.setEnabled(false);
         itemNr.setEnabled(true);
         cashTable.setEnabled(true);
@@ -305,6 +273,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         checkout = new CheckOutDialog(this, transactionListener);
         checkout.setLocationRelativeTo(this);
         checkout.setVisible(true);
+        newCustomer();
     }
 
     @Override

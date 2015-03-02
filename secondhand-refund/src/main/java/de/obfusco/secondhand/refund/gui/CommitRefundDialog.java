@@ -92,7 +92,7 @@ public class CommitRefundDialog extends JDialog implements ActionListener {
 
         checkOutPanel.add(new JSeparator(JSeparator.HORIZONTAL));
 
-        JLabel sumLabel = new JLabel("Auszahlung: ");
+        JLabel sumLabel = new JLabel("Summe:");
         sumLabel.setFont(title.getFont().deriveFont(20.0f));
         priceLabel = new JLabel(frame.getPrice());
         priceLabel.setFont(title.getFont().deriveFont(20.0f));
@@ -173,7 +173,6 @@ public class CommitRefundDialog extends JDialog implements ActionListener {
         Transaction transaction = storageService.storeRefundInformation(items);
         transactionListener.notify(transaction);
 
-        frame.getNewButton().setEnabled(true);
         frame.getReadyButton().setEnabled(false);
         frame.getItemNr().setEnabled(false);
         frame.getCashTable().setEnabled(false);

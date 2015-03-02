@@ -61,14 +61,13 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
     TransactionListener transactionListener;
 
     JButton readyButton = new JButton("Fertig");
-    JButton newButton = new JButton("Neue Rückgabe");
 
     CommitRefundDialog checkout = null;
     private JLabel countLabel;
 
     public RefundGui() {
         super("Storno");
-        setSize(1000, 800);
+        setSize(1000, 700);
         addComponentsToPane(getContentPane());
         setLocationRelativeTo(null);
     }
@@ -191,14 +190,11 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
         sumPanel.add(euroLabel);
         pane.add(itemPanel, BorderLayout.CENTER);
 
-        newButton.setEnabled(false);
         readyButton.setEnabled(false);
-        JPanel buttonPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+        JPanel buttonPanel = new JPanel(new GridLayout(0, 1, 5, 5));
         readyButton.setFont(pane.getFont().deriveFont(30f));
-        newButton.setFont(pane.getFont().deriveFont(30f));
 
         buttonPanel.add(readyButton);
-        buttonPanel.add(newButton);
 
         readyButton.addActionListener(this);
         readyButton.addKeyListener(new KeyListener() {
@@ -218,25 +214,6 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
                 }
             }
         });
-        newButton.addActionListener(this);
-        newButton.addKeyListener(new KeyListener() {
-
-            @Override
-            public void keyTyped(KeyEvent arg0) {
-            }
-
-            @Override
-            public void keyReleased(KeyEvent arg0) {
-            }
-
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    newCustomer();
-                }
-
-            }
-        });
 
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new GridLayout(2, 0));
@@ -254,10 +231,6 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
         return priceLabel.getText();
     }
 
-    public JButton getNewButton() {
-        return newButton;
-    }
-
     public JButton getReadyButton() {
         return readyButton;
     }
@@ -272,20 +245,13 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
 
     @Override
     public void actionPerformed(ActionEvent event) {
-
         if (event.getSource() == readyButton) {
-
             openDialog();
-
-        } else if (event.getSource() == newButton) {
-
-            newCustomer();
         }
     }
 
     private void newCustomer() {
         checkout = null;
-        newButton.setEnabled(false);
         readyButton.setEnabled(false);
         itemNr.setEnabled(true);
         itemTable.setEnabled(true);
@@ -309,6 +275,7 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
         checkout = new CommitRefundDialog(this, transactionListener);
         checkout.setLocationRelativeTo(this);
         checkout.setVisible(true);
+        newCustomer();
     }
 
     @Override

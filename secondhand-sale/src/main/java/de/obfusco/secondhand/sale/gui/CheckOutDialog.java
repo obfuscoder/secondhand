@@ -9,10 +9,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -59,13 +62,19 @@ public class CheckOutDialog extends JDialog implements ActionListener {
     StorageService storageService;
     List<ReservedItem> items;
 
+    boolean showPostCode;
+
     int postCode = 0;
     private Path basePath = Paths.get("data/pdfs/sale");
     private TransactionListener transactionListener;
 
     public CheckOutDialog(JFrame parentFrame, TransactionListener orderListener) {
-
         super(parentFrame, "Verkauf abschließen", true);
+
+        Properties properties = new Properties();
+        loadProperties(properties);
+        showPostCode = "true".equals(properties.getProperty("postcode"));
+
         this.transactionListener = orderListener;
         setSize(400, 300);
 
@@ -75,9 +84,25 @@ public class CheckOutDialog extends JDialog implements ActionListener {
         errorLabel = new JLabel(" ");
         errorLabel.setForeground(new Color(255, 0, 0, 255));
 
-        // build the whole dialog
         buildNewObjectDialog();
+    }
 
+    private void loadProperties(Properties properties) {
+        InputStream input = null;
+        try {
+            input = new FileInputStream("config.properties");
+            properties.load(input);
+        } catch (IOException ex) {
+            LOG.warn("Could not load properties", ex);
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    LOG.error("Could not close properties file", e);
+                }
+            }
+        }
     }
 
     private void buildNewObjectDialog() {
@@ -122,7 +147,11 @@ public class CheckOutDialog extends JDialog implements ActionListener {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 
                     calculateChange();
-                    postCodeTextField.requestFocus();
+                    if (showPostCode) {
+                        postCodeTextField.requestFocus();
+                    } else {
+                        okButton.requestFocus();
+                    }
                 }
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     frame.getItemNr().requestFocus();
@@ -167,8 +196,6 @@ public class CheckOutDialog extends JDialog implements ActionListener {
         changeBarlabel.setForeground(Color.red);
         changeBarlabel.setFont(getFont());
 
-        JLabel postCodeLabel = new JLabel("PLZ (optional)");
-
         JPanel barPanel = new JPanel(new GridLayout(0, 3));
         barPanel.add(barLabel);
         barPanel.add(barTextField);
@@ -179,15 +206,17 @@ public class CheckOutDialog extends JDialog implements ActionListener {
         changePanel.add(changeBarlabel);
         changePanel.add(changeeuroLabel);
 
-        JPanel postCodePanel = new JPanel(new GridLayout(0, 3));
-        postCodePanel.add(postCodeLabel);
-        postCodePanel.add(postCodeTextField);
-
         checkOutPanel.add(sumPanel);
         checkOutPanel.add(barPanel);
         checkOutPanel.add(changePanel);
-        checkOutPanel.add(new JPanel());
-        checkOutPanel.add(postCodePanel);
+        if (showPostCode) {
+            JPanel postCodePanel = new JPanel(new GridLayout(0, 3));
+            postCodePanel.add(new JLabel("PLZ (optional)"));
+            postCodePanel.add(postCodeTextField);
+
+            checkOutPanel.add(new JPanel());
+            checkOutPanel.add(postCodePanel);
+        }
         checkOutPanel.add(new JPanel());
 
         this.add(checkOutPanel, BorderLayout.CENTER);
@@ -296,7 +325,6 @@ public class CheckOutDialog extends JDialog implements ActionListener {
         Transaction transaction = storageService.storeSoldInformation(items, postCode);
         transactionListener.notify(transaction);
 
-        frame.getNewButton().setEnabled(true);
         frame.getReadyButton().setEnabled(false);
         frame.getItemNr().setEnabled(false);
         frame.getCashTable().setEnabled(false);
