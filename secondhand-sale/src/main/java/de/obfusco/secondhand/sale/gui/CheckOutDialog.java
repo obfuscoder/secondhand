@@ -325,10 +325,7 @@ public class CheckOutDialog extends JDialog implements ActionListener {
         Transaction transaction = storageService.storeSoldInformation(items, postCode);
         transactionListener.notify(transaction);
 
-        frame.getReadyButton().setEnabled(false);
-        frame.getItemNr().setEnabled(false);
-        frame.getCashTable().setEnabled(false);
-
+        frame.newCustomer();
         this.dispose();
     }
 

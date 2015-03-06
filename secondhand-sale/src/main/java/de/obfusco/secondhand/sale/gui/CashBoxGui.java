@@ -248,7 +248,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         }
     }
 
-    private void newCustomer() {
+    public void newCustomer() {
         checkout = null;
         readyButton.setEnabled(false);
         itemNr.setEnabled(true);
@@ -273,7 +273,6 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         checkout = new CheckOutDialog(this, transactionListener);
         checkout.setLocationRelativeTo(this);
         checkout.setVisible(true);
-        newCustomer();
     }
 
     @Override
