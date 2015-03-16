@@ -54,7 +54,6 @@ public class BarCodeLabelSheet {
         PdfWriter writer = PdfWriter.getInstance(document,
                 new FileOutputStream(filePath.toFile()));
         document.open();
-        //drawGrid(writer);
 
         PdfPTable table = null;
         for (int i = 0; i < items.size(); i++) {
@@ -93,7 +92,7 @@ public class BarCodeLabelSheet {
         cb.restoreState();
     }
 
-    public Path createPDFFile(Path basePath, Reservation reservation) throws DocumentException, FileNotFoundException, IOException {
+    public Path createPDFFile(Path basePath, Reservation reservation) throws DocumentException, IOException {
         String customer = new DecimalFormat("000").format(reservation.getNumber());
         Path targetPath = Paths.get(basePath.toString(), customer);
         Files.createDirectories(targetPath);
@@ -195,7 +194,7 @@ public class BarCodeLabelSheet {
     }
 
     private PdfPCell createItemNumberCell(ReservedItem item) {
-        PdfPCell cell = new PdfPCell(new Phrase(new Chunk(item.getCode().substring(5, 7),
+        PdfPCell cell = new PdfPCell(new Phrase(new Chunk(Integer.toString(item.getNumber()),
                 FontFactory.getFont(FontFactory.HELVETICA, 12))));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setVerticalAlignment(Element.ALIGN_BASELINE);

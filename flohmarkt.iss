@@ -1,6 +1,6 @@
 [Files]
 Source: "secondhand-gui\target\secondhand-gui-2.4.0.jar"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "config.properties"; DestDir: "{app}"; Flags: ignoreversion
+Source: "config.properties.default"; DestDir: "{app}"; DestName: "config.properties"; Flags: ignoreversion
 Source: "db\floh.mv.db"; DestDir: "{app}"; Flags: ignoreversion
 Source: "java\COPYRIGHT"; DestDir: "{app}\java"; Flags: ignoreversion
 Source: "java\LICENSE"; DestDir: "{app}\java"; Flags: ignoreversion

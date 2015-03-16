@@ -94,7 +94,7 @@ public class BarCodeSheet {
         table.setTotalWidth(100);
         table.setLockedWidth(true);
 
-        PdfPCell cell = new PdfPCell(new Phrase((new Chunk(item.getCode().substring(5, 7),
+        PdfPCell cell = new PdfPCell(new Phrase((new Chunk(Integer.toString(item.getNumber()),
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8)))));
 
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
