@@ -55,22 +55,16 @@ public class BarCodeLabelSheet {
                 new FileOutputStream(filePath.toFile()));
         document.open();
 
-        PdfPTable table = null;
+        PdfPTable table = createTableLine();
         for (int i = 0; i < items.size(); i++) {
-            if (i % NUMBER_OF_COLUMNS == 0) {
-                if (table != null) {
-                    document.add(table);
-                    if (i / NUMBER_OF_COLUMNS % NUMBER_OF_ROWS == 0) {
-                        document.newPage();
-                    }
-                }
-                table = createTableLine();
-            }
             table.addCell(createTableCell(writer, items.get(i)));
         }
-        if (table != null) {
-            document.add(table);
+        for (int i=0; i<(NUMBER_OF_COLUMNS-(items.size() % NUMBER_OF_COLUMNS)) % NUMBER_OF_COLUMNS; i++) {
+            PdfPCell cell = new PdfPCell(new Paragraph(""));
+            cell.setBorderColor(BaseColor.WHITE);
+            table.addCell(cell);
         }
+        document.add(table);
         document.close();
         return filePath;
     }
