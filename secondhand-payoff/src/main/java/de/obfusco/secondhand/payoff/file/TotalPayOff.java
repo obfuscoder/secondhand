@@ -17,9 +17,9 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.Reservation;
-import de.obfusco.secondhand.storage.model.ReservedItem;
+import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.repository.ReservationRepository;
-import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 public class TotalPayOff extends BasePayOff {
 
     @Autowired
-    ReservedItemRepository reservedItemRepository;
+    ItemRepository ItemRepository;
 
     @Autowired
     ReservationRepository reservationRepository;
@@ -49,15 +49,15 @@ public class TotalPayOff extends BasePayOff {
     private PdfPTable createTotalTable(Event event) {
         List<Reservation> reservations
                 = reservationRepository.findByEvent(event);
-        List<ReservedItem> soldItems
-                = reservedItemRepository.findByReservationEventAndSoldNotNull(event);
+        List<Item> soldItems
+                = ItemRepository.findByReservationEventAndSoldNotNull(event);
 
         PdfPTable table = new PdfPTable(6);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
 
         double sum = 0;
-        for (ReservedItem item : soldItems) {
-            sum += item.getItem().getPrice().doubleValue();
+        for (Item item : soldItems) {
+            sum += item.getPrice().doubleValue();
         }
 
         double kitaSum = sum * CHILDCARE_SHARE;

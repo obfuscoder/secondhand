@@ -12,12 +12,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -28,10 +26,10 @@ import javax.swing.SwingConstants;
 
 import com.itextpdf.text.DocumentException;
 
-import de.obfusco.secondhand.storage.model.ReservedItem;
+import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.model.TransactionListener;
-import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
 
 import de.obfusco.secondhand.storage.service.StorageService;
 import org.slf4j.Logger;
@@ -55,8 +53,8 @@ public class CommitRefundDialog extends JDialog implements ActionListener {
     RefundGui frame;
 
     StorageService storageService;
-    ReservedItemRepository itemRepository;
-    List<ReservedItem> items;
+    ItemRepository itemRepository;
+    List<Item> items;
 
     private Path basePath = Paths.get("data/pdfs/refund");
     private TransactionListener transactionListener;

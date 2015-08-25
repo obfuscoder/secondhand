@@ -24,9 +24,8 @@ import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import de.obfusco.secondhand.storage.model.ReservedItem;
-import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
-
+import de.obfusco.secondhand.storage.model.Item;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +41,7 @@ public class TestScanGui extends JFrame implements ActionListener {
     JButton clearButton = new JButton("Tabelle leeren");
 
     @Autowired
-    private ReservedItemRepository reservedItemRepository;
+    private ItemRepository itemRepository;
 
     public TestScanGui() {
         super("Barcode Test");
@@ -156,25 +155,25 @@ public class TestScanGui extends JFrame implements ActionListener {
         private List<String> columnNames = new ArrayList<>(Arrays.asList(
                 "ArtNr", "Kategorie", "Bezeichnung", "Groesse", "Preis"));
 
-        private List<ReservedItem> data = new ArrayList<>();
+        private List<Item> data = new ArrayList<>();
 
-        private String getItemValueForColumn(ReservedItem item, int col) {
+        private String getItemValueForColumn(Item item, int col) {
             String columnValue = "";
             switch (col) {
                 case 0:
                     columnValue = item.getCode();
                     break;
                 case 1:
-                    columnValue = item.getItem().getCategory().getName();
+                    columnValue = item.getCategory().getName();
                     break;
                 case 2:
-                    columnValue = item.getItem().getDescription();
+                    columnValue = item.getDescription();
                     break;
                 case 3:
-                    columnValue = item.getItem().getSize();
+                    columnValue = item.getSize();
                     break;
                 case 4:
-                    columnValue = item.getItem().getPrice().toString();
+                    columnValue = item.getPrice().toString();
                     break;
             }
             return columnValue;
@@ -210,7 +209,7 @@ public class TestScanGui extends JFrame implements ActionListener {
             return false;
         }
 
-        public void addRow(ReservedItem item) {
+        public void addRow(Item item) {
 
             if (data.contains(item)) {
                 setErrorText("Artikel schon vorhanden!");
@@ -228,7 +227,7 @@ public class TestScanGui extends JFrame implements ActionListener {
 
     public void addItem() {
         setErrorText(" ");
-        ReservedItem item = reservedItemRepository.findByCode(itemNr.getText());
+        Item item = itemRepository.findByCode(itemNr.getText());
         if (item != null) {
             tablemodel.addRow(item);
         } else {

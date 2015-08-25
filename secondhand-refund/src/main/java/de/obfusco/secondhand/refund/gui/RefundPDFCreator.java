@@ -22,13 +22,13 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import de.obfusco.secondhand.storage.model.ReservedItem;
+import de.obfusco.secondhand.storage.model.Item;
 
 public class RefundPDFCreator {
 
     private static NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
-    public File createPdf(Path basePath, List<ReservedItem> data, Double sum)
+    public File createPdf(Path basePath, List<Item> data, Double sum)
             throws IOException, DocumentException {
 
         Files.createDirectories(basePath);
@@ -60,7 +60,7 @@ public class RefundPDFCreator {
         return targetPath.toFile();
     }
 
-    public static PdfPTable insertItemTable(List<ReservedItem> data, Double sum) {
+    public static PdfPTable insertItemTable(List<Item> data, Double sum) {
 
         PdfPTable table = new PdfPTable(5);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -84,19 +84,19 @@ public class RefundPDFCreator {
         table.addCell(cell);
 
         for (int i = 0; i < data.size(); i++) {
-            ReservedItem item = data.get(i);
+            Item item = data.get(i);
             table.addCell(Integer.toString(i + 1));
             cell = new PdfPCell(new Phrase(item.getCode()));
             table.addCell(cell);
-            cell = new PdfPCell(new Phrase(item.getItem().getCategory().getName()));
+            cell = new PdfPCell(new Phrase(item.getCategory().getName()));
             table.addCell(cell);
-            cell = new PdfPCell(new Phrase(item.getItem().getSize()));
+            cell = new PdfPCell(new Phrase(item.getSize()));
             table.addCell(cell);
-            cell = new PdfPCell(new Phrase(currency.format(item.getItem().getPrice())));
+            cell = new PdfPCell(new Phrase(currency.format(item.getPrice())));
             cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             table.addCell(cell);
             //new Row
-            cell = new PdfPCell(new Phrase(item.getItem().getDescription()));
+            cell = new PdfPCell(new Phrase(item.getDescription()));
             cell.setColspan(5);
             table.addCell(cell);
         }

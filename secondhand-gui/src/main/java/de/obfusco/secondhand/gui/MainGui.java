@@ -10,10 +10,10 @@ import de.obfusco.secondhand.receipt.file.ReceiptFile;
 import de.obfusco.secondhand.refund.gui.RefundGui;
 import de.obfusco.secondhand.reports.ReportsGui;
 import de.obfusco.secondhand.sale.gui.CashBoxGui;
-import de.obfusco.secondhand.storage.model.ReservedItem;
+import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.model.TransactionListener;
-import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
 import de.obfusco.secondhand.storage.repository.TransactionRepository;
 import de.obfusco.secondhand.testscan.gui.TestScanGui;
 import org.slf4j.Logger;
@@ -79,7 +79,9 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     TransactionRepository transactionRepository;
 
     @Autowired
-    ReservedItemRepository reservedItemRepository;
+    ItemRepository ItemRepository;
+
+    ConfigGui configGui = new ConfigGui();
 
     private static final long serialVersionUID = 4961295225628108431L;
 
@@ -92,6 +94,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     public JButton createSellerReceipt;
     public JButton createSellerResultReceipt;
     public JButton reportsButton;
+    public JButton configButton;
     public JToggleButton helpButton;
     JFileChooser fc;
     JLabel statusLine;
@@ -271,6 +274,16 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         });
         helpButton.setFont(helpButton.getFont().deriveFont(BUTTON_FONT_SIZE));
 
+        configButton = new JButton("Einstellungen");
+        configButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent arg) {
+                configGui.setVisible(true);
+            }
+        });
+        configButton.setFont(configButton.getFont().deriveFont(BUTTON_FONT_SIZE));
+
         panel.add(sale);
         panel.add(refund);
         panel.add(search);
@@ -285,6 +298,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         }
         panel.add(reportsButton);
         panel.add(helpButton);
+        panel.add(configButton);
 
         statusLine = new JLabel("", SwingConstants.CENTER);
         updateStatusLine();
@@ -331,9 +345,9 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         Date date = new Date(Long.parseLong(messageParts[2]));
         Integer zipCode = null;
         try { zipCode = Integer.parseInt(messageParts[3]); } catch (NumberFormatException ex) {}
-        List<ReservedItem> reservedItems = new ArrayList<>();
+        List<Item> Items = new ArrayList<>();
         for (String itemId : messageParts[4].split(",")) {
-            ReservedItem item = reservedItemRepository.findOne(Integer.parseInt(itemId));
+            Item item = ItemRepository.findOne(Integer.parseInt(itemId));
             if (item == null) {
                 continue;
             }
@@ -345,9 +359,9 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
                     item.setSold(null);
                     break;
             }
-            reservedItems.add(item);
+            Items.add(item);
         }
-        return Transaction.create(id, date, type, reservedItems, zipCode);
+        return Transaction.create(id, date, type, Items, zipCode);
     }
 
     @Override
@@ -406,8 +420,8 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
                 .append(transaction.getCreated().getTime()).append(";")
                 .append(transaction.getZipCode()).append(";");
         List<Integer> ids = new ArrayList<>();
-        for(ReservedItem reservedItem : transaction.getReservedItems()) {
-            ids.add(reservedItem.getId());
+        for(Item Item : transaction.getItems()) {
+            ids.add(Item.getId());
         }
         stringBuilder.append(StringUtils.arrayToCommaDelimitedString(ids.toArray()));
         return stringBuilder.toString();

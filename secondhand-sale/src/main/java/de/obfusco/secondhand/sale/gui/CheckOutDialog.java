@@ -32,7 +32,7 @@ import com.itextpdf.text.DocumentException;
 
 import de.obfusco.secondhand.storage.service.StorageService;
 import de.obfusco.secondhand.storage.model.Transaction;
-import de.obfusco.secondhand.storage.model.ReservedItem;
+import de.obfusco.secondhand.storage.model.Item;
 
 import de.obfusco.secondhand.storage.model.TransactionListener;
 import org.slf4j.Logger;
@@ -60,7 +60,7 @@ public class CheckOutDialog extends JDialog implements ActionListener {
     CashBoxGui frame;
 
     StorageService storageService;
-    List<ReservedItem> items;
+    List<Item> items;
 
     boolean showPostCode;
 

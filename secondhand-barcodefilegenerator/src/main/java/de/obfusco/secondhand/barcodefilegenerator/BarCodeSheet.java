@@ -26,8 +26,8 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import de.obfusco.secondhand.storage.model.Reservation;
-import de.obfusco.secondhand.storage.model.ReservedItem;
-import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
+import de.obfusco.secondhand.storage.model.Item;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 public class BarCodeSheet {
 
     @Autowired
-    ReservedItemRepository reservedItemRepository;
+    ItemRepository ItemRepository;
 
     public static final int NUMBER_OF_COLUMNS = 4;
 
@@ -73,14 +73,14 @@ public class BarCodeSheet {
         return table;
     }
 
-    private PdfPCell createTableCell(PdfWriter writer, ReservedItem item) {
+    private PdfPCell createTableCell(PdfWriter writer, Item item) {
         PdfPCell cell = new PdfPCell(new Paragraph(""));
         cell.setBorderColor(BaseColor.WHITE);
         cell.addElement(createCellContent(writer, item));
         return cell;
     }
 
-    private Element createCellContent(PdfWriter writer, ReservedItem item) {
+    private Element createCellContent(PdfWriter writer, Item item) {
         PdfContentByte cb = writer.getDirectContent();
 
         Barcode128 codeEAN = new Barcode128();
@@ -112,13 +112,13 @@ public class BarCodeSheet {
         return table;
     }
 
-    List<ReservedItem> items;
+    List<Item> items;
 
     public Path createPDFFile(Path basePath, Reservation reservation) throws IOException, DocumentException {
         String customer = new DecimalFormat("000").format(reservation.getNumber());
         Path targetPath = Paths.get(basePath.toString(), customer);
         Files.createDirectories(targetPath);
-        items = reservedItemRepository.findByReservationOrderByNumberAsc(reservation);
+        items = ItemRepository.findByReservationOrderByNumberAsc(reservation);
         return createPdf(targetPath);
     }
 }

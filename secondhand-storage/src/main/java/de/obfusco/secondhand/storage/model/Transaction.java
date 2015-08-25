@@ -15,7 +15,7 @@ import java.util.List;
 @Entity(name = "transactions")
 public class Transaction extends AbstractEntityWithUuid {
 
-    public static enum Type {
+    public enum Type {
         PURCHASE,
         REFUND
     }
@@ -29,7 +29,7 @@ public class Transaction extends AbstractEntityWithUuid {
             joinColumns={@JoinColumn(name = "transaction_id", referencedColumnName = "id")},
             inverseJoinColumns ={@JoinColumn(name = "reserved_item_id", referencedColumnName = "id")}
     )
-    private List<ReservedItem> reservedItems;
+    private List<Item> items;
 
     public Integer getZipCode() {
         return zipCode;
@@ -39,21 +39,21 @@ public class Transaction extends AbstractEntityWithUuid {
         return type;
     }
 
-    public List<ReservedItem> getReservedItems() {
-        return reservedItems;
+    public List<Item> getItems() {
+        return items;
     }
 
 
-    public static Transaction create(Type type, List<ReservedItem> reservedItems, Integer zipCode) {
+    public static Transaction create(Type type, List<Item> items, Integer zipCode) {
         Transaction transaction = new Transaction();
         transaction.type = type;
         transaction.zipCode = zipCode;
-        transaction.reservedItems = reservedItems;
+        transaction.items = items;
         return transaction;
     }
 
-    public static Transaction create(String id, Date date, Type type, List<ReservedItem> reservedItems, Integer zipCode) {
-        Transaction transaction = create(type, reservedItems, zipCode);
+    public static Transaction create(String id, Date date, Type type, List<Item> items, Integer zipCode) {
+        Transaction transaction = create(type, items, zipCode);
         transaction.setId(id);
         transaction.setCreated(date);
         return transaction;

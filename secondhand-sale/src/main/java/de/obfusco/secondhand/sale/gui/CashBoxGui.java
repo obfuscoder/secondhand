@@ -1,6 +1,6 @@
 package de.obfusco.secondhand.sale.gui;
 
-import de.obfusco.secondhand.storage.model.ReservedItem;
+import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.TransactionListener;
 import de.obfusco.secondhand.storage.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -285,14 +285,14 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         readyButton.setEnabled(rowCount > 0);
         double totalPrice = 0;
         for (int i = 0; i < rowCount; i++) {
-            BigDecimal price = tablemodel.getData().get(i).getItem().getPrice();
+            BigDecimal price = tablemodel.getData().get(i).getPrice();
             totalPrice += price.doubleValue();
         }
         priceLabel.setText(String.format("%.2f", totalPrice).replace('.', ','));
         countLabel.setText(Integer.toString(rowCount));
     }
 
-    List<ReservedItem> getTableData() {
+    List<Item> getTableData() {
         return tablemodel.getData();
     }
 
@@ -301,9 +301,9 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         private List<String> columnNames = new ArrayList<>(Arrays.asList(
                 "ArtNr", "Kategorie", "Bezeichnung", "Groesse", "Preis"));
 
-        private List<ReservedItem> data = new ArrayList<>();
+        private List<Item> data = new ArrayList<>();
 
-        public List<ReservedItem> getData() {
+        public List<Item> getData() {
             return data;
         }
 
@@ -319,18 +319,18 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
 
         @Override
         public Object getValueAt(int row, int col) {
-            ReservedItem item = data.get(row);
+            Item item = data.get(row);
             switch (col) {
                 case 0:
                     return item.getCode();
                 case 1:
-                    return item.getItem().getCategory().getName();
+                    return item.getCategory().getName();
                 case 2:
-                    return item.getItem().getDescription();
+                    return item.getDescription();
                 case 3:
-                    return item.getItem().getSize();
+                    return item.getSize();
                 case 4:
-                    return currency.format(item.getItem().getPrice());
+                    return currency.format(item.getPrice());
                 default:
                     return null;
             }
@@ -343,7 +343,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
 
         public Boolean findItemNr(String nr) {
 
-            for (ReservedItem item : data) {
+            for (Item item : data) {
                 if (item.getCode().equals(nr)) {
                     return true;
                 }
@@ -351,7 +351,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
             return false;
         }
 
-        public void addRow(ReservedItem item) {
+        public void addRow(Item item) {
             if (findItemNr(item.getCode())) {
                 setErrorText("Artikel schon vorhanden!");
             } else {
@@ -370,17 +370,17 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         String code = itemNr.getText();
         itemNr.setText("");
         setErrorText("");
-        ReservedItem reservedItem = storageService.getReservedItem(code);
-        if (reservedItem == null) {
+        Item Item = storageService.getItem(code);
+        if (Item == null) {
             setErrorText("Artikel mit Nummer \"" + code + "\" existiert nicht!");
             return;
         }
-        if (reservedItem.isSold()) {
+        if (Item.isSold()) {
             setErrorText("Artikel mit Nummer \"" + code
                     + "\" wurde bereits verkauft!");
             return;
         }
-        tablemodel.addRow(reservedItem);
+        tablemodel.addRow(Item);
     }
 
     public void setErrorText(String text) {

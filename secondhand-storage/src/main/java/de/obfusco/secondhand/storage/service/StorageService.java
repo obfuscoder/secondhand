@@ -1,10 +1,9 @@
 package de.obfusco.secondhand.storage.service;
 
-import de.obfusco.secondhand.storage.model.ReservedItem;
+import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Transaction;
-import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
 import de.obfusco.secondhand.storage.repository.TransactionRepository;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,20 +22,20 @@ public class StorageService {
     private final static Logger LOG = LoggerFactory.getLogger(StorageService.class);
 
     @Autowired
-    private ReservedItemRepository reservedItemRepository;
+    private ItemRepository itemRepository;
 
     @Autowired
     private TransactionRepository transactionRepository;
 
     @Transactional
-    public Transaction storeSoldInformation(List<ReservedItem> items, int zipCode) {
+    public Transaction storeSoldInformation(List<Item> items, int zipCode) {
         Date soldDate = new Date();
         LOG.info("SALE: {}", getItemCodes(items));
         Transaction transaction = Transaction.create(Transaction.Type.PURCHASE, items, zipCode);
-        for (ReservedItem item : items) {
+        for (Item item : items) {
             try {
                 item.setSold(soldDate);
-                reservedItemRepository.save(item);
+                itemRepository.save(item);
             } catch (DataAccessException ex) {
                 LOG.error("sold information could not be stored", ex);
             }
@@ -44,22 +43,22 @@ public class StorageService {
         return transactionRepository.save(transaction);
     }
 
-    private String getItemCodes(List<ReservedItem> items) {
+    private String getItemCodes(List<Item> items) {
         List<String> codes = new ArrayList<String>();
-        for(ReservedItem item : items) {
+        for(Item item : items) {
             codes.add(item.getCode());
         }
         return StringUtils.join(codes);
     }
 
     @Transactional
-    public Transaction storeRefundInformation(List<ReservedItem> items) {
+    public Transaction storeRefundInformation(List<Item> items) {
         LOG.info("REFUND: {}", getItemCodes(items));
         Transaction transaction = Transaction.create(Transaction.Type.REFUND, items, null);
-        for (ReservedItem item : items) {
+        for (Item item : items) {
             try {
                 item.setSold(null);
-                reservedItemRepository.save(item);
+                itemRepository.save(item);
             } catch (DataAccessException ex) {
                 LOG.error("Refund information could not be stored", ex);
             }
@@ -67,7 +66,7 @@ public class StorageService {
         return transactionRepository.save(transaction);
     }
 
-    public ReservedItem getReservedItem(String code) {
-        return reservedItemRepository.findByCode(code);
+    public Item getItem(String code) {
+        return itemRepository.findByCode(code);
     }
 }

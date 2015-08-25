@@ -1,7 +1,7 @@
 package de.obfusco.secondhand.gui;
 
-import de.obfusco.secondhand.storage.model.ReservedItem;
-import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
+import de.obfusco.secondhand.storage.model.Item;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ public class SearchGui extends JFrame {
     private static final String TITLE = "Artikelsuche";
 
     @Autowired
-    ReservedItemRepository reservedItemRepository;
+    ItemRepository ItemRepository;
     private JTextField searchText;
     private JTable resultTable;
 
@@ -55,18 +55,18 @@ public class SearchGui extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 String[] keywords = searchText.getText().split(" ");
-                List<ReservedItem> results;
+                List<Item> results;
                 switch (keywords.length) {
                     case 0:
                         return;
                     case 1:
-                        results = reservedItemRepository.findByKeywords(makeLike(keywords[0]));
+                        results = ItemRepository.findByKeywords(makeLike(keywords[0]));
                         break;
                     case 2:
-                        results = reservedItemRepository.findByKeywords(makeLike(keywords[0]), makeLike(keywords[1]));
+                        results = ItemRepository.findByKeywords(makeLike(keywords[0]), makeLike(keywords[1]));
                         break;
                     default:
-                        results = reservedItemRepository.findByKeywords(makeLike(keywords[0]), makeLike(keywords[1]), makeLike(keywords[2]));
+                        results = ItemRepository.findByKeywords(makeLike(keywords[0]), makeLike(keywords[1]), makeLike(keywords[2]));
                 }
                 ResultsModel resultsModel = new ResultsModel(results);
                 resultTable.setModel(resultsModel);
@@ -115,13 +115,13 @@ public class SearchGui extends JFrame {
 
     private static class ResultsModel extends AbstractTableModel {
 
-        private final List<ReservedItem> results;
+        private final List<Item> results;
 
         private final static NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
         private final static String[] COLUMN_NAMES = new String[] {
                 "ArtNr", "Kategorie", "Bezeichnung", "Größe", "Preis", "verkauft" };
 
-        public ResultsModel(List<ReservedItem> results) {
+        public ResultsModel(List<Item> results) {
             this.results = results;
         }
 
@@ -143,18 +143,18 @@ public class SearchGui extends JFrame {
 
         @Override
         public Object getValueAt(int row, int column) {
-            ReservedItem result = results.get(row);
+            Item result = results.get(row);
             switch (column) {
                 case 0:
                     return result.getCode();
                 case 1:
-                    return result.getItem().getCategory().getName();
+                    return result.getCategory().getName();
                 case 2:
-                    return result.getItem().getDescription();
+                    return result.getDescription();
                 case 3:
-                    return result.getItem().getSize();
+                    return result.getSize();
                 case 4:
-                    return currency.format(result.getItem().getPrice());
+                    return currency.format(result.getPrice());
                 case 5:
                     return result.isSold() ? "ja" : "nein";
                 default:

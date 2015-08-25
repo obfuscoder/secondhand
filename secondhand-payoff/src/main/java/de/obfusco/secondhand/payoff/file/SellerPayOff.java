@@ -22,9 +22,9 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import de.obfusco.secondhand.storage.model.Reservation;
-import de.obfusco.secondhand.storage.model.ReservedItem;
+import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Seller;
-import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 public class SellerPayOff extends BasePayOff {
 
     @Autowired
-    ReservedItemRepository reservedItemRepository;
+    ItemRepository ItemRepository;
 
     public static final int NUMBER_OF_COLUMNS = 3;
     public static final int NUMBER_OF_ITEMS_PER_LINE = 2;
@@ -62,14 +62,14 @@ public class SellerPayOff extends BasePayOff {
 
         document.add(new Phrase("Reservierungsnummer: " + reservation.getNumber() + "\n\n",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
-        List<ReservedItem> soldItems = reservedItemRepository.findByReservationAndSoldNotNullOrderByNumberAsc(reservation);
+        List<Item> soldItems = ItemRepository.findByReservationAndSoldNotNullOrderByNumberAsc(reservation);
 
         document.add(new Phrase(new Chunk(soldItems.size() + " Artikel wurde(n) verkauft",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
 
         double totalPrice = 0;
-        for (ReservedItem item : soldItems) {
-            totalPrice += item.getItem().getPrice().doubleValue();
+        for (Item item : soldItems) {
+            totalPrice += item.getPrice().doubleValue();
         }
         double kitaSum = totalPrice * CHILDCARE_SHARE;
         kitaSum = Math.ceil(kitaSum * 10) / 10;
@@ -83,19 +83,19 @@ public class SellerPayOff extends BasePayOff {
         document.add(table);
         document.add(new Phrase("\n"));
 
-        List<ReservedItem> unsoldItems = reservedItemRepository.findByReservationAndSoldNullOrderByNumberAsc(reservation);
+        List<Item> unsoldItems = ItemRepository.findByReservationAndSoldNullOrderByNumberAsc(reservation);
         document.add(new Phrase(new Chunk(unsoldItems.size() + " Artikel wurde(n) nicht verkauft",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
 
         totalPrice = 0;
-        for (ReservedItem item : unsoldItems) {
-            totalPrice += item.getItem().getPrice().doubleValue();
+        for (Item item : unsoldItems) {
+            totalPrice += item.getPrice().doubleValue();
         }
         table = createItemTable(unsoldItems);
         document.add(table);
     }
 
-    private PdfPTable createItemTable(List<ReservedItem> items) throws DocumentException {
+    private PdfPTable createItemTable(List<Item> items) throws DocumentException {
         PdfPTable table = new PdfPTable(NUMBER_OF_COLUMNS * NUMBER_OF_ITEMS_PER_LINE);
         table.setWidthPercentage(100f);
         table.setWidths(new int[]{1, 8, 3, 1, 8, 3});
@@ -105,7 +105,7 @@ public class SellerPayOff extends BasePayOff {
         }
 
         for (int i = 0; i < items.size(); i++) {
-            ReservedItem item = items.get((i % 2 == 0) ? i / 2 : i / 2 + (items.size() + 1) / 2);
+            Item item = items.get((i % 2 == 0) ? i / 2 : i / 2 + (items.size() + 1) / 2);
             for (int column = 0; column < NUMBER_OF_COLUMNS; column++) {
                 PdfPCell cell = new PdfPCell(new Phrase(getColumnText(item, column),
                         FontFactory.getFont(FontFactory.HELVETICA, 10)));
@@ -177,14 +177,14 @@ public class SellerPayOff extends BasePayOff {
         }
     }
 
-    private String getColumnText(ReservedItem item, int column) {
+    private String getColumnText(Item item, int column) {
         switch (column) {
             case 0:
                 return Integer.toString(item.getNumber());
             case 1:
-                return item.getItem().getDescription();
+                return item.getDescription();
             case 2:
-                return currency.format(item.getItem().getPrice());
+                return currency.format(item.getPrice());
             default:
                 return StringUtils.EMPTY;
         }

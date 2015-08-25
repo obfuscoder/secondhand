@@ -2,7 +2,7 @@ package de.obfusco.secondhand.reports;
 
 import de.obfusco.secondhand.net.Network;
 import de.obfusco.secondhand.net.Peer;
-import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
 import de.obfusco.secondhand.storage.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,7 @@ public class ReportsGui extends JFrame {
     private TransactionRepository transactionRepository;
 
     @Autowired
-    private ReservedItemRepository reservedItemRepository;
+    private ItemRepository itemRepository;
 
     private JLabel itemCount;
     private JLabel transactionCount;
@@ -62,10 +62,10 @@ public class ReportsGui extends JFrame {
     }
 
     public void update() {
-        itemCount.setText("" + reservedItemRepository.count());
+        itemCount.setText("" + itemRepository.count());
         transactionCount.setText("" + transactionRepository.count());
-        soldCount.setText("" + reservedItemRepository.countBySoldNotNull());
-        Double sumOfSoldItems = reservedItemRepository.sumOfSoldItems();
+        soldCount.setText("" + itemRepository.countBySoldNotNull());
+        Double sumOfSoldItems = itemRepository.sumOfSoldItems();
         if (sumOfSoldItems == null) sumOfSoldItems = 0.0;
         soldSum.setText(currencyFormat.format(sumOfSoldItems));
 

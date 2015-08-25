@@ -18,12 +18,11 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import de.obfusco.secondhand.storage.model.Reservation;
-import de.obfusco.secondhand.storage.model.ReservedItem;
-import de.obfusco.secondhand.storage.repository.ReservedItemRepository;
+import de.obfusco.secondhand.storage.model.Item;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,10 +39,10 @@ public class BarCodeLabelSheet {
     public static final int NUMBER_OF_COLUMNS = 3;
     public static final int NUMBER_OF_ROWS = 5;
 
-    List<ReservedItem> items;
+    List<Item> items;
 
     @Autowired
-    ReservedItemRepository reservedItemRepository;
+    ItemRepository ItemRepository;
 
     public Path createPdf(Path targetPath) throws DocumentException, IOException {
 
@@ -90,11 +89,11 @@ public class BarCodeLabelSheet {
         String customer = new DecimalFormat("000").format(reservation.getNumber());
         Path targetPath = Paths.get(basePath.toString(), customer);
         Files.createDirectories(targetPath);
-        items = reservedItemRepository.findByReservationOrderByNumberAsc(reservation);
+        items = ItemRepository.findByReservationOrderByNumberAsc(reservation);
         return createPdf(targetPath);
     }
 
-    private Element createCellContent(PdfWriter writer, ReservedItem item) {
+    private Element createCellContent(PdfWriter writer, Item item) {
         PdfContentByte cb = writer.getDirectContent();
 
         Barcode128 barcode = new Barcode128();
@@ -147,9 +146,9 @@ public class BarCodeLabelSheet {
         return cell;
     }
 
-    private PdfPCell createPriceCell(ReservedItem item) {
+    private PdfPCell createPriceCell(Item item) {
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.GERMANY);
-        String price = currencyFormat.format(item.getItem().getPrice());
+        String price = currencyFormat.format(item.getPrice());
         PdfPCell cell = new PdfPCell(new Phrase(price, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22)));
         cell.setBorderColor(BaseColor.WHITE);
         cell.setColspan(5);
@@ -157,17 +156,17 @@ public class BarCodeLabelSheet {
         return cell;
     }
 
-    private PdfPCell createSizeCell(ReservedItem item) {
-        PdfPCell cell = new PdfPCell(new Phrase("Größe: " + item.getItem().getSize()));
+    private PdfPCell createSizeCell(Item item) {
+        PdfPCell cell = new PdfPCell(new Phrase("Größe: " + item.getSize()));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setColspan(5);
         cell.setBorderColor(BaseColor.WHITE);
         return cell;
     }
 
-    private PdfPCell createDescriptionCell(ReservedItem item, PdfPTable table) {
+    private PdfPCell createDescriptionCell(Item item, PdfPTable table) {
 
-        PdfPCell cell = new PdfPCell(new Phrase(new Chunk(item.getItem().getDescription(),
+        PdfPCell cell = new PdfPCell(new Phrase(new Chunk(item.getDescription(),
                 FontFactory.getFont(FontFactory.HELVETICA, 10))));
         cell.setColspan(table.getNumberOfColumns());
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -176,8 +175,8 @@ public class BarCodeLabelSheet {
         return cell;
     }
 
-    private PdfPCell createCategoryCell(ReservedItem item) {
-        PdfPCell cell = new PdfPCell(new Phrase(new Chunk(item.getItem().getCategory().getName(),
+    private PdfPCell createCategoryCell(Item item) {
+        PdfPCell cell = new PdfPCell(new Phrase(new Chunk(item.getCategory().getName(),
                 FontFactory.getFont(FontFactory.HELVETICA, 10))));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setVerticalAlignment(Element.ALIGN_CENTER);
@@ -187,7 +186,7 @@ public class BarCodeLabelSheet {
         return cell;
     }
 
-    private PdfPCell createItemNumberCell(ReservedItem item) {
+    private PdfPCell createItemNumberCell(Item item) {
         PdfPCell cell = new PdfPCell(new Phrase(new Chunk(Integer.toString(item.getNumber()),
                 FontFactory.getFont(FontFactory.HELVETICA, 12))));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -197,7 +196,7 @@ public class BarCodeLabelSheet {
         return cell;
     }
 
-    private PdfPCell createSellerNumberCell(ReservedItem item) {
+    private PdfPCell createSellerNumberCell(Item item) {
         PdfPCell cell = new PdfPCell(new Phrase(new Chunk(
                 item.getReservation().getNumber().toString(),
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18))));
@@ -208,7 +207,7 @@ public class BarCodeLabelSheet {
         return cell;
     }
 
-    private PdfPCell createTableCell(PdfWriter writer, ReservedItem item) {
+    private PdfPCell createTableCell(PdfWriter writer, Item item) {
         PdfPCell cell = new PdfPCell(new Paragraph(""));
         cell.setBorderColor(BaseColor.WHITE);
         cell.addElement(createCellContent(writer, item));

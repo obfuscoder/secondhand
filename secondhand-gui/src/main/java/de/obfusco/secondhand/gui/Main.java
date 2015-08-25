@@ -19,7 +19,7 @@ public class Main {
             LOG.error("Error while starting application!", ex);
             JOptionPane.showMessageDialog(null, "Fehler beim Initialisieren der Applikation.\n" +
                             "Mögliche Ursache ist eine defekte, blockierte oder nicht vorhandene Datenbank.\n" +
-                            "Haben Sie die Applikation vielleicht bereits gestartet?" +
+                            "Haben Sie die Applikation vielleicht bereits gestartet?\n" +
                             "Details zum Fehler finden Sie in der Protokolldatei.",
                     "Programmfehler",
                     JOptionPane.ERROR_MESSAGE);
