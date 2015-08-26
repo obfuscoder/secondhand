@@ -11,4 +11,8 @@ abstract class AbstractEntityWithId extends AbstractEntity {
     public void setId(int id) {
         this.id = id;
     }
+
+    public int getId() {
+        return id;
+    }
 }

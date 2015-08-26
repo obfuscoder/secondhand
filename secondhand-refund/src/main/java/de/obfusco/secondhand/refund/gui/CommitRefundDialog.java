@@ -72,7 +72,6 @@ public class CommitRefundDialog extends JDialog implements ActionListener {
         errorLabel = new JLabel(" ");
         errorLabel.setForeground(new Color(255, 0, 0, 255));
 
-        // build the whole dialog
         buildDialog();
 
     }

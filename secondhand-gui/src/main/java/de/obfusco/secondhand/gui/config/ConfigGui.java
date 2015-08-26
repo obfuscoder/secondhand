@@ -1,8 +1,9 @@
 package de.obfusco.secondhand.gui.config;
 
+import de.obfusco.secondhand.net.DataPusher;
 import de.obfusco.secondhand.net.EventDownloader;
 import de.obfusco.secondhand.net.EventStorageConverter;
-import de.obfusco.secondhand.net.JsonToEventParser;
+import de.obfusco.secondhand.net.JsonEventConverter;
 import de.obfusco.secondhand.net.dto.Event;
 import de.obfusco.secondhand.storage.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,8 @@ public class ConfigGui extends JDialog {
     ReservationRepository reservationRepository;
     @Autowired
     ItemRepository itemRepository;
+    @Autowired
+    private DataPusher dataPusher;
 
     public ConfigGui() {
         setTitle("Einstellungen");
@@ -71,6 +74,25 @@ public class ConfigGui extends JDialog {
                 }
             }
         });
+
+        pushDataButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                int dialogOptions = JOptionPane.YES_NO_OPTION;
+                String question = "Es werden sämtliche Daten in der Datenbank der anderen Kassensysteme gelöscht\n" +
+                        "und mit den Daten dieses Kassensystems überschrieben.\n\n" +
+                        "Sind Sie sicher?";
+                int dialogResult = JOptionPane.showConfirmDialog(null, question, "Achtung", dialogOptions);
+                if (dialogResult == JOptionPane.YES_OPTION) {
+                    pushDatabase();
+                }
+            }
+        });
+    }
+
+    private void pushDatabase() {
+        Event event = eventStorageConverter.convertToEvent();
+        dataPusher.push(event);
     }
 
     private void reportSuccess() {
@@ -81,7 +103,7 @@ public class ConfigGui extends JDialog {
 
     private void downloadDatabase(String baseUrl, String token) throws IOException {
         InputStream inputStream = new EventDownloader().downloadEventData(baseUrl, token);
-        Event event = new JsonToEventParser().parse(inputStream);
+        Event event = new JsonEventConverter().parse(inputStream);
         eventStorageConverter.storeEvent(event);
     }
 }

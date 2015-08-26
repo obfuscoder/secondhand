@@ -92,7 +92,7 @@ public class EventImporterTest {
     }
 
     private Event parse(InputStream inputStream) {
-        return new JsonToEventParser().parse(inputStream);
+        return new JsonEventConverter().parse(inputStream);
     }
 
     private void checkReservations(List<Reservation> reservations) throws ParseException {

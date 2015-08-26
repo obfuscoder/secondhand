@@ -1,11 +1,11 @@
 package de.obfusco.secondhand.gui;
 
+import com.google.gson.Gson;
 import com.itextpdf.text.DocumentException;
 import de.obfusco.secondhand.barcodefilegenerator.BarCodeGeneratorGui;
 import de.obfusco.secondhand.gui.config.ConfigGui;
-import de.obfusco.secondhand.net.MessageBroker;
-import de.obfusco.secondhand.net.Network;
-import de.obfusco.secondhand.net.Peer;
+import de.obfusco.secondhand.net.*;
+import de.obfusco.secondhand.net.dto.Event;
 import de.obfusco.secondhand.payoff.gui.PayOffGui;
 import de.obfusco.secondhand.refund.gui.RefundGui;
 import de.obfusco.secondhand.reports.ReportsGui;
@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Properties;
 
 @Component
-public class MainGui extends JFrame implements MessageBroker, TransactionListener {
+public class MainGui extends JFrame implements MessageBroker, TransactionListener, DataPusher {
 
     private final static Logger LOG = LoggerFactory.getLogger(MainGui.class);
 
@@ -84,6 +84,9 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
     @Autowired
     ConfigGui configGui;
+
+    @Autowired
+    private EventStorageConverter eventStorageConverter;
 
     private static final long serialVersionUID = 4961295225628108431L;
 
@@ -297,10 +300,10 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             panel.add(barcodeGenerator);
             panel.add(testScan);
             panel.add(billGenerator);
+            panel.add(configButton);
         }
         panel.add(reportsButton);
         panel.add(helpButton);
-        panel.add(configButton);
 
         statusLine = new JLabel("", SwingConstants.CENTER);
         updateStatusLine();
@@ -319,6 +322,8 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         try {
             if (message.startsWith("HELP")) {
                 parseHelpMessage(peer, message);
+            } else if(message.startsWith("DATA")) {
+                parseDataMessage(peer, message);
             } else {
                 Transaction transaction = parseTransaction(message);
                 synchronized (transactionRepository) {
@@ -332,6 +337,13 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         catch (IllegalArgumentException ex) {
             LOG.error("Invalid message <" + message + ">. Reason: " + ex.getMessage());
         }
+    }
+
+    private void parseDataMessage(Peer peer, String message) {
+        String json = message.substring(4);
+        JsonEventConverter converter = new JsonEventConverter();
+        Event event = converter.parse(json);
+        eventStorageConverter.storeEvent(event);
     }
 
     private void parseHelpMessage(Peer peer, String message) {
@@ -427,5 +439,10 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         }
         stringBuilder.append(StringUtils.arrayToCommaDelimitedString(ids.toArray()));
         return stringBuilder.toString();
+    }
+
+    @Override
+    public void push(Event event) {
+        network.send("DATA" + new Gson().toJson(event));
     }
 }

@@ -14,6 +14,7 @@ import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -113,4 +114,26 @@ public class EventStorageConverter {
         }
     }
 
+    public Event convertToEvent() {
+        MapperFactory mapperFactory = createMapperFactory();
+        MapperFacade mapper = mapperFactory.getMapperFacade();
+        Event event = mapper.map(eventRepository.find(), Event.class);
+        event.categories = new ArrayList<>();
+        for (de.obfusco.secondhand.storage.model.Category category : categoryRepository.findAll()) {
+            event.categories.add(mapper.map(category, Category.class));
+        }
+        event.sellers = new ArrayList<>();
+        for (de.obfusco.secondhand.storage.model.Seller seller : sellerRepository.findAll()) {
+            event.sellers.add(mapper.map(seller, Seller.class));
+        }
+        event.reservations = new ArrayList<>();
+        for (de.obfusco.secondhand.storage.model.Reservation reservation : reservationRepository.findAll()) {
+            event.reservations.add(mapper.map(reservation, Reservation.class));
+        }
+        event.items = new ArrayList<>();
+        for (de.obfusco.secondhand.storage.model.Item item : itemRepository.findAll()) {
+            event.items.add(mapper.map(item, Item.class));
+        }
+        return event;
+    }
 }
