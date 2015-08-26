@@ -1,5 +1,6 @@
 package de.obfusco.secondhand.storage.model;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -8,15 +9,11 @@ import javax.persistence.Temporal;
 @Entity(name = "events")
 public class Event extends AbstractEntityWithId {
 
-    private String name;
+    public String name;
     @Temporal(javax.persistence.TemporalType.DATE)
-    private Date date;
-
-    public String getName() {
-        return name;
-    }
-
-    public Date getDate() {
-        return date;
-    }
+    public Date date;
+    public BigDecimal commissionRate;
+    public boolean donationOfUnsoldItemsEnabled;
+    public BigDecimal pricePrecision;
+    public BigDecimal sellerFee;
 }

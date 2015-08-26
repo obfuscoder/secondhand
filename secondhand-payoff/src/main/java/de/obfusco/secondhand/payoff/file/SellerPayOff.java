@@ -24,6 +24,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import de.obfusco.secondhand.storage.model.Reservation;
 import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Seller;
+import de.obfusco.secondhand.storage.repository.EventRepository;
 import de.obfusco.secondhand.storage.repository.ItemRepository;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,11 +37,14 @@ public class SellerPayOff extends BasePayOff {
     @Autowired
     ItemRepository ItemRepository;
 
+    @Autowired
+    EventRepository eventRepository;
+
     public static final int NUMBER_OF_COLUMNS = 3;
     public static final int NUMBER_OF_ITEMS_PER_LINE = 2;
 
     public File createFile(Path basePath, Reservation reservation) throws DocumentException, IOException {
-        Path targetPath = Paths.get(basePath.toString(), reservation.getNumber().toString());
+        Path targetPath = Paths.get(basePath.toString(), Integer.toString(reservation.number));
         Files.createDirectories(targetPath);
         Path fullPath = Paths.get(targetPath.toString(), "payoff.pdf");
         Document document = createPdfDocument(fullPath);
@@ -50,17 +54,17 @@ public class SellerPayOff extends BasePayOff {
     }
 
     private void addContentToPdf(Document document, Reservation reservation) throws DocumentException {
-        addHeader(document, reservation.getEvent());
+        addHeader(document, eventRepository.find());
         document.add(new Phrase("\n\n"));
 
-        Seller seller = reservation.getSeller();
+        Seller seller = reservation.seller;
         document.add(new Phrase(seller.getName() + "\n", FontFactory.getFont(FontFactory.HELVETICA, 12)));
-        document.add(new Phrase(seller.getStreet() + "\n", FontFactory.getFont(FontFactory.HELVETICA, 12)));
-        document.add(new Phrase(seller.getZipCode() + " " + seller.getCity() + "\n",
+        document.add(new Phrase(seller.street + "\n", FontFactory.getFont(FontFactory.HELVETICA, 12)));
+        document.add(new Phrase(seller.zipCode + " " + seller.city + "\n",
                 FontFactory.getFont(FontFactory.HELVETICA, 12)));
-        document.add(new Phrase("Tel.: " + seller.getPhone() + "\n", FontFactory.getFont(FontFactory.HELVETICA, 12)));
+        document.add(new Phrase("Tel.: " + seller.phone + "\n", FontFactory.getFont(FontFactory.HELVETICA, 12)));
 
-        document.add(new Phrase("Reservierungsnummer: " + reservation.getNumber() + "\n\n",
+        document.add(new Phrase("Reservierungsnummer: " + reservation.number + "\n\n",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
         List<Item> soldItems = ItemRepository.findByReservationAndSoldNotNullOrderByNumberAsc(reservation);
 
@@ -69,7 +73,7 @@ public class SellerPayOff extends BasePayOff {
 
         double totalPrice = 0;
         for (Item item : soldItems) {
-            totalPrice += item.getPrice().doubleValue();
+            totalPrice += item.price.doubleValue();
         }
         double kitaSum = totalPrice * CHILDCARE_SHARE;
         kitaSum = Math.ceil(kitaSum * 10) / 10;
@@ -89,7 +93,7 @@ public class SellerPayOff extends BasePayOff {
 
         totalPrice = 0;
         for (Item item : unsoldItems) {
-            totalPrice += item.getPrice().doubleValue();
+            totalPrice += item.price.doubleValue();
         }
         table = createItemTable(unsoldItems);
         document.add(table);
@@ -146,7 +150,7 @@ public class SellerPayOff extends BasePayOff {
         table.setHeaderRows(1);
     }
 
-    public File createFileForAll(Path basePath, List<Reservation> reservations) throws IOException, DocumentException {
+    public File createFileForAll(Path basePath, Iterable<Reservation> reservations) throws IOException, DocumentException {
         Path targetPath = Paths.get(basePath.toString());
         Files.createDirectories(targetPath);
         Path fullPath = Paths.get(targetPath.toString(), "allpayoff.pdf");
@@ -180,11 +184,11 @@ public class SellerPayOff extends BasePayOff {
     private String getColumnText(Item item, int column) {
         switch (column) {
             case 0:
-                return Integer.toString(item.getNumber());
+                return Integer.toString(item.number);
             case 1:
-                return item.getDescription();
+                return item.description;
             case 2:
-                return currency.format(item.getPrice());
+                return currency.format(item.price);
             default:
                 return StringUtils.EMPTY;
         }

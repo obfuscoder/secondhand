@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -50,7 +49,7 @@ public class ReceiptFile {
         document.open();
         addHeader(document, title);
 
-        List<Reservation> reservations = reservationRepository.findByEvent(eventRepository.find());
+        Iterable<Reservation> reservations = reservationRepository.findAll();
 
         String[] columnNames = {"ResNr", "Name", "Unterschrift"};
         float[] widths = new float[]{12f, 40f, 40f};
@@ -74,14 +73,13 @@ public class ReceiptFile {
         table.setHeaderRows(2);
 
         for (final Reservation reservation : reservations) {
-            PdfPCell cell = new PdfPCell(new Phrase(new Chunk(reservation.getNumber()
-                    .toString(),
+            PdfPCell cell = new PdfPCell(new Phrase(new Chunk(Integer.toString(reservation.number),
                     FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14))));
             table.addCell(cell);
             cell = new PdfPCell(new Phrase(
-                    reservation.getSeller().getLastName()
+                    reservation.seller.lastName
                     + ", "
-                    + reservation.getSeller().getFirstName()));
+                    + reservation.seller.firstName));
             table.addCell(cell);
             cell = new PdfPCell();
             table.addCell(cell);

@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -25,10 +24,10 @@ import javax.swing.SwingConstants;
 import com.itextpdf.text.DocumentException;
 
 import de.obfusco.secondhand.payoff.file.PdfFileCreator;
-import de.obfusco.secondhand.payoff.file.SellerPayOff;
 import de.obfusco.secondhand.payoff.file.TotalPayOff;
-import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.Reservation;
+import de.obfusco.secondhand.payoff.file.SellerPayOff;
+import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.repository.EventRepository;
 import de.obfusco.secondhand.storage.repository.ReservationRepository;
 
@@ -90,7 +89,7 @@ public class PayOffGui extends JFrame {
             }
         };
 
-        final List<Reservation> reservations = reservationRepository.findByEvent(event);
+        final Iterable<Reservation> reservations = reservationRepository.findAll();
 
         final PdfFileCreator allSellerPayoffCreator = new PdfFileCreator() {
             @Override
@@ -125,7 +124,7 @@ public class PayOffGui extends JFrame {
                 }
             };
             JLabel customerPayoffNr = createPdfLink(
-                    reservation.getNumber() + " | " + reservation.getSeller().getName(),
+                    reservation.number + " | " + reservation.seller.getName(),
                     14.0f, sellerPayoffCreator);
             panel.add(customerPayoffNr);
         }

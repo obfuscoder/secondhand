@@ -1,4 +1,4 @@
-package de.obfusco.secondhand.dto;
+package de.obfusco.secondhand.net.dto;
 
 public class Category {
     public int id;

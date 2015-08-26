@@ -2,20 +2,21 @@ package de.obfusco.secondhand.gui;
 
 import com.itextpdf.text.DocumentException;
 import de.obfusco.secondhand.barcodefilegenerator.BarCodeGeneratorGui;
+import de.obfusco.secondhand.gui.config.ConfigGui;
 import de.obfusco.secondhand.net.MessageBroker;
 import de.obfusco.secondhand.net.Network;
 import de.obfusco.secondhand.net.Peer;
 import de.obfusco.secondhand.payoff.gui.PayOffGui;
-import de.obfusco.secondhand.receipt.file.ReceiptFile;
 import de.obfusco.secondhand.refund.gui.RefundGui;
 import de.obfusco.secondhand.reports.ReportsGui;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
+import de.obfusco.secondhand.testscan.gui.TestScanGui;
+import de.obfusco.secondhand.receipt.file.ReceiptFile;
 import de.obfusco.secondhand.sale.gui.CashBoxGui;
 import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.model.TransactionListener;
-import de.obfusco.secondhand.storage.repository.ItemRepository;
 import de.obfusco.secondhand.storage.repository.TransactionRepository;
-import de.obfusco.secondhand.testscan.gui.TestScanGui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +68,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     PayOffGui payOffGui;
 
     @Autowired
-    SearchGui searchGui;
+    de.obfusco.secondhand.gui.SearchGui searchGui;
 
     @Autowired
     ReportsGui reportsGui;
@@ -79,9 +80,10 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     TransactionRepository transactionRepository;
 
     @Autowired
-    ItemRepository ItemRepository;
+    ItemRepository itemRepository;
 
-    ConfigGui configGui = new ConfigGui();
+    @Autowired
+    ConfigGui configGui;
 
     private static final long serialVersionUID = 4961295225628108431L;
 
@@ -320,7 +322,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             } else {
                 Transaction transaction = parseTransaction(message);
                 synchronized (transactionRepository) {
-                    if (!transactionRepository.exists(transaction.getId())) {
+                    if (!transactionRepository.exists(transaction.id)) {
                         transactionRepository.save(transaction);
                         reportsGui.update();
                     }
@@ -347,16 +349,16 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         try { zipCode = Integer.parseInt(messageParts[3]); } catch (NumberFormatException ex) {}
         List<Item> Items = new ArrayList<>();
         for (String itemId : messageParts[4].split(",")) {
-            Item item = ItemRepository.findOne(Integer.parseInt(itemId));
+            Item item = itemRepository.findOne(Integer.parseInt(itemId));
             if (item == null) {
                 continue;
             }
             switch (type) {
                 case PURCHASE:
-                    item.setSold(date);
+                    item.sold = date;
                     break;
                 case REFUND:
-                    item.setSold(null);
+                    item.sold = null;
                     break;
             }
             Items.add(item);
@@ -376,7 +378,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             public void run() {
                 for(Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
                     try {
-                        LOG.info("Syncing transaction " + transaction.getId() + " with peer " + peer.getAddress());
+                        LOG.info("Syncing transaction " + transaction.id + " with peer " + peer.getAddress());
                         peer.send(createMessageFromTransaction(transaction));
                     } catch (IOException e) {
                         LOG.error("could not create and send json", e);
@@ -402,7 +404,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
     @Override
     public void notify(Transaction transaction) {
-        LOG.info("Notifying all peers about transaction " + transaction.getId());
+        LOG.info("Notifying all peers about transaction " + transaction.id);
         try {
             String message = createMessageFromTransaction(transaction);
             network.send(message);
@@ -415,13 +417,13 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     private String createMessageFromTransaction(Transaction transaction) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder
-                .append(transaction.getId()).append(";")
-                .append(transaction.getType()).append(";")
-                .append(transaction.getCreated().getTime()).append(";")
-                .append(transaction.getZipCode()).append(";");
+                .append(transaction.id).append(";")
+                .append(transaction.type).append(";")
+                .append(transaction.created.getTime()).append(";")
+                .append(transaction.zipCode).append(";");
         List<Integer> ids = new ArrayList<>();
-        for(Item Item : transaction.getItems()) {
-            ids.add(Item.getId());
+        for(Item item : transaction.items) {
+            ids.add(item.id);
         }
         stringBuilder.append(StringUtils.arrayToCommaDelimitedString(ids.toArray()));
         return stringBuilder.toString();

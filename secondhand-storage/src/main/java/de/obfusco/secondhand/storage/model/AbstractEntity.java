@@ -16,18 +16,10 @@ import java.util.Date;
 public class AbstractEntity implements Serializable {
     @CreatedDate
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    private Date created;
+    public Date created;
     @LastModifiedDate
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    private Date modified;
-
-    public Date getCreated() {
-        return created;
-    }
-
-    public Date getModified() {
-        return modified;
-    }
+    public Date modified;
 
     @Override
     public String toString() {
@@ -46,9 +38,5 @@ public class AbstractEntity implements Serializable {
     @PreUpdate
     protected void preUpdate() {
         modified = new Date();
-    }
-
-    protected void setCreated(Date created) {
-        this.created = created;
     }
 }

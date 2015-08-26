@@ -12,55 +12,15 @@ import javax.persistence.Temporal;
 public class Item extends AbstractEntityWithId {
 
     @ManyToOne
-    private Category category;
-    private String description;
-    private String size;
-    private BigDecimal price;
+    public Category category;
+    public String description;
+    public String size;
+    public BigDecimal price;
     @ManyToOne
     @JoinColumn(name = "reservation_id")
-    private Reservation reservation;
-    private int number;
-    private String code;
+    public Reservation reservation;
+    public int number;
+    public String code;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    private Date sold;
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getSize() {
-        return size;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public int getNumber() {
-        return number;
-    }
-
-    public Reservation getReservation() {
-        return reservation;
-    }
-
-    public Date getSold() {
-        return sold;
-    }
-
-    public void setSold(Date sold) {
-        this.sold = sold;
-    }
-
-    public boolean isSold() {
-        return getSold() != null;
-    }
+    public Date sold;
 }

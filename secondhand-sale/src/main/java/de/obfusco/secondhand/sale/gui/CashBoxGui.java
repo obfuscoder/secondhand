@@ -285,7 +285,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         readyButton.setEnabled(rowCount > 0);
         double totalPrice = 0;
         for (int i = 0; i < rowCount; i++) {
-            BigDecimal price = tablemodel.getData().get(i).getPrice();
+            BigDecimal price = tablemodel.getData().get(i).price;
             totalPrice += price.doubleValue();
         }
         priceLabel.setText(String.format("%.2f", totalPrice).replace('.', ','));
@@ -322,15 +322,15 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
             Item item = data.get(row);
             switch (col) {
                 case 0:
-                    return item.getCode();
+                    return item.code;
                 case 1:
-                    return item.getCategory().getName();
+                    return item.category.name;
                 case 2:
-                    return item.getDescription();
+                    return item.description;
                 case 3:
-                    return item.getSize();
+                    return item.size;
                 case 4:
-                    return currency.format(item.getPrice());
+                    return currency.format(item.price);
                 default:
                     return null;
             }
@@ -344,7 +344,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         public Boolean findItemNr(String nr) {
 
             for (Item item : data) {
-                if (item.getCode().equals(nr)) {
+                if (item.code.equals(nr)) {
                     return true;
                 }
             }
@@ -352,7 +352,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         }
 
         public void addRow(Item item) {
-            if (findItemNr(item.getCode())) {
+            if (findItemNr(item.code)) {
                 setErrorText("Artikel schon vorhanden!");
             } else {
                 data.add(item);
@@ -370,17 +370,17 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         String code = itemNr.getText();
         itemNr.setText("");
         setErrorText("");
-        Item Item = storageService.getItem(code);
-        if (Item == null) {
+        Item item = storageService.getItem(code);
+        if (item == null) {
             setErrorText("Artikel mit Nummer \"" + code + "\" existiert nicht!");
             return;
         }
-        if (Item.isSold()) {
+        if (item.sold != null) {
             setErrorText("Artikel mit Nummer \"" + code
                     + "\" wurde bereits verkauft!");
             return;
         }
-        tablemodel.addRow(Item);
+        tablemodel.addRow(item);
     }
 
     public void setErrorText(String text) {

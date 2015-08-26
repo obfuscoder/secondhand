@@ -24,8 +24,8 @@ import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.repository.ItemRepository;
+import de.obfusco.secondhand.storage.model.Item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -161,19 +161,19 @@ public class TestScanGui extends JFrame implements ActionListener {
             String columnValue = "";
             switch (col) {
                 case 0:
-                    columnValue = item.getCode();
+                    columnValue = item.code;
                     break;
                 case 1:
-                    columnValue = item.getCategory().getName();
+                    columnValue = item.category.name;
                     break;
                 case 2:
-                    columnValue = item.getDescription();
+                    columnValue = item.description;
                     break;
                 case 3:
-                    columnValue = item.getSize();
+                    columnValue = item.size;
                     break;
                 case 4:
-                    columnValue = item.getPrice().toString();
+                    columnValue = item.price.toString();
                     break;
             }
             return columnValue;

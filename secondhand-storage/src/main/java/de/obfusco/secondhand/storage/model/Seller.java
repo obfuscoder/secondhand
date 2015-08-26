@@ -7,45 +7,17 @@ import javax.persistence.Entity;
 public class Seller extends AbstractEntityWithId {
 
     @Column(name = "first_name")
-    private String firstName;
+    public String firstName;
     @Column(name = "last_name")
-    private String lastName;
-    private String street;
+    public String lastName;
+    public String street;
     @Column(name = "zip_code")
-    private Integer zipCode;
-    private String city;
-    private String email;
-    private String phone;
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
+    public Integer zipCode;
+    public String city;
+    public String email;
+    public String phone;
 
     public String getName() {
-        return getFirstName() + " " + getLastName();
-    }
-
-    public String getStreet() {
-        return street;
-    }
-
-    public Integer getZipCode() {
-        return zipCode;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPhone() {
-        return phone;
+        return firstName + " " + lastName;
     }
 }

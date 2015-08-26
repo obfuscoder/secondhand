@@ -85,13 +85,13 @@ public class BarCodeSheet {
 
         Barcode128 codeEAN = new Barcode128();
         codeEAN.setCodeType(Barcode.CODE128);
-        codeEAN.setCode(item.getCode());
+        codeEAN.setCode(item.code);
 
         PdfPTable table = new PdfPTable(6);
         table.setTotalWidth(100);
         table.setLockedWidth(true);
 
-        PdfPCell cell = new PdfPCell(new Phrase((new Chunk(Integer.toString(item.getNumber()),
+        PdfPCell cell = new PdfPCell(new Phrase((new Chunk(Integer.toString(item.number),
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8)))));
 
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -115,7 +115,7 @@ public class BarCodeSheet {
     List<Item> items;
 
     public Path createPDFFile(Path basePath, Reservation reservation) throws IOException, DocumentException {
-        String customer = new DecimalFormat("000").format(reservation.getNumber());
+        String customer = new DecimalFormat("000").format(reservation.number);
         Path targetPath = Paths.get(basePath.toString(), customer);
         Files.createDirectories(targetPath);
         items = ItemRepository.findByReservationOrderByNumberAsc(reservation);

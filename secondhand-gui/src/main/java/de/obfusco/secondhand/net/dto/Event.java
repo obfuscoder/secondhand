@@ -1,4 +1,4 @@
-package de.obfusco.secondhand.dto;
+package de.obfusco.secondhand.net.dto;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -11,5 +11,7 @@ public class Event {
     public BigDecimal sellerFee;
     public boolean donationOfUnsoldItemsEnabled;
     public List<Category> categories;
+    public List<Seller> sellers;
     public List<Reservation> reservations;
+    public List<Item> items;
 }

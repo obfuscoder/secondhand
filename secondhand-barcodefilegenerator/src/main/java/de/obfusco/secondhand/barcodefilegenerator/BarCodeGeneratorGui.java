@@ -22,9 +22,9 @@ import javax.swing.SwingConstants;
 
 import com.itextpdf.text.DocumentException;
 
-import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.repository.EventRepository;
 import de.obfusco.secondhand.storage.repository.ReservationRepository;
+import de.obfusco.secondhand.storage.model.Event;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,8 +134,7 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
         if (actionEvent.getSource() == justBarcode) {
             try {
                 targetPath = barCodeSheet.createPDFFile(basePath,
-                        reservationRepository.findByEventAndNumber(
-                                event, Integer.parseInt(customerNr.getText()))
+                        reservationRepository.findByNumber(Integer.parseInt(customerNr.getText()))
                 );
 
                 etiquettesLabel.setText("Barcodes für " + customerNr.getText());
@@ -147,9 +146,7 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
             try {
 
                 targetPath = barCodeLabelSheet.createPDFFile(basePath,
-                        reservationRepository.findByEventAndNumber(
-                                event,
-                                Integer.parseInt(customerNr.getText())));
+                        reservationRepository.findByNumber(Integer.parseInt(customerNr.getText())));
 
                 etiquettesLabel.setText("Etiketten für " + customerNr.getText());
             } catch (DocumentException | IOException e) {

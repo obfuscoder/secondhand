@@ -1,4 +1,4 @@
-package de.obfusco.secondhand.dto;
+package de.obfusco.secondhand.net.dto;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -6,6 +6,7 @@ import java.sql.Date;
 public class Item {
     public int id;
     public int categoryId;
+    public int reservationId;
     public String description;
     public String size;
     public BigDecimal price;

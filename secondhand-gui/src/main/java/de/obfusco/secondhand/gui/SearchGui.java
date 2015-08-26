@@ -1,7 +1,6 @@
 package de.obfusco.secondhand.gui;
 
 import de.obfusco.secondhand.storage.model.Item;
-import de.obfusco.secondhand.storage.repository.ItemRepository;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,7 +26,7 @@ public class SearchGui extends JFrame {
     private static final String TITLE = "Artikelsuche";
 
     @Autowired
-    ItemRepository ItemRepository;
+    de.obfusco.secondhand.storage.repository.ItemRepository ItemRepository;
     private JTextField searchText;
     private JTable resultTable;
 
@@ -146,17 +145,17 @@ public class SearchGui extends JFrame {
             Item result = results.get(row);
             switch (column) {
                 case 0:
-                    return result.getCode();
+                    return result.code;
                 case 1:
-                    return result.getCategory().getName();
+                    return result.category.name;
                 case 2:
-                    return result.getDescription();
+                    return result.description;
                 case 3:
-                    return result.getSize();
+                    return result.size;
                 case 4:
-                    return currency.format(result.getPrice());
+                    return currency.format(result.price);
                 case 5:
-                    return result.isSold() ? "ja" : "nein";
+                    return result.sold != null ? "ja" : "nein";
                 default:
                     return "";
             }

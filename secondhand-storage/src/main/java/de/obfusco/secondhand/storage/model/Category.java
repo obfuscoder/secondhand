@@ -4,10 +4,5 @@ import javax.persistence.Entity;
 
 @Entity(name = "categories")
 public class Category extends AbstractEntityWithId {
-
-    private String name;
-
-    public String getName() {
-        return name;
-    }
+    public String name;
 }

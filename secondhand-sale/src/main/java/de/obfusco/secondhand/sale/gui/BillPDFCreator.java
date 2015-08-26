@@ -89,17 +89,17 @@ public class BillPDFCreator {
         for (int i = 0; i < data.size(); i++) {
             Item item = data.get(i);
             table.addCell(Integer.toString(i + 1));
-            cell = new PdfPCell(new Phrase(item.getCode()));
+            cell = new PdfPCell(new Phrase(item.code));
             table.addCell(cell);
-            cell = new PdfPCell(new Phrase(item.getCategory().getName()));
+            cell = new PdfPCell(new Phrase(item.category.name));
             table.addCell(cell);
-            cell = new PdfPCell(new Phrase(item.getSize()));
+            cell = new PdfPCell(new Phrase(item.size));
             table.addCell(cell);
-            cell = new PdfPCell(new Phrase(currency.format(item.getPrice())));
+            cell = new PdfPCell(new Phrase(currency.format(item.price)));
             cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             table.addCell(cell);
             //new Row
-            cell = new PdfPCell(new Phrase(item.getDescription()));
+            cell = new PdfPCell(new Phrase(item.description));
             cell.setColspan(5);
             table.addCell(cell);
         }

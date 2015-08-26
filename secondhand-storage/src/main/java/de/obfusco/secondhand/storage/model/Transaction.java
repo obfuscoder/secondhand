@@ -21,28 +21,15 @@ public class Transaction extends AbstractEntityWithUuid {
     }
 
     @Column(name = "zip_code")
-    private Integer zipCode;
+    public Integer zipCode;
     @Enumerated(EnumType.STRING)
-    private Type type;
+    public Type type;
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(name="transaction_items",
             joinColumns={@JoinColumn(name = "transaction_id", referencedColumnName = "id")},
             inverseJoinColumns ={@JoinColumn(name = "reserved_item_id", referencedColumnName = "id")}
     )
-    private List<Item> items;
-
-    public Integer getZipCode() {
-        return zipCode;
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public List<Item> getItems() {
-        return items;
-    }
-
+    public List<Item> items;
 
     public static Transaction create(Type type, List<Item> items, Integer zipCode) {
         Transaction transaction = new Transaction();
@@ -54,8 +41,8 @@ public class Transaction extends AbstractEntityWithUuid {
 
     public static Transaction create(String id, Date date, Type type, List<Item> items, Integer zipCode) {
         Transaction transaction = create(type, items, zipCode);
-        transaction.setId(id);
-        transaction.setCreated(date);
+        transaction.id = id;
+        transaction.created = date;
         return transaction;
     }
 

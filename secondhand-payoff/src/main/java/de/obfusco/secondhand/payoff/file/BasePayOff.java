@@ -42,9 +42,9 @@ abstract public class BasePayOff {
 
     protected void addHeader(Document document, Event event) throws DocumentException {
         document.add(new Phrase("Abrechnung Flohmarkt", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
-        document.add(new Phrase("\n" + event.getName() + "\n", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
+        document.add(new Phrase("\n" + event.name + "\n", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
         document.add(new Phrase(
-                SimpleDateFormat.getDateInstance(0, Locale.GERMAN).format(event.getDate()),
+                SimpleDateFormat.getDateInstance(0, Locale.GERMAN).format(event.date),
                 FontFactory.getFont(FontFactory.HELVETICA, 10)));
     }
 }

@@ -34,7 +34,7 @@ public class StorageService {
         Transaction transaction = Transaction.create(Transaction.Type.PURCHASE, items, zipCode);
         for (Item item : items) {
             try {
-                item.setSold(soldDate);
+                item.sold = soldDate;
                 itemRepository.save(item);
             } catch (DataAccessException ex) {
                 LOG.error("sold information could not be stored", ex);
@@ -46,7 +46,7 @@ public class StorageService {
     private String getItemCodes(List<Item> items) {
         List<String> codes = new ArrayList<String>();
         for(Item item : items) {
-            codes.add(item.getCode());
+            codes.add(item.code);
         }
         return StringUtils.join(codes);
     }
@@ -57,7 +57,7 @@ public class StorageService {
         Transaction transaction = Transaction.create(Transaction.Type.REFUND, items, null);
         for (Item item : items) {
             try {
-                item.setSold(null);
+                item.sold = null;
                 itemRepository.save(item);
             } catch (DataAccessException ex) {
                 LOG.error("Refund information could not be stored", ex);

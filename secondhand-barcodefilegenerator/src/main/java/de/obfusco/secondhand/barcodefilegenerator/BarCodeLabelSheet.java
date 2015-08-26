@@ -19,7 +19,6 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import de.obfusco.secondhand.storage.model.Reservation;
 import de.obfusco.secondhand.storage.model.Item;
-import de.obfusco.secondhand.storage.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +41,7 @@ public class BarCodeLabelSheet {
     List<Item> items;
 
     @Autowired
-    ItemRepository ItemRepository;
+    de.obfusco.secondhand.storage.repository.ItemRepository ItemRepository;
 
     public Path createPdf(Path targetPath) throws DocumentException, IOException {
 
@@ -86,7 +85,7 @@ public class BarCodeLabelSheet {
     }
 
     public Path createPDFFile(Path basePath, Reservation reservation) throws DocumentException, IOException {
-        String customer = new DecimalFormat("000").format(reservation.getNumber());
+        String customer = new DecimalFormat("000").format(reservation.number);
         Path targetPath = Paths.get(basePath.toString(), customer);
         Files.createDirectories(targetPath);
         items = ItemRepository.findByReservationOrderByNumberAsc(reservation);
@@ -98,7 +97,7 @@ public class BarCodeLabelSheet {
 
         Barcode128 barcode = new Barcode128();
         barcode.setCodeType(Barcode.CODE128);
-        barcode.setCode(item.getCode());
+        barcode.setCode(item.code);
 
         PdfPTable table = new PdfPTable(5);
         table.setTotalWidth(180);
@@ -148,7 +147,7 @@ public class BarCodeLabelSheet {
 
     private PdfPCell createPriceCell(Item item) {
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.GERMANY);
-        String price = currencyFormat.format(item.getPrice());
+        String price = currencyFormat.format(item.price);
         PdfPCell cell = new PdfPCell(new Phrase(price, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22)));
         cell.setBorderColor(BaseColor.WHITE);
         cell.setColspan(5);
@@ -157,7 +156,7 @@ public class BarCodeLabelSheet {
     }
 
     private PdfPCell createSizeCell(Item item) {
-        PdfPCell cell = new PdfPCell(new Phrase("Größe: " + item.getSize()));
+        PdfPCell cell = new PdfPCell(new Phrase("Größe: " + item.size));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setColspan(5);
         cell.setBorderColor(BaseColor.WHITE);
@@ -166,7 +165,7 @@ public class BarCodeLabelSheet {
 
     private PdfPCell createDescriptionCell(Item item, PdfPTable table) {
 
-        PdfPCell cell = new PdfPCell(new Phrase(new Chunk(item.getDescription(),
+        PdfPCell cell = new PdfPCell(new Phrase(new Chunk(item.description,
                 FontFactory.getFont(FontFactory.HELVETICA, 10))));
         cell.setColspan(table.getNumberOfColumns());
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -176,7 +175,7 @@ public class BarCodeLabelSheet {
     }
 
     private PdfPCell createCategoryCell(Item item) {
-        PdfPCell cell = new PdfPCell(new Phrase(new Chunk(item.getCategory().getName(),
+        PdfPCell cell = new PdfPCell(new Phrase(new Chunk(item.category.name,
                 FontFactory.getFont(FontFactory.HELVETICA, 10))));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setVerticalAlignment(Element.ALIGN_CENTER);
@@ -187,7 +186,7 @@ public class BarCodeLabelSheet {
     }
 
     private PdfPCell createItemNumberCell(Item item) {
-        PdfPCell cell = new PdfPCell(new Phrase(new Chunk(Integer.toString(item.getNumber()),
+        PdfPCell cell = new PdfPCell(new Phrase(new Chunk(Integer.toString(item.number),
                 FontFactory.getFont(FontFactory.HELVETICA, 12))));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setVerticalAlignment(Element.ALIGN_BASELINE);
@@ -197,8 +196,7 @@ public class BarCodeLabelSheet {
     }
 
     private PdfPCell createSellerNumberCell(Item item) {
-        PdfPCell cell = new PdfPCell(new Phrase(new Chunk(
-                item.getReservation().getNumber().toString(),
+        PdfPCell cell = new PdfPCell(new Phrase(new Chunk(Integer.toString(item.reservation.number),
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18))));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setVerticalAlignment(Element.ALIGN_TOP);

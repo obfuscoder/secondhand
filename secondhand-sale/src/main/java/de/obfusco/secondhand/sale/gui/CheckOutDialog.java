@@ -30,9 +30,9 @@ import javax.swing.SwingConstants;
 
 import com.itextpdf.text.DocumentException;
 
-import de.obfusco.secondhand.storage.service.StorageService;
-import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.model.Item;
+import de.obfusco.secondhand.storage.model.Transaction;
+import de.obfusco.secondhand.storage.service.StorageService;
 
 import de.obfusco.secondhand.storage.model.TransactionListener;
 import org.slf4j.Logger;
