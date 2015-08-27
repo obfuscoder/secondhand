@@ -10,8 +10,6 @@ import javax.persistence.Temporal;
 public class Event extends AbstractEntityWithId {
 
     public String name;
-    @Temporal(javax.persistence.TemporalType.DATE)
-    public Date date;
     public String token;
     public BigDecimal commissionRate;
     public boolean donationOfUnsoldItemsEnabled;

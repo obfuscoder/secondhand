@@ -21,6 +21,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
+import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.Reservation;
 import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Seller;
@@ -71,18 +72,24 @@ public class SellerPayOff extends BasePayOff {
         document.add(new Phrase(new Chunk(soldItems.size() + " Artikel wurde(n) verkauft",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
 
+        Event event = eventRepository.find();
+
         double totalPrice = 0;
         for (Item item : soldItems) {
             totalPrice += item.price.doubleValue();
         }
-        double kitaSum = totalPrice * CHILDCARE_SHARE;
-        kitaSum = Math.ceil(kitaSum * 10) / 10;
-        double totalSum = totalPrice - (kitaSum + ENTRY_FEE);
+        double pricePrecision = event.pricePrecision.doubleValue();
+        double kitaSum = totalPrice * event.commissionRate.doubleValue();
+        kitaSum = Math.ceil(kitaSum/pricePrecision) * pricePrecision;
+        double totalSum = totalPrice - (kitaSum + event.sellerFee.doubleValue());
 
         PdfPTable table = createItemTable(soldItems);
         addTotalLine(table, "Summe", currency.format(totalPrice), true, 10);
-        addTotalLine(table, "Kommissionsanteil (" + percent.format(CHILDCARE_SHARE) + " auf 10 Cent aufgerundet)", currency.format(-kitaSum), false, 10);
-        addTotalLine(table, "Reservierungsgebühr", currency.format(-ENTRY_FEE), false, 10);
+        String commissionText = String.format("Kommissionsanteil (%s auf %s aufgerundet)",
+                percent.format(event.commissionRate.doubleValue()),
+                currency.format(pricePrecision));
+        addTotalLine(table, commissionText, currency.format(-kitaSum), false, 10);
+        addTotalLine(table, "Reservierungsgebühr", currency.format(-event.sellerFee.doubleValue()), false, 10);
         addTotalLine(table, "Auszuzahlender Betrag", currency.format(totalSum), true, 12);
         document.add(table);
         document.add(new Phrase("\n"));

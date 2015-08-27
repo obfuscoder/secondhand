@@ -2,6 +2,7 @@ package de.obfusco.secondhand.payoff.file;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import com.itextpdf.text.Chunk;
@@ -18,9 +19,6 @@ import com.itextpdf.text.pdf.PdfPTable;
 import de.obfusco.secondhand.storage.model.Event;
 
 abstract public class BasePayOff {
-
-    protected static final double CHILDCARE_SHARE = 0.2;
-    protected static final double ENTRY_FEE = 2.5;
 
     protected NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
     protected NumberFormat percent = NumberFormat.getPercentInstance(Locale.GERMANY);
@@ -44,7 +42,7 @@ abstract public class BasePayOff {
         document.add(new Phrase("Abrechnung Flohmarkt", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
         document.add(new Phrase("\n" + event.name + "\n", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
         document.add(new Phrase(
-                SimpleDateFormat.getDateInstance(0, Locale.GERMAN).format(event.date),
+                SimpleDateFormat.getDateInstance(0, Locale.GERMAN).format(new Date()),
                 FontFactory.getFont(FontFactory.HELVETICA, 10)));
     }
 }

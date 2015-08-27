@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.itextpdf.text.Document;
@@ -18,6 +19,8 @@ import com.itextpdf.text.pdf.PdfWriter;
 import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Reservation;
+import de.obfusco.secondhand.storage.repository.EventRepository;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
 import de.obfusco.secondhand.storage.repository.ReservationRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +30,13 @@ import org.springframework.stereotype.Component;
 public class TotalPayOff extends BasePayOff {
 
     @Autowired
-    de.obfusco.secondhand.storage.repository.ItemRepository ItemRepository;
+    ItemRepository itemRepository;
 
     @Autowired
     ReservationRepository reservationRepository;
+
+    @Autowired
+    EventRepository eventRepository;
 
     public File createTotalPayoffFile(Path basePath, Event event) throws DocumentException, IOException {
         Files.createDirectories(basePath);
@@ -48,25 +54,32 @@ public class TotalPayOff extends BasePayOff {
     private PdfPTable createTotalTable(Event event) {
         long reservationCount = reservationRepository.count();
         Iterable<Reservation> reservations = reservationRepository.findAll();
-        List<Item> soldItems = ItemRepository.findBySoldNotNull(event);
 
         PdfPTable table = new PdfPTable(6);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
 
-        double sum = 0;
-        for (Item item : soldItems) {
-            sum += item.price.doubleValue();
+        double pricePrecision = event.pricePrecision.doubleValue();
+
+        double commissionSum = 0.0;
+        double feeSum = 0.0;
+        double soldSum = 0.0;
+        for (Reservation reservation : reservations) {
+            double sum = 0;
+            for (Item item : itemRepository.findByReservationAndSoldNotNullOrderByNumberAsc(reservation)) {
+                sum += item.price.doubleValue();
+            }
+            soldSum += sum;
+            sum *= event.commissionRate.doubleValue();
+            commissionSum += Math.ceil(sum/pricePrecision) * pricePrecision;
+            feeSum += event.sellerFee.doubleValue();
         }
 
-        double kitaSum = sum * CHILDCARE_SHARE;
-        double totalEntryFees = ENTRY_FEE * reservationCount;
-        double totalSum = kitaSum + totalEntryFees;
-
-        addTotalLine(table, "Anzahl verkaufter Artikel", Integer.toString(soldItems.size()), true, 12);
-        addTotalLine(table, "Summe verkaufter Artikel", currency.format(sum), true, 12);
-        addTotalLine(table, "Kommissionsanteil (" + percent.format(CHILDCARE_SHARE) + ")", currency.format(kitaSum), false, 12);
-        addTotalLine(table, "Teilnahmegebühren für " + reservationCount + " Teilnehmer", currency.format(totalEntryFees), false, 12);
-        addTotalLine(table, "Gewinn insgesamt", currency.format(totalSum), true, 14);
+        int soldItemCount = itemRepository.findBySoldNotNull().size();
+        addTotalLine(table, "Anzahl verkaufter Artikel", Integer.toString(soldItemCount), true, 12);
+        addTotalLine(table, "Summe verkaufter Artikel", currency.format(soldSum), true, 12);
+        addTotalLine(table, "Kommissionsanteil (" + percent.format(event.commissionRate) + ")", currency.format(commissionSum), false, 12);
+        addTotalLine(table, "Teilnahmegebühren für " + reservationCount + " Teilnehmer", currency.format(feeSum), false, 12);
+        addTotalLine(table, "Gewinn insgesamt", currency.format(commissionSum + feeSum), true, 14);
 
         return table;
     }
