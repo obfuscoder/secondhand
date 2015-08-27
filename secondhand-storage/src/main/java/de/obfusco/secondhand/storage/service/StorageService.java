@@ -28,7 +28,7 @@ public class StorageService {
     private TransactionRepository transactionRepository;
 
     @Transactional
-    public Transaction storeSoldInformation(List<Item> items, int zipCode) {
+    public Transaction storeSoldInformation(List<Item> items, String zipCode) {
         Date soldDate = new Date();
         LOG.info("SALE: {}", getItemCodes(items));
         Transaction transaction = Transaction.create(Transaction.Type.PURCHASE, items, zipCode);

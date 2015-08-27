@@ -5,6 +5,7 @@ import de.obfusco.secondhand.net.dto.Event;
 import de.obfusco.secondhand.net.dto.Item;
 import de.obfusco.secondhand.net.dto.Reservation;
 import de.obfusco.secondhand.net.dto.Seller;
+import de.obfusco.secondhand.net.dto.Transaction;
 import de.obfusco.secondhand.storage.repository.*;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MapperFacade;
@@ -15,10 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Component
-public class EventStorageConverter {
+public class StorageConverter {
     @Autowired
     EventRepository eventRepository;
     @Autowired
@@ -29,8 +31,11 @@ public class EventStorageConverter {
     ReservationRepository reservationRepository;
     @Autowired
     ItemRepository itemRepository;
+    @Autowired
+    TransactionRepository transactionRepository;
 
     public void storeEvent(Event event) {
+        transactionRepository.deleteAll();
         itemRepository.deleteAll();
         reservationRepository.deleteAll();
         sellerRepository.deleteAll();
@@ -49,6 +54,7 @@ public class EventStorageConverter {
         MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
         mapReservation(mapperFactory);
         mapItem(mapperFactory);
+        mapTransaction(mapperFactory);
         return mapperFactory;
     }
 
@@ -85,6 +91,33 @@ public class EventStorageConverter {
                             @Override
                             public void mapBtoA(de.obfusco.secondhand.storage.model.Reservation b, Reservation a, MappingContext context) {
                                 a.sellerId = b.seller.id;
+                            }
+                        })
+                .register();
+    }
+
+    private void mapTransaction(MapperFactory mapperFactory) {
+        mapperFactory.classMap(Transaction.class, de.obfusco.secondhand.storage.model.Transaction.class)
+                .field("type", "type")
+                .field("id", "id")
+                .customize(
+                        new CustomMapper<Transaction, de.obfusco.secondhand.storage.model.Transaction>() {
+                            @Override
+                            public void mapAtoB(Transaction a, de.obfusco.secondhand.storage.model.Transaction b, MappingContext context) {
+                                b.created = a.date;
+                                b.items = new ArrayList<>();
+                                for (de.obfusco.secondhand.storage.model.Item item : itemRepository.findAll(a.items)) {
+                                    b.items.add(item);
+                                }
+                            }
+
+                            @Override
+                            public void mapBtoA(de.obfusco.secondhand.storage.model.Transaction b, Transaction a, MappingContext context) {
+                                a.date = b.created;
+                                a.items = new ArrayList<>();
+                                for (de.obfusco.secondhand.storage.model.Item item : b.items) {
+                                    a.items.add(item.id);
+                                }
                             }
                         })
                 .register();
@@ -135,5 +168,11 @@ public class EventStorageConverter {
             event.items.add(mapper.map(item, Item.class));
         }
         return event;
+    }
+
+    public List<Transaction> convertToTransactions(Iterable<de.obfusco.secondhand.storage.model.Transaction> transactions) {
+        MapperFactory mapperFactory = createMapperFactory();
+        MapperFacade mapper = mapperFactory.getMapperFacade();
+        return mapper.mapAsList(transactions, Transaction.class);
     }
 }

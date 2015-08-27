@@ -64,7 +64,7 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 
     boolean showPostCode;
 
-    int postCode = 0;
+    String postCode = null;
     private Path basePath = Paths.get("data/pdfs/sale");
     private TransactionListener transactionListener;
 
@@ -264,10 +264,10 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 
     private boolean getPostcode() {
         String postText = postCodeTextField.getText();
-        postCode = 0;
+        postCode = null;
         if (postText.length() == 5) {
             try {
-                postCode = Integer.parseInt(postText);
+                postCode = postText;
                 errorLabel.setText("");
                 return true;
             } catch (NumberFormatException ex) {
@@ -315,7 +315,7 @@ public class CheckOutDialog extends JDialog implements ActionListener {
         calculateChange();
 
         boolean postcodeOK = true;
-        if (postCode == 0 && postCodeTextField.getText().length() > 0) {
+        if (postCode == null && postCodeTextField.getText().length() > 0) {
             postcodeOK = getPostcode();
         }
         if (!postcodeOK) {

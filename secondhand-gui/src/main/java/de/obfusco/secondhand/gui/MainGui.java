@@ -86,7 +86,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     ConfigGui configGui;
 
     @Autowired
-    private EventStorageConverter eventStorageConverter;
+    private StorageConverter storageConverter;
 
     private static final long serialVersionUID = 4961295225628108431L;
 
@@ -284,6 +284,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
             @Override
             public void actionPerformed(ActionEvent arg) {
+                configGui.setRootUrl(properties.getProperty("online.root"));
                 configGui.setVisible(true);
             }
         });
@@ -343,7 +344,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         String json = message.substring(4);
         JsonEventConverter converter = new JsonEventConverter();
         Event event = converter.parse(json);
-        eventStorageConverter.storeEvent(event);
+        storageConverter.storeEvent(event);
     }
 
     private void parseHelpMessage(Peer peer, String message) {
@@ -353,12 +354,16 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
     private Transaction parseTransaction(String message) {
         String[] messageParts = message.split(";");
-        if (messageParts.length != 5) throw new IllegalArgumentException("Message does not contain 5 segments separated by ';'");
+        if (messageParts.length != 5) {
+            throw new IllegalArgumentException("Message does not contain 5 segments separated by ';'");
+        }
         String id = messageParts[0];
         Transaction.Type type = Transaction.Type.valueOf(messageParts[1]);
         Date date = new Date(Long.parseLong(messageParts[2]));
-        Integer zipCode = null;
-        try { zipCode = Integer.parseInt(messageParts[3]); } catch (NumberFormatException ex) {}
+        String zipCode = null;
+        try {
+            zipCode = messageParts[3];
+        } catch (NumberFormatException ex) {}
         List<Item> Items = new ArrayList<>();
         for (String itemId : messageParts[4].split(",")) {
             Item item = itemRepository.findOne(Integer.parseInt(itemId));

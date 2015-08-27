@@ -21,7 +21,7 @@ public class Transaction extends AbstractEntityWithUuid {
     }
 
     @Column(name = "zip_code")
-    public Integer zipCode;
+    public String zipCode;
     @Enumerated(EnumType.STRING)
     public Type type;
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
@@ -31,7 +31,7 @@ public class Transaction extends AbstractEntityWithUuid {
     )
     public List<Item> items;
 
-    public static Transaction create(Type type, List<Item> items, Integer zipCode) {
+    public static Transaction create(Type type, List<Item> items, String zipCode) {
         Transaction transaction = new Transaction();
         transaction.type = type;
         transaction.zipCode = zipCode;
@@ -39,7 +39,7 @@ public class Transaction extends AbstractEntityWithUuid {
         return transaction;
     }
 
-    public static Transaction create(String id, Date date, Type type, List<Item> items, Integer zipCode) {
+    public static Transaction create(String id, Date date, Type type, List<Item> items, String zipCode) {
         Transaction transaction = create(type, items, zipCode);
         transaction.id = id;
         transaction.created = date;

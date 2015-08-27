@@ -37,12 +37,12 @@ public class EventImporterTest {
     ItemRepository itemRepository;
 
     @Autowired
-    EventStorageConverter eventStorageConverter;
+    StorageConverter storageConverter;
 
     @Test
     public void importJson() {
         Event event = parse(getClass().getResourceAsStream("/test.json"));
-        eventStorageConverter.storeEvent(event);
+        storageConverter.storeEvent(event);
         de.obfusco.secondhand.storage.model.Event dataEvent = eventRepository.find();
         assertEquals(4, dataEvent.id);
         assertEquals(event.categories.size(), categoryRepository.count());

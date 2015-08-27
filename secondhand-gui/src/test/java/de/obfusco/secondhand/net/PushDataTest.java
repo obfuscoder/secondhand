@@ -9,15 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
 
@@ -36,11 +29,11 @@ public class PushDataTest {
     ItemRepository itemRepository;
 
     @Autowired
-    EventStorageConverter eventStorageConverter;
+    StorageConverter storageConverter;
 
     @Test
     public void convertToEvent() {
-        Event event = eventStorageConverter.convertToEvent();
+        Event event = storageConverter.convertToEvent();
         assertEquals(4, event.id);
         assertEquals(categoryRepository.count(), event.categories.size());
         assertEquals(1, event.categories.get(0).id);
