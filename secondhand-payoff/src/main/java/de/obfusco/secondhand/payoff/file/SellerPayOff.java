@@ -97,13 +97,19 @@ public class SellerPayOff extends BasePayOff {
         List<Item> unsoldItems = ItemRepository.findByReservationAndSoldNullOrderByNumberAsc(reservation);
         document.add(new Phrase(new Chunk(unsoldItems.size() + " Artikel wurde(n) nicht verkauft",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
-
-        totalPrice = 0;
-        for (Item item : unsoldItems) {
-            totalPrice += item.price.doubleValue();
-        }
         table = createItemTable(unsoldItems);
         document.add(table);
+
+        if (event.donationOfUnsoldItemsEnabled) {
+            List<Item> donatedItems = ItemRepository.findByReservationAndSoldNullAndDonationTrueOrderByNumberAsc(reservation);
+            if (donatedItems.size() > 0) {
+                document.add(new Phrase("\n"));
+                document.add(new Phrase(new Chunk(donatedItems.size() + " Artikel werden gespendet",
+                        FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
+                table = createItemTable(donatedItems);
+                document.add(table);
+            }
+        }
     }
 
     private PdfPTable createItemTable(List<Item> items) throws DocumentException {

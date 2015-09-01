@@ -23,4 +23,5 @@ public class Item extends AbstractEntityWithId {
     public String code;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date sold;
+    public boolean donation;
 }
