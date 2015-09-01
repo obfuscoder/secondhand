@@ -112,6 +112,8 @@ public class BarCodeLabelSheet {
         cell = createCategoryCell(item);
         table.addCell(cell);
 
+        if (item.donation) table.addCell(createDonationCell(item, table));
+
         cell = createDescriptionCell(item, table);
         table.addCell(cell);
 
@@ -134,6 +136,15 @@ public class BarCodeLabelSheet {
         return table;
     }
 
+    private PdfPCell createDonationCell(Item item, PdfPTable table) {
+        PdfPCell cell = new PdfPCell(new Phrase(new Chunk("S", FontFactory.getFont(FontFactory.HELVETICA, 40))));
+        cell.setColspan(1);
+        cell.setRowspan(3);
+        cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell.setBorderColor(BaseColor.WHITE);
+        return cell;
+    }
+
     private PdfPCell createBarcodeCell(PdfContentByte cb, Barcode128 codeEAN) {
         Image barcode = codeEAN.createImageWithBarcode(cb, null, null);
         barcode.scalePercent(120f);
@@ -150,7 +161,7 @@ public class BarCodeLabelSheet {
         String price = currencyFormat.format(item.price);
         PdfPCell cell = new PdfPCell(new Phrase(price, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22)));
         cell.setBorderColor(BaseColor.WHITE);
-        cell.setColspan(5);
+        cell.setColspan(5 - (item.donation ? 1 : 0));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         return cell;
     }
@@ -158,16 +169,15 @@ public class BarCodeLabelSheet {
     private PdfPCell createSizeCell(Item item) {
         PdfPCell cell = new PdfPCell(new Phrase("Größe: " + item.size));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        cell.setColspan(5);
+        cell.setColspan(5 - (item.donation ? 1 : 0));
         cell.setBorderColor(BaseColor.WHITE);
         return cell;
     }
 
     private PdfPCell createDescriptionCell(Item item, PdfPTable table) {
-
         PdfPCell cell = new PdfPCell(new Phrase(new Chunk(item.description,
                 FontFactory.getFont(FontFactory.HELVETICA, 10))));
-        cell.setColspan(table.getNumberOfColumns());
+        cell.setColspan(table.getNumberOfColumns() - (item.donation ? 1 : 0));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setBorderColor(BaseColor.WHITE);
         cell.setBorder(NUMBER_OF_COLUMNS);
