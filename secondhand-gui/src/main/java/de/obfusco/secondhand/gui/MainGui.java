@@ -328,7 +328,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         boolean withPayouts = JOptionPane.showConfirmDialog(
                 null, "Soll eine Spalte für den Auszahlbetrag mit enthalten sein?", "Ausdruck",
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION;
-        File file = null;
+        File file;
         Path fileBasePath = Paths.get("data/pdfs/receipts");
         String title = "Rückgabe Verkäufer";
         String introText = "Mit meiner Unterschrift bestätige ich den Erhalt meiner nicht verkauften Artikel sowie meines Gewinnanteils der verkauften Artikel.";
@@ -346,15 +346,9 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
                 commissionCutSum = Math.floor(commissionCutSum / pricePrecision) * pricePrecision;
                 payouts.put(reservation.number, currency.format(commissionCutSum - sellerFee));
             }
-            file = receiptFile.createFile(fileBasePath,
-                    title,
-                    introText,
-                    "Betrag", payouts);
+            file = receiptFile.createFile(fileBasePath, title, introText, "Betrag", payouts);
         } else {
-            file = receiptFile.createFile(fileBasePath,
-                    title,
-                    introText,
-                    null, null);
+            file = receiptFile.createFile(fileBasePath, title, introText, null, null);
         }
         Desktop.getDesktop().open(file);
     }
