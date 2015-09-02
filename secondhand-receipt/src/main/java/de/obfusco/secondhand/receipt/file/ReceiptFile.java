@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -30,8 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ReceiptFile {
 
-    public static final int EVENT_ID = 1;
-
     @Autowired
     ReservationRepository reservationRepository;
 
@@ -39,6 +38,15 @@ public class ReceiptFile {
     EventRepository eventRepository;
 
     public File createFile(Path basePath, String title, String introText) throws DocumentException, IOException {
+        return createFile(basePath, title, introText, null, null);
+    }
+
+    protected void addHeader(Document document, String title) throws DocumentException {
+        document.add(new Phrase(new Chunk(title, FontFactory
+                .getFont(FontFactory.HELVETICA_BOLD, 24))));
+    }
+
+    public File createFile(Path basePath, String title, String introText, String payoutTitle, Map<Integer, String> payouts) throws IOException, DocumentException {
         Files.createDirectories(basePath);
         Path fullPath = Paths.get(basePath.toString(), "receipt.pdf");
         Document document = new Document(PageSize.A4, 80, 50, 50, 30);
@@ -49,10 +57,10 @@ public class ReceiptFile {
         document.open();
         addHeader(document, title);
 
-        Iterable<Reservation> reservations = reservationRepository.findAll();
+        Iterable<Reservation> reservations = reservationRepository.findAllByOrderByNumberAsc();
 
-        String[] columnNames = {"ResNr", "Name", "Unterschrift"};
-        float[] widths = new float[]{12f, 40f, 40f};
+        String[] columnNames = ((payoutTitle != null) ? new String[]{"ResNr", "Name", payoutTitle, "Unterschrift"} : new String[]{"ResNr", "Name", "Unterschrift"});
+        float[] widths = (payoutTitle != null) ? new float[]{12f, 40f, 20f, 40f} : new float[]{12f, 40f, 40f};
         PdfPTable table = new PdfPTable(columnNames.length);
         table.setWidths(widths);
         table.setWidthPercentage(100f);
@@ -78,9 +86,13 @@ public class ReceiptFile {
             table.addCell(cell);
             cell = new PdfPCell(new Phrase(
                     reservation.seller.lastName
-                    + ", "
-                    + reservation.seller.firstName));
+                            + ", "
+                            + reservation.seller.firstName));
             table.addCell(cell);
+            if (payoutTitle != null) {
+                table.addCell(new PdfPCell(new Phrase(new Chunk(payouts.get(reservation.number),
+                        FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)))));
+            }
             cell = new PdfPCell();
             table.addCell(cell);
         }
@@ -88,11 +100,5 @@ public class ReceiptFile {
         document.add(table);
         document.close();
         return fullPath.toFile();
-
-    }
-
-    protected void addHeader(Document document, String title) throws DocumentException {
-        document.add(new Phrase(new Chunk(title, FontFactory
-                .getFont(FontFactory.HELVETICA_BOLD, 24))));
     }
 }

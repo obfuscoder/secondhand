@@ -5,14 +5,17 @@ import com.itextpdf.text.DocumentException;
 import de.obfusco.secondhand.barcodefilegenerator.BarCodeGeneratorGui;
 import de.obfusco.secondhand.gui.config.ConfigGui;
 import de.obfusco.secondhand.net.*;
-import de.obfusco.secondhand.net.dto.Event;
 import de.obfusco.secondhand.payoff.gui.PayOffGui;
 import de.obfusco.secondhand.refund.gui.RefundGui;
 import de.obfusco.secondhand.reports.ReportsGui;
+import de.obfusco.secondhand.storage.model.Reservation;
+import de.obfusco.secondhand.storage.repository.EventRepository;
 import de.obfusco.secondhand.storage.repository.ItemRepository;
+import de.obfusco.secondhand.storage.repository.ReservationRepository;
 import de.obfusco.secondhand.testscan.gui.TestScanGui;
 import de.obfusco.secondhand.receipt.file.ReceiptFile;
 import de.obfusco.secondhand.sale.gui.CashBoxGui;
+import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.model.TransactionListener;
@@ -34,14 +37,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
+import java.text.NumberFormat;
+import java.util.*;
 
 @Component
 public class MainGui extends JFrame implements MessageBroker, TransactionListener, DataPusher {
@@ -83,10 +86,19 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     ItemRepository itemRepository;
 
     @Autowired
+    ReservationRepository reservationRepository;
+
+    @Autowired
+    EventRepository eventRepository;
+
+    @Autowired
     ConfigGui configGui;
 
     @Autowired
     private StorageConverter storageConverter;
+
+    private NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
+
 
     private static final long serialVersionUID = 4961295225628108431L;
 
@@ -207,16 +219,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         });
         billGenerator.setFont(billGenerator.getFont().deriveFont(BUTTON_FONT_SIZE));
 
-        barcodeGenerator = new JButton("Barcodes drucken");
-        barcodeGenerator.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                barCodeGeneratorGui.setVisible(true);
-            }
-        });
-        barcodeGenerator.setFont(barcodeGenerator.getFont().deriveFont(BUTTON_FONT_SIZE));
-
         testScan = new JButton("Barcode-Test");
         testScan.addActionListener(new ActionListener() {
 
@@ -227,14 +229,25 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         });
         testScan.setFont(testScan.getFont().deriveFont(BUTTON_FONT_SIZE));
 
+        barcodeGenerator = new JButton("Barcodes drucken");
+        barcodeGenerator.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                barCodeGeneratorGui.setVisible(true);
+            }
+        });
+        barcodeGenerator.setFont(barcodeGenerator.getFont().deriveFont(BUTTON_FONT_SIZE));
+
         createSellerReceipt = new JButton("Annahme Verkäuferliste");
         createSellerReceipt.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    Desktop.getDesktop().open(receiptFile.createFile(Paths.get("data/pdfs/receipts"), "Annahme Flohmarkt",
-                            "Mit meiner Unterschrift bestaetige ich die Teilnahmebedingungen."));
+                    Desktop.getDesktop().open(receiptFile.createFile(Paths.get("data/pdfs/receipts"),
+                            "Annahme Flohmarkt",
+                            "Mit meiner Unterschrift bestätige ich die Teilnahmebedingungen."));
 
                 } catch (IOException | DocumentException e1) {
                     LOG.error("Failed to create and open receipts file", e1);
@@ -249,9 +262,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    Desktop.getDesktop().open(receiptFile.createFile(Paths.get("data/pdfs/receipts"), "Rückgabe Verkäufer",
-                            "Mit meiner Unterschrift bestätige ich den Erhalt meiner nicht verkauften Artikel sowie meines Gewinnanteils der verkauften Artikel."));
-
+                    createPayoutReceipt();
                 } catch (IOException | DocumentException e1) {
                     LOG.error("Failed to create and open receipts file", e1);
                 }
@@ -298,8 +309,8 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         if (showAllButtons) {
             panel.add(createSellerReceipt);
             panel.add(createSellerResultReceipt);
-            panel.add(barcodeGenerator);
             panel.add(testScan);
+            panel.add(barcodeGenerator);
             panel.add(billGenerator);
             panel.add(configButton);
         }
@@ -313,8 +324,43 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         pane.add(panel, BorderLayout.SOUTH);
     }
 
+    private void createPayoutReceipt() throws IOException, DocumentException {
+        boolean withPayouts = JOptionPane.showConfirmDialog(
+                null, "Soll eine Spalte für den Auszahlbetrag mit enthalten sein?", "Ausdruck",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION;
+        File file = null;
+        Path fileBasePath = Paths.get("data/pdfs/receipts");
+        String title = "Rückgabe Verkäufer";
+        String introText = "Mit meiner Unterschrift bestätige ich den Erhalt meiner nicht verkauften Artikel sowie meines Gewinnanteils der verkauften Artikel.";
+        if (withPayouts) {
+            Map<Integer, String> payouts = new HashMap<>();
+            Event event = eventRepository.find();
+            double pricePrecision = event.pricePrecision.doubleValue();
+            double sellerFee = event.sellerFee.doubleValue();
+            for (Reservation reservation : reservationRepository.findAll()) {
+                double sum = 0;
+                for (Item item : itemRepository.findByReservationAndSoldNotNullOrderByNumberAsc(reservation)) {
+                    sum += item.price.doubleValue();
+                }
+                double commissionCutSum = sum * (1 - event.commissionRate.doubleValue());
+                commissionCutSum = Math.floor(commissionCutSum / pricePrecision) * pricePrecision;
+                payouts.put(reservation.number, currency.format(commissionCutSum - sellerFee));
+            }
+            file = receiptFile.createFile(fileBasePath,
+                    title,
+                    introText,
+                    "Betrag", payouts);
+        } else {
+            file = receiptFile.createFile(fileBasePath,
+                    title,
+                    introText,
+                    null, null);
+        }
+        Desktop.getDesktop().open(file);
+    }
+
     private void helpNeeded(boolean isNeeded) {
-        network.send("HELP-" + (isNeeded ? "ON":"OFF"));
+        network.send("HELP-" + (isNeeded ? "ON" : "OFF"));
     }
 
     @Override
@@ -343,7 +389,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     private void parseDataMessage(Peer peer, String message) {
         String json = message.substring(4);
         JsonEventConverter converter = new JsonEventConverter();
-        Event event = converter.parse(json);
+        de.obfusco.secondhand.net.dto.Event event = converter.parse(json);
         storageConverter.storeEvent(event);
     }
 
@@ -447,7 +493,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     }
 
     @Override
-    public void push(Event event) {
+    public void push(de.obfusco.secondhand.net.dto.Event event) {
         network.send("DATA" + new Gson().toJson(event));
     }
 }
