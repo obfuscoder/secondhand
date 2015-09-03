@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.itextpdf.text.DocumentException;
 import de.obfusco.secondhand.barcodefilegenerator.BarCodeGeneratorGui;
 import de.obfusco.secondhand.gui.config.ConfigGui;
+import de.obfusco.secondhand.gui.transactions.TransactionsGui;
 import de.obfusco.secondhand.net.*;
 import de.obfusco.secondhand.payoff.gui.PayOffGui;
 import de.obfusco.secondhand.refund.gui.RefundGui;
@@ -112,9 +113,13 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     public JButton createSellerResultReceipt;
     public JButton reportsButton;
     public JButton configButton;
+    public JButton transactionsButton;
     public JToggleButton helpButton;
     JFileChooser fc;
     JLabel statusLine;
+
+    @Autowired
+    private TransactionsGui transactionsGui;
 
     public MainGui() {
         super("Flohmarkt Kassensystem");
@@ -301,6 +306,16 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         });
         configButton.setFont(configButton.getFont().deriveFont(BUTTON_FONT_SIZE));
 
+        transactionsButton = new JButton("Transaktionen");
+        transactionsButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent arg) {
+                transactionsGui.setVisible(true);
+            }
+        });
+        transactionsButton.setFont(transactionsButton.getFont().deriveFont(BUTTON_FONT_SIZE));
+        
         panel.add(sale);
         panel.add(refund);
         panel.add(search);
@@ -313,6 +328,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             panel.add(barcodeGenerator);
             panel.add(billGenerator);
             panel.add(configButton);
+            panel.add(transactionsButton);
         }
         panel.add(reportsButton);
         panel.add(helpButton);

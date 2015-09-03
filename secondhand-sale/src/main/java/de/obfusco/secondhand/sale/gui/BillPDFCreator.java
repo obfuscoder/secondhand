@@ -28,7 +28,7 @@ public class BillPDFCreator {
 
     private static NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
-    public File createPdf(Path basePath, List<Item> data, Double sum, Double bar, Double change)
+    public File createPdf(Path basePath, List<Item> data)
             throws IOException, DocumentException {
 
         Files.createDirectories(basePath);
@@ -52,10 +52,10 @@ public class BillPDFCreator {
                 FontFactory.HELVETICA_BOLD, 12))));
         document.add(new Paragraph("\n"));
 
-        document.add(insertItemTable(data, sum, bar, change));
+        document.add(insertItemTable(data));
 
         document.add(new Paragraph("\n"));
-        document.add(new Phrase(new Chunk("Vielen Dank für Ihren Einkauf. Der Erlös kommt den Kindergärten \n \"Arche Noah\" und \"Regenbogen\" zugute.",
+        document.add(new Phrase(new Chunk("Vielen Dank für Ihren Einkauf.",
                 FontFactory.getFont(FontFactory.HELVETICA, 10))));
 
         document.close();
@@ -63,7 +63,7 @@ public class BillPDFCreator {
         return targetPath.toFile();
     }
 
-    public static PdfPTable insertItemTable(List<Item> data, Double sum, Double bar, Double change) {
+    public static PdfPTable insertItemTable(List<Item> data) {
 
         PdfPTable table = new PdfPTable(5);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -86,6 +86,7 @@ public class BillPDFCreator {
         cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
         table.addCell(cell);
 
+        double sum = 0.0;
         for (int i = 0; i < data.size(); i++) {
             Item item = data.get(i);
             table.addCell(Integer.toString(i + 1));
@@ -102,6 +103,8 @@ public class BillPDFCreator {
             cell = new PdfPCell(new Phrase(item.description));
             cell.setColspan(5);
             table.addCell(cell);
+
+            sum += item.price.doubleValue();
         }
 
         cell = new PdfPCell(new Phrase("------------------------------------------------------------"));
@@ -114,24 +117,6 @@ public class BillPDFCreator {
         table.addCell(cell);
         cell = new PdfPCell(new Phrase(new Chunk(currency.format(sum), FontFactory.getFont(
                 FontFactory.HELVETICA_BOLD, 12))));
-        cell.setColspan(4);
-        cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        table.addCell(cell);
-
-        cell = new PdfPCell(new Phrase(new Chunk("BAR", FontFactory.getFont(
-                FontFactory.HELVETICA, 12))));
-        table.addCell(cell);
-        cell = new PdfPCell(new Phrase(new Chunk(currency.format(bar), FontFactory.getFont(
-                FontFactory.HELVETICA, 12))));
-        cell.setColspan(4);
-        cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        table.addCell(cell);
-
-        cell = new PdfPCell(new Phrase(new Chunk("Rückgeld", FontFactory.getFont(
-                FontFactory.HELVETICA, 12))));
-        table.addCell(cell);
-        cell = new PdfPCell(new Phrase(new Chunk(change == null ? "--" : currency.format(change), FontFactory.getFont(
-                FontFactory.HELVETICA, 12))));
         cell.setColspan(4);
         cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
         table.addCell(cell);

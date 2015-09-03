@@ -298,8 +298,8 @@ public class CheckOutDialog extends JDialog implements ActionListener {
                 } else {
                     bar = Double.parseDouble(frame.getPrice().replace(",", "."));
                 }
-                File pdfFile = new BillPDFCreator().createPdf(basePath, frame.getTableData(),
-                        Double.parseDouble(frame.getPrice().replace(",", ".")), bar, getChange());
+                File pdfFile = new BillPDFCreator().createPdf(basePath, frame.getTableData()
+                );
                 Desktop.getDesktop().open(pdfFile);
             } catch (DocumentException | IOException ex) {
                 JOptionPane.showMessageDialog(this, "Fehler",

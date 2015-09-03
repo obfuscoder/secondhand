@@ -16,8 +16,18 @@ import java.util.List;
 public class Transaction extends AbstractEntityWithUuid {
 
     public enum Type {
-        PURCHASE,
-        REFUND
+        PURCHASE {
+            @Override
+            public String toString() {
+                return "Verkauf";
+            }
+        },
+        REFUND {
+            @Override
+            public String toString() {
+                return "Storno";
+            }
+        }
     }
 
     @Column(name = "zip_code")
