@@ -94,8 +94,8 @@ public class SellerPayOff extends BasePayOff {
         document.add(table);
         document.add(new Phrase("\n"));
 
-        List<Item> unsoldItems = ItemRepository.findByReservationAndSoldNullOrderByNumberAsc(reservation);
-        document.add(new Phrase(new Chunk(unsoldItems.size() + " Artikel wurde(n) nicht verkauft",
+        List<Item> unsoldItems = ItemRepository.findByReservationAndSoldNullAndDonationFalseOrderByNumberAsc(reservation);
+        document.add(new Phrase(new Chunk(unsoldItems.size() + " Artikel wurde(n) zurückgegeben",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
         table = createItemTable(unsoldItems);
         document.add(table);
@@ -104,7 +104,7 @@ public class SellerPayOff extends BasePayOff {
             List<Item> donatedItems = ItemRepository.findByReservationAndSoldNullAndDonationTrueOrderByNumberAsc(reservation);
             if (donatedItems.size() > 0) {
                 document.add(new Phrase("\n"));
-                document.add(new Phrase(new Chunk(donatedItems.size() + " Artikel werden gespendet",
+                document.add(new Phrase(new Chunk(donatedItems.size() + " Artikel wurde(n) gespendet",
                         FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
                 table = createItemTable(donatedItems);
                 document.add(table);

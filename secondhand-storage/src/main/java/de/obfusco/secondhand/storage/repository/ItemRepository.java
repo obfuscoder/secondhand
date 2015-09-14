@@ -15,7 +15,7 @@ public interface ItemRepository extends CrudRepository<Item, Integer> {
 
     List<Item> findByReservationAndSoldNotNullOrderByNumberAsc(Reservation reservation);
 
-    List<Item> findByReservationAndSoldNullOrderByNumberAsc(Reservation reservation);
+    List<Item> findByReservationAndSoldNullAndDonationFalseOrderByNumberAsc(Reservation reservation);
 
     List<Item> findByReservationAndSoldNullAndDonationTrueOrderByNumberAsc(Reservation reservation);
 
