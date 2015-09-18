@@ -19,7 +19,7 @@ public class JsonEventConverter {
         Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").create();
-        return gson.fromJson(new InputStreamReader(inputStream), Event.class);
+        return gson.fromJson(new InputStreamReader(inputStream, StandardCharsets.UTF_8), Event.class);
     }
 
     public String toJson(Event event) {
