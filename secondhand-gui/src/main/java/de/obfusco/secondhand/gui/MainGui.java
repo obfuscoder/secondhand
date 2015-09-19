@@ -491,7 +491,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder
                 .append(transaction.id).append(";")
-                .append(transaction.type).append(";")
+                .append(transaction.type.name()).append(";")
                 .append(transaction.created.getTime()).append(";")
                 .append(transaction.zipCode).append(";");
         List<Integer> ids = new ArrayList<>();
