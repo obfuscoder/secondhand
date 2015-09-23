@@ -11,4 +11,4 @@ dependency-reduced-pom.xml
 *.db
 Output
 config.properties
-flohmarkt.iss
+flohmarkt_installer.iss
