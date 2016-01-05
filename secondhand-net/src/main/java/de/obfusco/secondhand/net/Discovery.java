@@ -17,22 +17,23 @@ public class Discovery implements Closeable {
     private MulticastSocket socket;
     private InetAddress multicastAddress = InetAddress.getByName("239.42.13.37");
 
-    public Discovery(int port, DiscoveryObserver observer) throws IOException {
+    public Discovery(int port, DiscoveryObserver observer, String name) throws IOException {
         socket = new MulticastSocket(port);
         socket.setBroadcast(true);
         socket.joinGroup(multicastAddress);
         discoveryListener = new DiscoveryListener(socket, observer);
-        discoveryAnnouncer = new DiscoveryAnnouncer(socket, multicastAddress);
+        discoveryAnnouncer = new DiscoveryAnnouncer(socket, multicastAddress, name);
     }
 
     public void start() {
+        LOG.info("Starting network discovery");
         discoveryListener.start();
         discoveryAnnouncer.start();
     }
 
     @Override
     public void close() throws IOException {
-        LOG.info("Closing discovery");
+        LOG.info("Closing network discovery");
         if (discoveryListener != null) {
             discoveryListener.close();
         }

@@ -75,7 +75,7 @@ public class ReportsGui extends JFrame {
             for (Peer peer: network.getPeers()) {
                 boolean needsHelp = peersNeedingHelp.contains(peer);
                 if (needsHelp) sb.append("<font color=\"red\">");
-                sb.append(peer.getAddress());
+                sb.append(String.format("%s - %s", peer.getAddress(), peer.getPeerName()));
                 if (needsHelp) sb.append("</font>");
                 sb.append("<br/>");
             }

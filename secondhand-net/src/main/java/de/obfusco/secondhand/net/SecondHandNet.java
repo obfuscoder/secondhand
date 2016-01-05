@@ -3,12 +3,13 @@ package de.obfusco.secondhand.net;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Date;
 
 public class SecondHandNet implements MessageBroker {
 
     public static void main(String[] args) throws IOException {
 
-        try (Network network = new Network(31337, new SecondHandNet())) {
+        try (Network network = new Network(31337, new SecondHandNet(), "SOMENAME")) {
             network.start();
             BufferedReader buffer=new BufferedReader(new InputStreamReader(System.in));
             while(true) {

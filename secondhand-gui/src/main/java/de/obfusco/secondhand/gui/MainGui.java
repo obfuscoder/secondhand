@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
@@ -145,20 +146,20 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     }
 
     public void start() {
-        if (!initializeNetwork()) return;
-
         Image image = new ImageIcon("favicon.ico").getImage();
         setIconImage(image);
         addComponentsToPane(getContentPane());
         pack();
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        if (!initializeNetwork()) return;
         setVisible(true);
     }
 
     private boolean initializeNetwork() {
         try {
-            network = new Network(31337, this);
+            String name = properties.getProperty("peer.name", InetAddress.getLocalHost().getHostName());
+            network = new Network(31337, this, name);
             network.start();
             reportsGui.setNetwork(network);
         } catch (IOException e) {

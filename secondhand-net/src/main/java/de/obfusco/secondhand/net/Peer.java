@@ -8,7 +8,11 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.Date;
+import java.util.Timer;
 
 public class Peer extends Thread implements Closeable {
 
@@ -19,14 +23,16 @@ public class Peer extends Thread implements Closeable {
     private Socket socket;
     private PeerObserver peerObserver;
     private Ping ping;
+    private long timeDiff;
+    private String localName;
+    private String peerName;
 
-    public Peer(Socket socket, PeerObserver peerObserver) throws IOException {
+    public Peer(Socket socket, PeerObserver peerObserver, String localName) throws IOException {
         this.socket = socket;
         this.peerObserver = peerObserver;
-        sender =
-                new PrintWriter(socket.getOutputStream(), true);
-        receiver = new BufferedReader(
-                new InputStreamReader(socket.getInputStream()));
+        this.localName = localName;
+        sender = new PrintWriter(socket.getOutputStream(), true);
+        receiver = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }
 
     @Override
@@ -44,7 +50,12 @@ public class Peer extends Thread implements Closeable {
                         peerObserver.disconnected(this);
                         return;
                     }
-                    if (!line.equals("PING")) peerObserver.messageReceived(this, line);
+                    LOG.debug("Received from peer {}: {}", socket.getInetAddress().getHostAddress(), line);
+                    if (line.startsWith("PING")) {
+                        if (line.length() > 4) pingReceived(line.substring(5));
+                    } else {
+                        peerObserver.messageReceived(this, line);
+                    }
                 } catch (IOException e) {
                     LOG.error("Error while communication with peer " + socket.getInetAddress().getHostAddress(), e);
                     peerObserver.errorOccurred(this);
@@ -55,6 +66,15 @@ public class Peer extends Thread implements Closeable {
             LOG.error("Exception!", ex);
             peerObserver.errorOccurred(this);
         }
+    }
+
+    private void pingReceived(String message) {
+        if (message.isEmpty()) return;
+        String[] pingParts = message.split(";");
+        long peerTime = Long.parseLong(pingParts[0]);
+        timeDiff = new Date().getTime() - peerTime;
+        peerName = pingParts[1];
+        LOG.debug("Peer {} info update: tdiff={}, name={}", getAddress(), timeDiff, peerName);
     }
 
     public boolean isConnected() {
@@ -79,11 +99,28 @@ public class Peer extends Thread implements Closeable {
     }
 
     public String getAddress() {
-        return socket.getInetAddress().getHostAddress();
+        return String.format("%s(%s)", socket.getInetAddress().getHostAddress(), socket.getInetAddress().getHostName());
+    }
+
+    public String getPeerName() {
+        return peerName;
+    }
+
+    public long getTimeDiff() {
+        return timeDiff;
     }
 
     public synchronized void send(String message) {
-        if (isConnected()) sender.println(message);
+        if (isConnected()) {
+            LOG.debug("Sending to peer {}: {}", getAddress(), message);
+            sender.println(message);
+        } else {
+            LOG.warn("Not connected to {} - not sending {}", getAddress(), message);
+        }
+    }
+
+    public String getLocalName() {
+        return localName;
     }
 
     private class Ping extends Thread {
@@ -98,7 +135,7 @@ public class Peer extends Thread implements Closeable {
         public void run() {
             LOG.info("Ping running");
             running = true;
-            while(running && peer.isConnected()) {
+            while (running && peer.isConnected()) {
                 try {
                     synchronized (this) {
                         wait(5000);
@@ -108,7 +145,7 @@ public class Peer extends Thread implements Closeable {
                     return;
                 }
                 if (!running) break;
-                peer.send("PING");
+                peer.send(String.format("PING %d;%s", new Date().getTime(), peer.getLocalName()));
             }
         }
 

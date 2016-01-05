@@ -34,7 +34,7 @@ class DiscoveryListener extends Thread implements Closeable {
                 DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length);
                 socket.receive(datagramPacket);
                 counter++;
-                observer.peerDiscovered(datagramPacket.getAddress().getHostAddress());
+                observer.peerDiscovered(datagramPacket.getAddress());
             } catch (IOException ex) {
                 LOG.error("Receive failed", ex);
             }

@@ -9,6 +9,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
+import java.util.Date;
 import java.util.Random;
 
 class DiscoveryAnnouncer extends Thread implements Closeable {
@@ -17,14 +18,17 @@ class DiscoveryAnnouncer extends Thread implements Closeable {
 
     private volatile MulticastSocket socket;
     private InetAddress multicastAddress;
+    private String name;
 
-    public DiscoveryAnnouncer(MulticastSocket socket, InetAddress multicastAddress) throws SocketException {
+    public DiscoveryAnnouncer(MulticastSocket socket, InetAddress multicastAddress, String name) throws SocketException {
         this.socket = socket;
         this.multicastAddress = multicastAddress;
+        this.name = name;
     }
 
     @Override
     public void run() {
+        LOG.info("Starting announcements");
         Random random = new Random();
         int counter = 0;
         while (true) {
@@ -48,9 +52,10 @@ class DiscoveryAnnouncer extends Thread implements Closeable {
     }
 
     private void sendAnnouncement() throws IOException {
-        byte[] buffer = ("HELLO " + System.currentTimeMillis()).getBytes();
+        byte[] buffer = (String.format("HELLO %d;%s", new Date().getTime(), name)).getBytes();
         DatagramPacket datagramPacket;
         datagramPacket = new DatagramPacket(buffer, buffer.length, multicastAddress, socket.getLocalPort());
+        LOG.debug("Sending announcement on interface {}", socket.getInterface());
         socket.send(datagramPacket);
     }
 

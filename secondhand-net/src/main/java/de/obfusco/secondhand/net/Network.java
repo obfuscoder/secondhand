@@ -21,12 +21,14 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
     private Map<String,Peer> peers = new HashMap<>();
     private List<String> localHostAddresses;
     private MessageBroker broker;
+    private String name;
 
-    public Network(int port, MessageBroker broker) throws IOException {
+    public Network(int port, MessageBroker broker, String name) throws IOException {
         this.broker = broker;
-        localHostAddresses = getLocalHostAddresses();
         this.port = port;
-        discovery = new Discovery(port, this);
+        this.name = name;
+        localHostAddresses = getLocalHostAddresses();
+        discovery = new Discovery(port, this, name);
         server = new PeerListener(port, this);
     }
     public void start() {
@@ -49,13 +51,14 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
         }
     }
 
-    public void peerDiscovered(String hostAddress) {
-        if (!isLocalAddress(hostAddress) && !isPeered(hostAddress)) {
-            LOG.info("Accepted announcement from {}", hostAddress);
+    public void peerDiscovered(InetAddress address) {
+        LOG.debug("Announcement received from {}({})", address.getHostAddress(), address.getHostName());
+        if (!isLocalAddress(address.getHostAddress()) && !isPeered(address.getHostAddress())) {
+            LOG.info("Accepted announcement from {}", address);
             try {
-                createPeer(new Socket(hostAddress, port), hostAddress);
+                createPeer(new Socket(address, port), address.getHostAddress());
             } catch (IOException e) {
-                LOG.error("Could not create peer client to host " + hostAddress, e);
+                LOG.error("Could not create peer client to host " + address, e);
             }
         }
     }
@@ -137,7 +140,7 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
     }
 
     private void createPeer(Socket socket, String hostAddress) throws IOException {
-        Peer peer = new Peer(socket, this);
+        Peer peer = new Peer(socket, this, name);
         peer.start();
         peers.put(hostAddress, peer);
         connected(peer);

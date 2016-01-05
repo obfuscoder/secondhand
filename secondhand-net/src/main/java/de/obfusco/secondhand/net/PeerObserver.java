@@ -1,5 +1,7 @@
 package de.obfusco.secondhand.net;
 
+import java.util.Date;
+
 public interface PeerObserver {
     void connected(Peer peer);
     void disconnected(Peer peer);
