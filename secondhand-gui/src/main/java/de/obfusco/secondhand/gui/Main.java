@@ -5,9 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 public class Main {
+
+    private final static Logger LOG = LoggerFactory.getLogger(Main.class);
 
     private Main() {
         LOG.info("Starting application");
@@ -23,11 +25,8 @@ public class Main {
                             "Details zum Fehler finden Sie in der Protokolldatei.",
                     "Programmfehler",
                     JOptionPane.ERROR_MESSAGE);
-                return;
         }
     }
-
-    private final static Logger LOG = LoggerFactory.getLogger(Main.class);
 
     public static void main(String args[]) {
         new Main();

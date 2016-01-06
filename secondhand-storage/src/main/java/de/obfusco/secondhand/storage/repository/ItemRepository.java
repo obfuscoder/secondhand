@@ -1,8 +1,7 @@
 package de.obfusco.secondhand.storage.repository;
 
-import de.obfusco.secondhand.storage.model.Reservation;
-import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.Item;
+import de.obfusco.secondhand.storage.model.Reservation;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 

@@ -3,9 +3,6 @@ package de.obfusco.secondhand.gui.transactions;
 import de.obfusco.secondhand.storage.model.Item;
 
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ItemTableModel extends AbstractTableModel {

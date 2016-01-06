@@ -1,26 +1,22 @@
 package de.obfusco.secondhand.gui;
 
-import com.google.gson.Gson;
 import com.itextpdf.text.DocumentException;
 import de.obfusco.secondhand.barcodefilegenerator.BarCodeGeneratorGui;
 import de.obfusco.secondhand.gui.config.ConfigGui;
 import de.obfusco.secondhand.gui.transactions.TransactionsGui;
 import de.obfusco.secondhand.net.*;
 import de.obfusco.secondhand.payoff.gui.PayOffGui;
+import de.obfusco.secondhand.receipt.file.ReceiptFile;
 import de.obfusco.secondhand.refund.gui.RefundGui;
 import de.obfusco.secondhand.reports.ReportsGui;
-import de.obfusco.secondhand.storage.model.Reservation;
+import de.obfusco.secondhand.sale.gui.CashBoxGui;
+import de.obfusco.secondhand.storage.model.Event;
+import de.obfusco.secondhand.storage.model.*;
 import de.obfusco.secondhand.storage.repository.EventRepository;
 import de.obfusco.secondhand.storage.repository.ItemRepository;
 import de.obfusco.secondhand.storage.repository.ReservationRepository;
-import de.obfusco.secondhand.testscan.gui.TestScanGui;
-import de.obfusco.secondhand.receipt.file.ReceiptFile;
-import de.obfusco.secondhand.sale.gui.CashBoxGui;
-import de.obfusco.secondhand.storage.model.Event;
-import de.obfusco.secondhand.storage.model.Item;
-import de.obfusco.secondhand.storage.model.Transaction;
-import de.obfusco.secondhand.storage.model.TransactionListener;
 import de.obfusco.secondhand.storage.repository.TransactionRepository;
+import de.obfusco.secondhand.testscan.gui.TestScanGui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.swing.*;
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Desktop;
-import java.awt.GridLayout;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -47,65 +39,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.List;
 
 @Component
 public class MainGui extends JFrame implements MessageBroker, TransactionListener, DataPusher {
 
-    private final static Logger LOG = LoggerFactory.getLogger(MainGui.class);
-
-    private Properties properties = new Properties();
-
-    Network network;
-
-    @Autowired
-    CashBoxGui cashBoxGui;
-
-    @Autowired
-    RefundGui refundGui;
-
-    @Autowired
-    TestScanGui testScanGui;
-
-    @Autowired
-    BarCodeGeneratorGui barCodeGeneratorGui;
-
-    @Autowired
-    PayOffGui payOffGui;
-
-    @Autowired
-    de.obfusco.secondhand.gui.SearchGui searchGui;
-
-    @Autowired
-    ReportsGui reportsGui;
-
-    @Autowired
-    ReceiptFile receiptFile;
-
-    @Autowired
-    TransactionRepository transactionRepository;
-
-    @Autowired
-    ItemRepository itemRepository;
-
-    @Autowired
-    ReservationRepository reservationRepository;
-
-    @Autowired
-    EventRepository eventRepository;
-
-    @Autowired
-    ConfigGui configGui;
-
-    @Autowired
-    private StorageConverter storageConverter;
-
-    private NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
-
-
-    private static final long serialVersionUID = 4961295225628108431L;
-
     public static final float BUTTON_FONT_SIZE = 25.0f;
-
+    private final static Logger LOG = LoggerFactory.getLogger(MainGui.class);
+    private static final long serialVersionUID = 4961295225628108431L;
     public JButton sale;
     public JButton billGenerator;
     public JButton barcodeGenerator;
@@ -116,9 +57,39 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     public JButton configButton;
     public JButton transactionsButton;
     public JToggleButton helpButton;
+    Network network;
+    @Autowired
+    CashBoxGui cashBoxGui;
+    @Autowired
+    RefundGui refundGui;
+    @Autowired
+    TestScanGui testScanGui;
+    @Autowired
+    BarCodeGeneratorGui barCodeGeneratorGui;
+    @Autowired
+    PayOffGui payOffGui;
+    @Autowired
+    de.obfusco.secondhand.gui.SearchGui searchGui;
+    @Autowired
+    ReportsGui reportsGui;
+    @Autowired
+    ReceiptFile receiptFile;
+    @Autowired
+    TransactionRepository transactionRepository;
+    @Autowired
+    ItemRepository itemRepository;
+    @Autowired
+    ReservationRepository reservationRepository;
+    @Autowired
+    EventRepository eventRepository;
+    @Autowired
+    ConfigGui configGui;
     JFileChooser fc;
     JLabel statusLine;
-
+    private Properties properties = new Properties();
+    @Autowired
+    private StorageConverter storageConverter;
+    private NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
     @Autowired
     private TransactionsGui transactionsGui;
 
@@ -417,13 +388,10 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         String id = messageParts[0];
         Transaction.Type type = Transaction.Type.valueOf(messageParts[1]);
         Date date = new Date(Long.parseLong(messageParts[2]));
-        String zipCode = null;
-        try {
-            zipCode = messageParts[3];
-        } catch (NumberFormatException ex) {}
-        List<Item> Items = new ArrayList<>();
-        for (String itemId : messageParts[4].split(",")) {
-            Item item = itemRepository.findOne(Integer.parseInt(itemId));
+        String zipCode = messageParts[3];
+        List<Item> items = new ArrayList<>();
+        for (String itemCode : messageParts[4].split(",")) {
+            Item item = itemRepository.findByCode(itemCode);
             if (item == null) {
                 continue;
             }
@@ -435,9 +403,9 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
                     item.sold = null;
                     break;
             }
-            Items.add(item);
+            items.add(item);
         }
-        return Transaction.create(id, date, type, Items, zipCode);
+        return Transaction.create(id, date, type, items, zipCode);
     }
 
     @Override
@@ -495,16 +463,17 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
                 .append(transaction.type.name()).append(";")
                 .append(transaction.created.getTime()).append(";")
                 .append(transaction.zipCode).append(";");
-        List<Integer> ids = new ArrayList<>();
+        List<String> codes = new ArrayList<>();
         for(Item item : transaction.items) {
-            ids.add(item.id);
+            codes.add(item.code);
         }
-        stringBuilder.append(StringUtils.arrayToCommaDelimitedString(ids.toArray()));
+        stringBuilder.append(StringUtils.arrayToCommaDelimitedString(codes.toArray()));
         return stringBuilder.toString();
     }
 
     @Override
     public void push(de.obfusco.secondhand.net.dto.Event event) {
-        network.send("DATA" + new Gson().toJson(event));
+        JsonEventConverter converter = new JsonEventConverter();
+        network.send("DATA" + converter.toJson(event));
     }
 }

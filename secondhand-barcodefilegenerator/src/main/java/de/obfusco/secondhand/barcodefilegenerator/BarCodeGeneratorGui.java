@@ -1,10 +1,16 @@
 package de.obfusco.secondhand.barcodefilegenerator;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Cursor;
-import java.awt.Desktop;
-import java.awt.GridLayout;
+import com.itextpdf.text.DocumentException;
+import de.obfusco.secondhand.storage.model.Event;
+import de.obfusco.secondhand.storage.repository.EventRepository;
+import de.obfusco.secondhand.storage.repository.ReservationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -13,51 +19,26 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-
-import com.itextpdf.text.DocumentException;
-
-import de.obfusco.secondhand.storage.repository.EventRepository;
-import de.obfusco.secondhand.storage.repository.ReservationRepository;
-import de.obfusco.secondhand.storage.model.Event;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 @Component
 public class BarCodeGeneratorGui extends JFrame implements ActionListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(BarCodeGeneratorGui.class);
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-
-    @Autowired
-    private EventRepository eventRepository;
-
-    @Autowired
-    private BarCodeSheet barCodeSheet;
-
-    @Autowired
-    private BarCodeLabelSheet barCodeLabelSheet;
-
     public JButton justBarcode;
     public JButton etiquettes;
     public JLabel customerNrLabel;
     public JTextField customerNr;
-
     public JLabel etiquettesLabel;
     public JLabel etiquettesLink;
-
     Path basePath = Paths.get("data/pdfs/labels");
     Path targetPath;
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private EventRepository eventRepository;
+    @Autowired
+    private BarCodeSheet barCodeSheet;
+    @Autowired
+    private BarCodeLabelSheet barCodeLabelSheet;
 
     public BarCodeGeneratorGui() {
         super("Etiketten/ Barcodes");

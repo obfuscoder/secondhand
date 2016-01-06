@@ -1,10 +1,7 @@
 package de.obfusco.secondhand.storage.model;
 
-import java.math.BigDecimal;
-import java.util.Date;
-
 import javax.persistence.Entity;
-import javax.persistence.Temporal;
+import java.math.BigDecimal;
 
 @Entity(name = "events")
 public class Event extends AbstractEntityWithId {

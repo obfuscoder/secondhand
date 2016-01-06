@@ -1,5 +1,19 @@
 package de.obfusco.secondhand.payoff.file;
 
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+import de.obfusco.secondhand.storage.model.Event;
+import de.obfusco.secondhand.storage.model.Item;
+import de.obfusco.secondhand.storage.model.Reservation;
+import de.obfusco.secondhand.storage.model.Seller;
+import de.obfusco.secondhand.storage.repository.EventRepository;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -9,40 +23,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
-
-import de.obfusco.secondhand.storage.model.Event;
-import de.obfusco.secondhand.storage.model.Reservation;
-import de.obfusco.secondhand.storage.model.Item;
-import de.obfusco.secondhand.storage.model.Seller;
-import de.obfusco.secondhand.storage.repository.EventRepository;
-import de.obfusco.secondhand.storage.repository.ItemRepository;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 @Component
 public class SellerPayOff extends BasePayOff {
 
-    @Autowired
-    ItemRepository ItemRepository;
-
-    @Autowired
-    EventRepository eventRepository;
-
     public static final int NUMBER_OF_COLUMNS = 3;
     public static final int NUMBER_OF_ITEMS_PER_LINE = 2;
+    @Autowired
+    ItemRepository ItemRepository;
+    @Autowired
+    EventRepository eventRepository;
 
     public File createFile(Path basePath, Reservation reservation) throws DocumentException, IOException {
         Path targetPath = Paths.get(basePath.toString(), Integer.toString(reservation.number));

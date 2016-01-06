@@ -3,16 +3,9 @@ package de.obfusco.secondhand.net;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.InetAddress;
+import java.io.*;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Date;
-import java.util.Timer;
 
 public class Peer extends Thread implements Closeable {
 
@@ -31,8 +24,8 @@ public class Peer extends Thread implements Closeable {
         this.socket = socket;
         this.peerObserver = peerObserver;
         this.localName = localName;
-        sender = new PrintWriter(socket.getOutputStream(), true);
-        receiver = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        sender = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"), true);
+        receiver = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
     }
 
     @Override
@@ -98,8 +91,16 @@ public class Peer extends Thread implements Closeable {
         }
     }
 
+    public String getHostAddress() {
+        return socket.getInetAddress().getHostAddress();
+    }
+
+    public String getHostName() {
+        return socket.getInetAddress().getHostName();
+    }
+
     public String getAddress() {
-        return String.format("%s(%s)", socket.getInetAddress().getHostAddress(), socket.getInetAddress().getHostName());
+        return String.format("%s(%s)", getHostAddress(), getHostName());
     }
 
     public String getPeerName() {

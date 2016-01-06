@@ -1,5 +1,13 @@
 package de.obfusco.secondhand.barcodefilegenerator;
 
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.*;
+import de.obfusco.secondhand.storage.model.Item;
+import de.obfusco.secondhand.storage.model.Reservation;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,37 +16,13 @@ import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.pdf.Barcode;
-import com.itextpdf.text.pdf.Barcode128;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
-
-import de.obfusco.secondhand.storage.model.Reservation;
-import de.obfusco.secondhand.storage.model.Item;
-import de.obfusco.secondhand.storage.repository.ItemRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 @Component
 public class BarCodeSheet {
 
+    public static final int NUMBER_OF_COLUMNS = 4;
     @Autowired
     ItemRepository ItemRepository;
-
-    public static final int NUMBER_OF_COLUMNS = 4;
+    List<Item> items;
 
     public Path createPdf(Path targetPath) throws IOException,
             DocumentException {
@@ -111,8 +95,6 @@ public class BarCodeSheet {
         table.setSpacingAfter(4f);
         return table;
     }
-
-    List<Item> items;
 
     public Path createPDFFile(Path basePath, Reservation reservation) throws IOException, DocumentException {
         String customer = new DecimalFormat("000").format(reservation.number);

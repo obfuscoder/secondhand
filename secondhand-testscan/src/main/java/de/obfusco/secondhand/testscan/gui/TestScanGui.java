@@ -1,9 +1,14 @@
 package de.obfusco.secondhand.testscan.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.GridLayout;
+import de.obfusco.secondhand.storage.model.Item;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -11,23 +16,6 @@ import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-
-import de.obfusco.secondhand.storage.repository.ItemRepository;
-import de.obfusco.secondhand.storage.model.Item;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Component
 public class TestScanGui extends JFrame implements ActionListener {
@@ -150,6 +138,43 @@ public class TestScanGui extends JFrame implements ActionListener {
 
     }
 
+    public void addItem() {
+        setErrorText(" ");
+        Item item = itemRepository.findByCode(itemNr.getText());
+        if (item != null) {
+            tablemodel.addRow(item);
+        } else {
+            setErrorText("Artikel mit Nummer \"" + itemNr.getText()
+                    + "\" existiert nicht!");
+        }
+
+        itemNr.setText("");
+    }
+
+    public void setErrorText(String text) {
+        errorLabel.setText(text);
+        errorLabel.getParent().invalidate();
+        errorLabel.getParent().validate();
+        this.validate();
+        this.pack();
+    }
+
+    public void deleteSelectedRow() {
+        int n = JOptionPane.showConfirmDialog(
+                this,
+                "Möchten sie den Artikel \""
+                        + tablemodel.getValueAt(cashTable.getSelectedRow(), 0)
+                        + "\" wirklich löschen?", "Artikel löschen",
+                JOptionPane.YES_NO_OPTION);
+
+        if (n == JOptionPane.YES_OPTION) {
+            tablemodel.delRow(cashTable.getSelectedRow());
+        }
+
+        itemNr.requestFocus();
+
+    }
+
     class CashTableModel extends AbstractTableModel {
 
         private List<String> columnNames = new ArrayList<>(Arrays.asList(
@@ -223,42 +248,5 @@ public class TestScanGui extends JFrame implements ActionListener {
             data.remove(row);
             this.fireTableDataChanged();
         }
-    }
-
-    public void addItem() {
-        setErrorText(" ");
-        Item item = itemRepository.findByCode(itemNr.getText());
-        if (item != null) {
-            tablemodel.addRow(item);
-        } else {
-            setErrorText("Artikel mit Nummer \"" + itemNr.getText()
-                    + "\" existiert nicht!");
-        }
-
-        itemNr.setText("");
-    }
-
-    public void setErrorText(String text) {
-        errorLabel.setText(text);
-        errorLabel.getParent().invalidate();
-        errorLabel.getParent().validate();
-        this.validate();
-        this.pack();
-    }
-
-    public void deleteSelectedRow() {
-        int n = JOptionPane.showConfirmDialog(
-                this,
-                "Möchten sie den Artikel \""
-                + tablemodel.getValueAt(cashTable.getSelectedRow(), 0)
-                + "\" wirklich löschen?", "Artikel löschen",
-                JOptionPane.YES_NO_OPTION);
-
-        if (n == JOptionPane.YES_OPTION) {
-            tablemodel.delRow(cashTable.getSelectedRow());
-        }
-
-        itemNr.requestFocus();
-
     }
 }

@@ -6,30 +6,13 @@ import de.obfusco.secondhand.storage.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.*;
+import java.awt.event.*;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -296,6 +279,46 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         return tablemodel.getData();
     }
 
+    public void addItem() {
+        String code = itemNr.getText();
+        itemNr.setText("");
+        setErrorText("");
+        Item item = storageService.getItem(code);
+        if (item == null) {
+            setErrorText("Artikel mit Nummer \"" + code + "\" existiert nicht!");
+            return;
+        }
+        if (item.sold != null) {
+            setErrorText("Artikel mit Nummer \"" + code
+                    + "\" wurde bereits verkauft!");
+            return;
+        }
+        tablemodel.addRow(item);
+    }
+
+    public void setErrorText(String text) {
+        errorLabel.setText(text);
+        errorLabel.getParent().invalidate();
+        errorLabel.getParent().validate();
+        this.validate();
+    }
+
+    public void deleteSelectedRow() {
+        int n = JOptionPane.showConfirmDialog(
+                this,
+                "Möchten sie den Artikel \""
+                        + tablemodel.getValueAt(cashTable.getSelectedRow(), 0)
+                        + "\" wirklich löschen?", "Artikel löschen",
+                JOptionPane.YES_NO_OPTION);
+
+        if (n == JOptionPane.YES_OPTION) {
+            tablemodel.delRow(cashTable.getSelectedRow());
+        }
+
+        itemNr.requestFocus();
+
+    }
+
     class CashTableModel extends AbstractTableModel {
 
         private List<String> columnNames = new ArrayList<>(Arrays.asList(
@@ -364,45 +387,5 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
             data.remove(row);
             this.fireTableDataChanged();
         }
-    }
-
-    public void addItem() {
-        String code = itemNr.getText();
-        itemNr.setText("");
-        setErrorText("");
-        Item item = storageService.getItem(code);
-        if (item == null) {
-            setErrorText("Artikel mit Nummer \"" + code + "\" existiert nicht!");
-            return;
-        }
-        if (item.sold != null) {
-            setErrorText("Artikel mit Nummer \"" + code
-                    + "\" wurde bereits verkauft!");
-            return;
-        }
-        tablemodel.addRow(item);
-    }
-
-    public void setErrorText(String text) {
-        errorLabel.setText(text);
-        errorLabel.getParent().invalidate();
-        errorLabel.getParent().validate();
-        this.validate();
-    }
-
-    public void deleteSelectedRow() {
-        int n = JOptionPane.showConfirmDialog(
-                this,
-                "Möchten sie den Artikel \""
-                + tablemodel.getValueAt(cashTable.getSelectedRow(), 0)
-                + "\" wirklich löschen?", "Artikel löschen",
-                JOptionPane.YES_NO_OPTION);
-
-        if (n == JOptionPane.YES_OPTION) {
-            tablemodel.delRow(cashTable.getSelectedRow());
-        }
-
-        itemNr.requestFocus();
-
     }
 }

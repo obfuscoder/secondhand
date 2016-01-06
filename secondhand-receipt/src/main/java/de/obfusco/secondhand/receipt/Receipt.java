@@ -1,13 +1,8 @@
 package de.obfusco.secondhand.receipt;
 
-import java.io.IOException;
-import java.nio.file.Paths;
-
 import com.itextpdf.text.DocumentException;
-
 import de.obfusco.secondhand.receipt.file.ReceiptFile;
 import de.obfusco.secondhand.storage.StorageConfiguration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -15,6 +10,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import java.io.IOException;
+import java.nio.file.Paths;
 
 @Configuration
 @ComponentScan("de.obfusco.secondhand")

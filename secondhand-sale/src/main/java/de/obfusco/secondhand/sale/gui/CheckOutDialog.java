@@ -1,9 +1,15 @@
 package de.obfusco.secondhand.sale.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Desktop;
-import java.awt.GridLayout;
+import com.itextpdf.text.DocumentException;
+import de.obfusco.secondhand.storage.model.Item;
+import de.obfusco.secondhand.storage.model.Transaction;
+import de.obfusco.secondhand.storage.model.TransactionListener;
+import de.obfusco.secondhand.storage.service.StorageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -16,27 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Properties;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFormattedTextField;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JSeparator;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-
-import com.itextpdf.text.DocumentException;
-
-import de.obfusco.secondhand.storage.model.Item;
-import de.obfusco.secondhand.storage.model.Transaction;
-import de.obfusco.secondhand.storage.service.StorageService;
-
-import de.obfusco.secondhand.storage.model.TransactionListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CheckOutDialog extends JDialog implements ActionListener {
 

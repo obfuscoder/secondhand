@@ -1,5 +1,20 @@
 package de.obfusco.secondhand.payoff.file;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+import de.obfusco.secondhand.storage.model.Event;
+import de.obfusco.secondhand.storage.model.Item;
+import de.obfusco.secondhand.storage.model.Reservation;
+import de.obfusco.secondhand.storage.repository.EventRepository;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
+import de.obfusco.secondhand.storage.repository.ReservationRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -7,24 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
-
-import de.obfusco.secondhand.storage.model.Event;
-import de.obfusco.secondhand.storage.model.Item;
-import de.obfusco.secondhand.storage.model.Reservation;
-import de.obfusco.secondhand.storage.repository.EventRepository;
-import de.obfusco.secondhand.storage.repository.ItemRepository;
-import de.obfusco.secondhand.storage.repository.ReservationRepository;
-
-import org.h2.mvstore.DataUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Component
 public class TotalPayOff extends BasePayOff {

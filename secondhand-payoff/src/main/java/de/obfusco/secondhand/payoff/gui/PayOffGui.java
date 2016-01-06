@@ -1,10 +1,19 @@
 package de.obfusco.secondhand.payoff.gui;
 
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Cursor;
-import java.awt.Desktop;
-import java.awt.GridLayout;
+import com.itextpdf.text.DocumentException;
+import de.obfusco.secondhand.payoff.file.PdfFileCreator;
+import de.obfusco.secondhand.payoff.file.SellerPayOff;
+import de.obfusco.secondhand.payoff.file.TotalPayOff;
+import de.obfusco.secondhand.storage.model.Event;
+import de.obfusco.secondhand.storage.model.Reservation;
+import de.obfusco.secondhand.storage.repository.EventRepository;
+import de.obfusco.secondhand.storage.repository.ReservationRepository;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -12,38 +21,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.swing.BoxLayout;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingConstants;
-
-import com.itextpdf.text.DocumentException;
-
-import de.obfusco.secondhand.payoff.file.PdfFileCreator;
-import de.obfusco.secondhand.payoff.file.TotalPayOff;
-import de.obfusco.secondhand.storage.model.Reservation;
-import de.obfusco.secondhand.payoff.file.SellerPayOff;
-import de.obfusco.secondhand.storage.model.Event;
-import de.obfusco.secondhand.storage.repository.EventRepository;
-import de.obfusco.secondhand.storage.repository.ReservationRepository;
-
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 @Component
 public class PayOffGui extends JFrame {
 
     private final static org.slf4j.Logger LOG = LoggerFactory.getLogger(PayOffGui.class);
-
-    public JLabel totalPayoff;
-
     private static final String TITLE = "Abrechnung";
-
+    public JLabel totalPayoff;
     @Autowired
     TotalPayOff totalPayOff;
 

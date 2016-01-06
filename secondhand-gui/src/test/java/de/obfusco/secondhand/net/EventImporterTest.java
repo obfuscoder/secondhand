@@ -1,11 +1,7 @@
 package de.obfusco.secondhand.net;
 
 import de.obfusco.secondhand.gui.MainConfiguration;
-import de.obfusco.secondhand.net.dto.Category;
-import de.obfusco.secondhand.net.dto.Event;
-import de.obfusco.secondhand.net.dto.Item;
-import de.obfusco.secondhand.net.dto.Reservation;
-import de.obfusco.secondhand.net.dto.Seller;
+import de.obfusco.secondhand.net.dto.*;
 import de.obfusco.secondhand.storage.repository.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,14 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = MainConfiguration.class)

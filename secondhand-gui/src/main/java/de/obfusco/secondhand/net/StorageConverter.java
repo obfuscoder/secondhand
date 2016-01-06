@@ -1,11 +1,6 @@
 package de.obfusco.secondhand.net;
 
-import de.obfusco.secondhand.net.dto.Category;
-import de.obfusco.secondhand.net.dto.Event;
-import de.obfusco.secondhand.net.dto.Item;
-import de.obfusco.secondhand.net.dto.Reservation;
-import de.obfusco.secondhand.net.dto.Seller;
-import de.obfusco.secondhand.net.dto.Transaction;
+import de.obfusco.secondhand.net.dto.*;
 import de.obfusco.secondhand.storage.repository.*;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MapperFacade;
@@ -16,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Component

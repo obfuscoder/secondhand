@@ -1,12 +1,10 @@
 package de.obfusco.secondhand.net;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import de.obfusco.secondhand.gui.MainConfiguration;
 import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Transaction;
-import de.obfusco.secondhand.storage.repository.*;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
+import de.obfusco.secondhand.storage.repository.TransactionRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

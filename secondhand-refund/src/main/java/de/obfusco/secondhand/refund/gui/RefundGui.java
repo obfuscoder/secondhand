@@ -1,43 +1,25 @@
 package de.obfusco.secondhand.refund.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import de.obfusco.secondhand.storage.model.Item;
+import de.obfusco.secondhand.storage.model.TransactionListener;
+import de.obfusco.secondhand.storage.repository.ItemRepository;
+import de.obfusco.secondhand.storage.service.StorageService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import java.awt.*;
+import java.awt.event.*;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-
-import de.obfusco.secondhand.storage.model.Item;
-import de.obfusco.secondhand.storage.model.TransactionListener;
-import de.obfusco.secondhand.storage.repository.ItemRepository;
-
-import de.obfusco.secondhand.storage.service.StorageService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Component
 public class RefundGui extends JFrame implements ActionListener, TableModelListener {
@@ -303,6 +285,35 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
         return storageService;
     }
 
+    public void addItem() {
+        String code = itemNr.getText();
+        itemNr.setText("");
+        setErrorText("");
+        Item item = itemRepository.findByCode(code);
+        if (item == null) {
+            setErrorText("Artikel mit Nummer \"" + code + "\" existiert nicht!");
+            return;
+        }
+        if (item.sold == null) {
+            setErrorText("Artikel mit Nummer \"" + code
+                    + "\" wurde noch nicht verkauft!");
+            return;
+        }
+        tableModel.addRow(item);
+    }
+
+    public void setErrorText(String text) {
+        errorLabel.setText(text);
+        errorLabel.getParent().invalidate();
+        errorLabel.getParent().validate();
+        this.validate();
+    }
+
+    public void deleteSelectedRow() {
+        tableModel.delRow(itemTable.getSelectedRow());
+        itemNr.requestFocus();
+    }
+
     class ItemTableModel extends AbstractTableModel {
 
         private List<String> columnNames = new ArrayList<>(Arrays.asList(
@@ -371,34 +382,5 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
             data.remove(row);
             this.fireTableDataChanged();
         }
-    }
-
-    public void addItem() {
-        String code = itemNr.getText();
-        itemNr.setText("");
-        setErrorText("");
-        Item item = itemRepository.findByCode(code);
-        if (item == null) {
-            setErrorText("Artikel mit Nummer \"" + code + "\" existiert nicht!");
-            return;
-        }
-        if (item.sold == null) {
-            setErrorText("Artikel mit Nummer \"" + code
-                    + "\" wurde noch nicht verkauft!");
-            return;
-        }
-        tableModel.addRow(item);
-    }
-
-    public void setErrorText(String text) {
-        errorLabel.setText(text);
-        errorLabel.getParent().invalidate();
-        errorLabel.getParent().validate();
-        this.validate();
-    }
-
-    public void deleteSelectedRow() {
-        tableModel.delRow(itemTable.getSelectedRow());
-        itemNr.requestFocus();
     }
 }

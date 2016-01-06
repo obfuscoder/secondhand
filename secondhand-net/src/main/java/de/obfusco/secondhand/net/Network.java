@@ -108,7 +108,7 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
     }
 
     private void removeAndClosePeer(Peer peer) {
-        peers.remove(peer.getAddress());
+        peers.remove(peer.getHostAddress());
         peer.close();
         broker.disconnected();
     }
