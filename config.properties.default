@@ -1,7 +1,0 @@
-# enables all buttons (advanced mode)
-# buttons.all=true
-
-# enables input of postcode during sale
-# postcode=true
-
-online.root=flohmarkthelfer.de

@@ -1,6 +1,5 @@
 [Files]
 Source: "secondhand-gui\target\secondhand-gui-##VERSION##.jar"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "config.properties.default"; DestDir: "{app}"; DestName: "config.properties"; Flags: ignoreversion
 Source: "java\COPYRIGHT"; DestDir: "{app}\java"; Flags: ignoreversion
 Source: "java\LICENSE"; DestDir: "{app}\java"; Flags: ignoreversion
 Source: "java\README.txt"; DestDir: "{app}\java"; Flags: ignoreversion
@@ -687,12 +686,13 @@ DisableReadyMemo=True
 ShowComponentSizes=False
 AppName=Flohmarkthelfer Kassensystem
 AppVersion=##VERSION##
-AppCopyright=2013-2015 Kai und Anne Lehmann
+AppCopyright=2013-2016 Lehmann Software Lösungen GbR
 PrivilegesRequired=none
 AppId={{FB40361A-0C2A-4AE4-98A8-1F6A435B45BB}
 ShowLanguageDialog=auto
 DefaultGroupName=Flohmarkthelfer Kassensystem
 DefaultDirName={userappdata}\Flohmarkthelfer Kassensystem
+DisableDirPage=True
 AlwaysShowComponentsList=False
 OutputBaseFilename=flohmarkthelfer-setup
 DisableProgramGroupPage=auto
@@ -702,9 +702,30 @@ UsePreviousGroup=False
 AlwaysUsePersonalGroup=True
 AppPublisherURL=http://flohmarkthelfer.de
 VersionInfoVersion=##VERSION##
-VersionInfoCopyright=2013-2015 Kai und Anne Lehmann
+VersionInfoCopyright=2013-2016 Lehmann Software Lösungen GbR
 VersionInfoProductName=Flohmarkthelfer Kassensystem
 VersionInfoProductVersion=##VERSION##
 
 [Languages]
 Name: "german"; MessagesFile: "compiler:Languages\German.isl"
+
+[INI]
+Filename: "{app}\config.properties"; Section: "dummy"; Key: "buttons.all"; String: "true"; Tasks: mode/advanced
+Filename: "{app}\config.properties"; Section: "dummy"; Key: "buttons.all"; String: "false"; Tasks: mode/basic
+Filename: "{app}\config.properties"; Section: "dummy"; Key: "postcode"; String: "true"; Tasks: zipcode/yes
+Filename: "{app}\config.properties"; Section: "dummy"; Key: "postcode"; String: "false"; Tasks: zipcode/no
+Filename: "{app}\config.properties"; Section: "dummy"; Key: "online.root"; String: "flohmarkthelfer.de"
+
+[Tasks]
+Name: "mode"; Description: "Modus setzen"
+Name: "mode/basic"; Description: "Standardmodus"; Flags: exclusive
+Name: "mode/advanced"; Description: "Erweiterter Modus"; Flags: exclusive unchecked
+
+Name: "zipcode"; Description: "PLZ bei Verkauf erfassen"
+Name: "zipcode/no"; Description: "nein"; Flags: exclusive
+Name: "zipcode/yes"; Description: "ja"; Flags: exclusive unchecked
+
+Name: "cleandb"; Description: "Datenbank leeren"; Flags: unchecked
+
+[InstallDelete]
+Type: files; Name: "{app}\floh.mv.db"; Tasks: cleandb
