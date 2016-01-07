@@ -354,10 +354,14 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
                 parseDataMessage(peer, message);
             } else {
                 Transaction transaction = parseTransaction(message);
-                synchronized (transactionRepository) {
-                    if (!transactionRepository.exists(transaction.id)) {
-                        transactionRepository.save(transaction);
-                        reportsGui.update();
+                if (transaction == null) {
+                    LOG.warn("Transaction could not be parsed. Probably not containing known items");
+                } else {
+                    synchronized (transactionRepository) {
+                        if (!transactionRepository.exists(transaction.id)) {
+                            transactionRepository.save(transaction);
+                            reportsGui.update();
+                        }
                     }
                 }
             }
@@ -404,6 +408,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             }
             items.add(item);
         }
+        if (items.isEmpty()) return null;
         return Transaction.create(id, date, type, items, zipCode);
     }
 
