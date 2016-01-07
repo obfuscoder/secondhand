@@ -44,8 +44,42 @@ public class TotalPayOff extends BasePayOff {
         document.open();
         addHeader(document, event);
         document.add(createTotalTable(event));
+        if (event.donationOfUnsoldItemsEnabled) {
+            document.newPage();
+            document.add(createDonatorsTable(event));
+        }
         document.close();
         return fullPath.toFile();
+    }
+
+    private PdfPTable createDonatorsTable(Event event) {
+        List<Donator> donators = new ArrayList<>();
+        List<Returner> returns = new ArrayList<>();
+        Iterable<Reservation> reservations = reservationRepository.findAllByOrderByNumberAsc();
+        for (Reservation reservation : reservations) {
+            List<Item> returnedItems = itemRepository.findByReservationAndSoldNullAndDonationFalseOrderByNumberAsc(reservation);
+            List<Item> donatedItems = itemRepository.findByReservationAndSoldNullAndDonationTrueOrderByNumberAsc(reservation);
+            if (returnedItems.isEmpty()) {
+                donators.add(new Donator(reservation, donatedItems.size()));
+            } else {
+                returns.add(new Returner(reservation, returnedItems.size()));
+            }
+        }
+
+        PdfPTable table = new PdfPTable(6);
+        table.setHorizontalAlignment(Element.ALIGN_LEFT);
+
+        addTotalLine(table, "Komplettspender", Integer.toString(donators.size()), true, 14);
+        for (Donator donator : donators) {
+            addTotalLine(table, donator.toString(), Integer.toString(donator.count), false, 12);
+        }
+
+        addTotalLine(table, "Verkäufer mit zurückzugebenden Artikeln", Integer.toString(returns.size()), true, 14);
+        for (Returner returner : returns) {
+            addTotalLine(table, returner.toString(), Integer.toString(returner.count), false, 12);
+        }
+
+        return table;
     }
 
     private PdfPTable createTotalTable(Event event) {
@@ -104,15 +138,40 @@ public class TotalPayOff extends BasePayOff {
         }
     }
 
-    private class Payout {
+    private class ReservationReference {
         public Reservation reservation;
+
+        public ReservationReference(Reservation reservation) {
+            this.reservation = reservation;
+        }
+
+        private ReservationReference() {
+        }
+
+        public String toString() {
+            return String.format("%d - %s", reservation.number, reservation.seller.getName());
+        }
+    }
+
+    private class ReservationReferenceWithCount extends ReservationReference {
+        int count;
+
+        public ReservationReferenceWithCount(Reservation reservation, int count) {
+            super(reservation);
+            this.count = count;
+        }
+    }
+
+    private class Payout extends ReservationReference {
         public double value;
         public Map<Integer, Integer> coins;
-        public Payout() {}
         public Payout(Reservation reservation, double value) {
-            this.reservation = reservation;
+            super(reservation);
             this.value = value;
             this.coins = calculateCoins();
+        }
+
+        public Payout() {
         }
 
         private Map<Integer, Integer> calculateCoins() {
@@ -129,7 +188,7 @@ public class TotalPayOff extends BasePayOff {
         }
 
         public String toString() {
-            return String.format("%d - %s (%s)", reservation.number, reservation.seller.getName(), coinString());
+            return String.format("%s (%s)", super.toString(), coinString());
         }
 
         public String coinString() {
@@ -143,6 +202,18 @@ public class TotalPayOff extends BasePayOff {
                 sb.append(String.format("%dx%s", coins.get(key), currency.format((double) key / 100)));
             }
             return sb.toString();
+        }
+    }
+
+    private class Returner extends ReservationReferenceWithCount {
+        public Returner(Reservation reservation, int itemCount) {
+            super(reservation, itemCount);
+        }
+    }
+
+    private class Donator extends ReservationReferenceWithCount {
+        public Donator(Reservation reservation, int count) {
+            super(reservation, count);
         }
     }
 }
