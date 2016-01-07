@@ -5,6 +5,7 @@ import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.repository.ItemRepository;
 import de.obfusco.secondhand.storage.repository.TransactionRepository;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ public class TransactionUploaderTest {
     @Autowired
     TransactionUploader transactionUploader;
 
+    @Ignore
     @Test
     public void uploadTransactions() throws IOException {
         createTransactions();

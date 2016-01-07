@@ -30,10 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -103,8 +100,10 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         try {
             input = new FileInputStream("config.properties");
             properties.load(input);
+        } catch (FileNotFoundException ex) {
+            LOG.warn("Could not load properties");
         } catch (IOException ex) {
-            LOG.warn("Could not load properties", ex);
+            LOG.error("Error while reading properties file", ex);
         } finally {
             if (input != null) {
                 try {

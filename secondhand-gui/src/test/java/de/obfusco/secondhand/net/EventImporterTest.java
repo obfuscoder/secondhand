@@ -136,7 +136,7 @@ public class EventImporterTest {
 
     private void checkEvent(Event event) {
         assertEquals(4, event.id);
-        assertEquals("Frühlingsflohmarkt \"Rund ums Kind\"", event.name);
+        assertEquals("Frühlingsflohmarkt \"Rund ums Kind\" 2014", event.name);
         assertEquals(new BigDecimal("0.1"), event.pricePrecision);
         assertEquals(new BigDecimal("0.2"), event.commissionRate);
         assertEquals(new BigDecimal("2.0"), event.sellerFee);
