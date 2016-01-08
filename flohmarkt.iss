@@ -1,4 +1,5 @@
 [Files]
+Source: "floh.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "secondhand-gui\target\secondhand-gui-##VERSION##.jar"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "java\COPYRIGHT"; DestDir: "{app}\java"; Flags: ignoreversion
 Source: "java\LICENSE"; DestDir: "{app}\java"; Flags: ignoreversion
@@ -677,8 +678,8 @@ Name: "{app}\java\lib\zi\Pacific"
 Name: "{app}\java\lib\zi\SystemV"
 
 [Icons]
-Name: "{group}\Flohmarkthelfer Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-##VERSION##.jar"""
-Name: "{userdesktop}\Flohmarkthelfer Kassensystem"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-##VERSION##.jar"""
+Name: "{group}\Flohmarkthelfer Kassensystem"; IconFilename: "{app}\floh.ico"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-##VERSION##.jar"""
+Name: "{userdesktop}\Flohmarkthelfer Kassensystem"; IconFilename: "{app}\floh.ico"; Filename: "{app}\java\bin\javaw.exe"; WorkingDir: "{app}"; Parameters: "-jar ""{app}\bin\secondhand-gui-##VERSION##.jar"""
 
 [Setup]
 DisableReadyPage=True
