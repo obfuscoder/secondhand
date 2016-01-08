@@ -129,7 +129,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     private boolean initializeNetwork() {
         try {
             String name = properties.getProperty("peer.name", InetAddress.getLocalHost().getHostName());
-            network = new Network(31337, this, name);
+            network = new Network(31454, this, name);
             network.start();
             reportsGui.setNetwork(network);
         } catch (IOException e) {

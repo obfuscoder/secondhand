@@ -8,7 +8,7 @@ public class SecondHandNet implements MessageBroker {
 
     public static void main(String[] args) throws IOException {
 
-        try (Network network = new Network(31337, new SecondHandNet(), "SOMENAME")) {
+        try (Network network = new Network(31454, new SecondHandNet(), "SOMENAME")) {
             network.start();
             BufferedReader buffer=new BufferedReader(new InputStreamReader(System.in));
             while(true) {
