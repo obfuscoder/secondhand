@@ -16,13 +16,14 @@ import de.obfusco.secondhand.storage.repository.EventRepository;
 import de.obfusco.secondhand.storage.repository.ItemRepository;
 import de.obfusco.secondhand.storage.repository.ReservationRepository;
 import de.obfusco.secondhand.storage.repository.TransactionRepository;
+import de.obfusco.secondhand.storage.service.StorageService;
+import de.obfusco.secondhand.sync.PathSyncer;
 import de.obfusco.secondhand.testscan.gui.TestScanGui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,11 +33,14 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.*;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
-import java.util.*;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 
 @Component
 public class MainGui extends JFrame implements MessageBroker, TransactionListener, DataPusher {
@@ -89,6 +93,10 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     private NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
     @Autowired
     private TransactionsGui transactionsGui;
+    @Autowired
+    private PathSyncer pathSyncer;
+    @Autowired
+    private StorageService storageService;
 
     public MainGui() {
         super("Flohmarkt Kassensystem");
@@ -123,7 +131,18 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         if (!initializeNetwork()) return;
+        startPathSync();
         setVisible(true);
+    }
+
+    private void startPathSync() {
+        String localName = "LOCAL";
+        try {
+            localName = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            LOG.warn("Could not get local host name", e);
+        }
+        pathSyncer.synchronize(properties.getProperty("sync.path", "E:\\"), localName);
     }
 
     private boolean initializeNetwork() {
@@ -353,21 +372,27 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             } else if(message.startsWith("DATA")) {
                 parseDataMessage(peer, message);
             } else {
-                Transaction transaction = parseTransaction(message);
-                if (transaction == null) {
-                    LOG.warn("Transaction could not be parsed. Probably not containing known items");
-                } else {
-                    synchronized (transactionRepository) {
-                        if (!transactionRepository.exists(transaction.id)) {
-                            transactionRepository.save(transaction);
-                            reportsGui.update();
-                        }
-                    }
-                }
+                transactionReceived(storageService.parseTransactionMessage(message));
             }
         }
         catch (IllegalArgumentException ex) {
             LOG.error("Invalid message <" + message + ">. Reason: " + ex.getMessage());
+        }
+    }
+
+    public void transactionReceived(Transaction transaction) {
+        LOG.debug("Received transaction: {}", transaction);
+        if (transaction == null) {
+            LOG.warn("Transaction could not be parsed. Probably not containing known items");
+        } else {
+            synchronized (transactionRepository) {
+                if (!transactionRepository.exists(transaction.id)) {
+                    transactionRepository.save(transaction);
+                    reportsGui.update();
+                } else {
+                    LOG.debug("Skipping transaction {} as it is already known", transaction.id);
+                }
+            }
         }
     }
 
@@ -383,35 +408,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         reportsGui.helpNeeded(peer, parts.length == 2 && parts[1].equals("ON"));
     }
 
-    private Transaction parseTransaction(String message) {
-        String[] messageParts = message.split(";");
-        if (messageParts.length != 5) {
-            throw new IllegalArgumentException("Message does not contain 5 segments separated by ';'");
-        }
-        String id = messageParts[0];
-        Transaction.Type type = Transaction.Type.valueOf(messageParts[1]);
-        Date date = new Date(Long.parseLong(messageParts[2]));
-        String zipCode = messageParts[3];
-        List<Item> items = new ArrayList<>();
-        for (String itemCode : messageParts[4].split(",")) {
-            Item item = itemRepository.findByCode(itemCode);
-            if (item == null) {
-                continue;
-            }
-            switch (type) {
-                case PURCHASE:
-                    item.sold = date;
-                    break;
-                case REFUND:
-                    item.sold = null;
-                    break;
-            }
-            items.add(item);
-        }
-        if (items.isEmpty()) return null;
-        return Transaction.create(id, date, type, items, zipCode);
-    }
-
     @Override
     public void connected(final Peer peer) {
         LOG.info("Connected with peer " + peer.getAddress());
@@ -423,15 +419,11 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             @Override
             public void run() {
                 for(Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
-                    try {
-                        LOG.info("Syncing transaction " + transaction.id + " with peer " + peer.getAddress());
-                        peer.send(createMessageFromTransaction(transaction));
-                    } catch (IOException e) {
-                        LOG.error("could not create and send json", e);
-                    }
+                    LOG.info("Syncing transaction " + transaction.id + " with peer " + peer.getAddress());
+                    peer.send(transaction.toString());
                 }
             }
-        }).run();
+        }).start();
     }
 
     @Override
@@ -451,28 +443,9 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     @Override
     public void notify(Transaction transaction) {
         LOG.info("Notifying all peers about transaction " + transaction.id);
-        try {
-            String message = createMessageFromTransaction(transaction);
-            network.send(message);
-        } catch (IOException ex) {
-            LOG.error("Could not create or send json", ex);
-        }
+        String message = transaction.toString();
+        network.send(message);
         reportsGui.update();
-    }
-
-    private String createMessageFromTransaction(Transaction transaction) throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder
-                .append(transaction.id).append(";")
-                .append(transaction.type.name()).append(";")
-                .append(transaction.created.getTime()).append(";")
-                .append(transaction.zipCode).append(";");
-        List<String> codes = new ArrayList<>();
-        for(Item item : transaction.items) {
-            codes.add(item.code);
-        }
-        stringBuilder.append(StringUtils.arrayToCommaDelimitedString(codes.toArray()));
-        return stringBuilder.toString();
     }
 
     @Override

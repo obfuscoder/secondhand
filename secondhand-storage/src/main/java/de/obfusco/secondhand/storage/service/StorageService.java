@@ -66,6 +66,35 @@ public class StorageService {
         return transactionRepository.save(transaction);
     }
 
+    public Transaction parseTransactionMessage(String message) {
+        String[] messageParts = message.split(";");
+        if (messageParts.length != 5) {
+            throw new IllegalArgumentException("Message does not contain 5 segments separated by ';'");
+        }
+        String id = messageParts[0];
+        Transaction.Type type = Transaction.Type.valueOf(messageParts[1]);
+        Date date = new Date(Long.parseLong(messageParts[2]));
+        String zipCode = messageParts[3];
+        List<Item> items = new ArrayList<>();
+        for (String itemCode : messageParts[4].split(",")) {
+            Item item = getItem(itemCode);
+            if (item == null) {
+                continue;
+            }
+            switch (type) {
+                case PURCHASE:
+                    item.sold = date;
+                    break;
+                case REFUND:
+                    item.sold = null;
+                    break;
+            }
+            items.add(item);
+        }
+        if (items.isEmpty()) return null;
+        return Transaction.create(id, date, type, items, zipCode);
+    }
+
     public Item getItem(String code) {
         return itemRepository.findByCode(code);
     }

@@ -687,7 +687,7 @@ DisableReadyMemo=True
 ShowComponentSizes=False
 AppName=Flohmarkthelfer Kassensystem
 AppVersion=##VERSION##
-AppCopyright=2013-2016 Lehmann Software L�sungen GbR
+AppCopyright=2013-2016 Lehmann Software Loesungen GbR
 PrivilegesRequired=none
 AppId={{FB40361A-0C2A-4AE4-98A8-1F6A435B45BB}
 ShowLanguageDialog=auto
@@ -703,7 +703,7 @@ UsePreviousGroup=False
 AlwaysUsePersonalGroup=True
 AppPublisherURL=http://flohmarkthelfer.de
 VersionInfoVersion=##VERSION##
-VersionInfoCopyright=2013-2016 Lehmann Software L�sungen GbR
+VersionInfoCopyright=2013-2016 Lehmann Software Loesungen GbR
 VersionInfoProductName=Flohmarkthelfer Kassensystem
 VersionInfoProductVersion=##VERSION##
 
@@ -717,6 +717,7 @@ Filename: "{app}\config.properties"; Section: "dummy"; Key: "postcode"; String: 
 Filename: "{app}\config.properties"; Section: "dummy"; Key: "postcode"; String: "false"; Tasks: zipcode/no
 Filename: "{app}\config.properties"; Section: "dummy"; Key: "online.root"; String: {code:GetHost}
 Filename: "{app}\config.properties"; Section: "dummy"; Key: "peer.name"; String: {code:GetPeerName}
+Filename: "{app}\config.properties"; Section: "dummy"; Key: "sync.path"; String: {code:GetSyncPath}
 
 [Tasks]
 Name: "mode"; Description: "Modus setzen"
@@ -751,13 +752,20 @@ begin
   Result := GetValueFromIni('online.host', 'flohmarkthelfer.de');
 end;
 
+function GetDefaultSyncPath(): String;
+begin
+  Result := GetValueFromIni('sync.path', 'E:\');
+end;
+
 procedure InitializeWizard();
 begin
   InputPage := CreateInputQueryPage(wpSelectProgramGroup, 'Installationsdetails', '', '');
   InputPage.Add('Name der Kasse:', False);
   InputPage.Values[0] := GetDefaultPeerName();
-  InputPage.Add('Adresse des Online-Systems:', False);
+  InputPage.Add('Hostname des Online-Systems (Adresse ohne "http://"):', False);
   InputPage.Values[1] := GetDefaultHost();
+  InputPage.Add('Verzeichnis zur automatischen Synchronisation:', False);
+  InputPage.Values[2] := GetDefaultSyncPath();
 end;
 
 function GetPeerName(Param: String): String;
@@ -768,4 +776,9 @@ end;
 function GetHost(Param: String): String;
 begin
   Result := InputPage.Values[1];
+end;
+
+function GetSyncPath(Param: String): String;
+begin
+  Result := InputPage.Values[2];
 end;

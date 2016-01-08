@@ -1,6 +1,9 @@
 package de.obfusco.secondhand.storage.model;
 
+import org.springframework.util.StringUtils;
+
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +34,21 @@ public class Transaction extends AbstractEntityWithUuid {
         transaction.id = id;
         transaction.created = date;
         return transaction;
+    }
+
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder
+                .append(id).append(";")
+                .append(type.name()).append(";")
+                .append(created.getTime()).append(";")
+                .append(zipCode).append(";");
+        List<String> codes = new ArrayList<>();
+        for (Item item : items) {
+            codes.add(item.code);
+        }
+        stringBuilder.append(StringUtils.arrayToCommaDelimitedString(codes.toArray()));
+        return stringBuilder.toString();
     }
 
     public enum Type {
