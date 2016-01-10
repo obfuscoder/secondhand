@@ -1,4 +1,4 @@
-package de.obfusco.secondhand.barcodefilegenerator;
+package de.obfusco.secondhand.labelgenerator;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;

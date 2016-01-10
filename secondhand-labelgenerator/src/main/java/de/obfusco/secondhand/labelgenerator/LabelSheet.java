@@ -1,4 +1,4 @@
-package de.obfusco.secondhand.barcodefilegenerator;
+package de.obfusco.secondhand.labelgenerator;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Component
-public class BarCodeLabelSheet {
+public class LabelSheet {
 
     public static final int NUMBER_OF_COLUMNS = 3;
     public static final int NUMBER_OF_ROWS = 5;

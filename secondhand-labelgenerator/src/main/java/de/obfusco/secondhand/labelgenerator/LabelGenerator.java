@@ -1,4 +1,4 @@
-package de.obfusco.secondhand.barcodefilegenerator;
+package de.obfusco.secondhand.labelgenerator;
 
 import de.obfusco.secondhand.storage.StorageConfiguration;
 import org.slf4j.Logger;
@@ -14,14 +14,14 @@ import javax.swing.*;
 @Configuration
 @ComponentScan("de.obfusco.secondhand")
 @Import(StorageConfiguration.class)
-public class BarCodeGenerator {
+public class LabelGenerator {
 
-    private final static Logger LOG = LoggerFactory.getLogger(BarCodeGenerator.class);
+    private final static Logger LOG = LoggerFactory.getLogger(LabelGenerator.class);
 
     public static void main(String args[]) {
         LOG.info("starting application");
-        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(BarCodeGenerator.class);
-        BarCodeGeneratorGui gui = applicationContext.getBean(BarCodeGeneratorGui.class);
+        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(LabelGenerator.class);
+        LabelGeneratorGui gui = applicationContext.getBean(LabelGeneratorGui.class);
         gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gui.setVisible(true);
     }

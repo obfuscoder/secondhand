@@ -1,4 +1,4 @@
-package de.obfusco.secondhand.barcodefilegenerator;
+package de.obfusco.secondhand.labelgenerator;
 
 import com.itextpdf.text.DocumentException;
 import de.obfusco.secondhand.storage.model.Event;
@@ -20,9 +20,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Component
-public class BarCodeGeneratorGui extends JFrame implements ActionListener {
+public class LabelGeneratorGui extends JFrame implements ActionListener {
 
-    private final static Logger LOG = LoggerFactory.getLogger(BarCodeGeneratorGui.class);
+    private final static Logger LOG = LoggerFactory.getLogger(LabelGeneratorGui.class);
     public JButton justBarcode;
     public JButton etiquettes;
     public JLabel customerNrLabel;
@@ -38,9 +38,9 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
     @Autowired
     private BarCodeSheet barCodeSheet;
     @Autowired
-    private BarCodeLabelSheet barCodeLabelSheet;
+    private LabelSheet labelSheet;
 
-    public BarCodeGeneratorGui() {
+    public LabelGeneratorGui() {
         super("Etiketten/ Barcodes");
         setSize(1000, 800);
         addComponentsToPane(getContentPane());
@@ -126,7 +126,7 @@ public class BarCodeGeneratorGui extends JFrame implements ActionListener {
         } else if (actionEvent.getSource() == etiquettes) {
             try {
 
-                targetPath = barCodeLabelSheet.createPDFFile(basePath,
+                targetPath = labelSheet.createPDFFile(basePath,
                         reservationRepository.findByNumber(Integer.parseInt(customerNr.getText())));
 
                 etiquettesLabel.setText("Etiketten für " + customerNr.getText());

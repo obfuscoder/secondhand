@@ -1,9 +1,9 @@
 package de.obfusco.secondhand.gui;
 
 import com.itextpdf.text.DocumentException;
-import de.obfusco.secondhand.barcodefilegenerator.BarCodeGeneratorGui;
 import de.obfusco.secondhand.gui.config.ConfigGui;
 import de.obfusco.secondhand.gui.transactions.TransactionsGui;
+import de.obfusco.secondhand.labelgenerator.LabelGeneratorGui;
 import de.obfusco.secondhand.net.*;
 import de.obfusco.secondhand.payoff.gui.PayOffGui;
 import de.obfusco.secondhand.receipt.file.ReceiptFile;
@@ -66,7 +66,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     @Autowired
     TestScanGui testScanGui;
     @Autowired
-    BarCodeGeneratorGui barCodeGeneratorGui;
+    LabelGeneratorGui labelGeneratorGui;
     @Autowired
     PayOffGui payOffGui;
     @Autowired
@@ -229,7 +229,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                barCodeGeneratorGui.setVisible(true);
+                labelGeneratorGui.setVisible(true);
             }
         });
         barcodeGenerator.setFont(barcodeGenerator.getFont().deriveFont(BUTTON_FONT_SIZE));
