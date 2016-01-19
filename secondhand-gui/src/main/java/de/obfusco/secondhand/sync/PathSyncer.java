@@ -20,6 +20,8 @@ public class PathSyncer {
     @Autowired
     private TransactionListener transactionListener;
     @Autowired
+    private PathSyncListener pathSyncListener;
+    @Autowired
     private StorageService storageService;
     private boolean stop = false;
 
@@ -32,8 +34,10 @@ public class PathSyncer {
                     int sleepTime = 10000;
                     File folder = new File(path);
                     if (folder.exists() && folder.isDirectory()) {
+                        pathSyncListener.syncPathAvailable();
                         sleepTime = 60000;
                         File localFile = new File(folder, localName + ".transactions");
+                        pathSyncListener.synchronizationStarted();
                         LOG.info("Writing transactions to {}.", localFile);
                         try (PrintWriter writer = new PrintWriter(localFile)) {
                             for (Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
@@ -41,6 +45,7 @@ public class PathSyncer {
                             }
                         } catch (FileNotFoundException e) {
                             LOG.error("could not open file for writing transactions", e);
+                            pathSyncListener.synchronizationError();
                         }
 
                         File[] files = folder.listFiles(new FilenameFilter() {
@@ -59,13 +64,21 @@ public class PathSyncer {
                                     transactionListener.transactionReceived(transaction);
                                 }
                             } catch (FileNotFoundException e) {
-                                LOG.error("Cannot read file {}: {}", file, e);
+                                LOG.error("Cannot read file {}: {}", file, e.getMessage());
+                                pathSyncListener.synchronizationError();
                             } catch (IOException e) {
-                                LOG.error("Error while reading file {}: {}", e);
+                                LOG.error("Error while reading file {}: {}", file, e.getMessage());
+                                pathSyncListener.synchronizationError();
+                            } catch (IllegalArgumentException e) {
+                                LOG.error("Error parsing file content of {}: {}", file, e.getMessage());
+                                pathSyncListener.synchronizationError();
                             }
+
                         }
+                        pathSyncListener.synchronizationFinished();
                     } else {
                         LOG.info("Path {} does not exist or is not a directory, skipping synchronisation", path);
+                        pathSyncListener.syncPathNotAvailable();
                     }
                     try {
                         Thread.sleep(sleepTime);
@@ -76,8 +89,5 @@ public class PathSyncer {
                 }
             }
         }).start();
-
     }
-
-
 }

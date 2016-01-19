@@ -17,6 +17,7 @@ import de.obfusco.secondhand.storage.repository.ItemRepository;
 import de.obfusco.secondhand.storage.repository.ReservationRepository;
 import de.obfusco.secondhand.storage.repository.TransactionRepository;
 import de.obfusco.secondhand.storage.service.StorageService;
+import de.obfusco.secondhand.sync.PathSyncListener;
 import de.obfusco.secondhand.sync.PathSyncer;
 import de.obfusco.secondhand.testscan.gui.TestScanGui;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ import java.util.Map;
 import java.util.Properties;
 
 @Component
-public class MainGui extends JFrame implements MessageBroker, TransactionListener, DataPusher {
+public class MainGui extends JFrame implements MessageBroker, TransactionListener, DataPusher, PathSyncListener {
 
     public static final float BUTTON_FONT_SIZE = 25.0f;
     private final static Logger LOG = LoggerFactory.getLogger(MainGui.class);
@@ -86,7 +87,8 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     @Autowired
     ConfigGui configGui;
     JFileChooser fc;
-    JLabel statusLine;
+    JLabel statusLabel;
+    JLabel folderSyncLabel;
     private Properties properties = new Properties();
     @Autowired
     private StorageConverter storageConverter;
@@ -97,6 +99,13 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     private PathSyncer pathSyncer;
     @Autowired
     private StorageService storageService;
+    private int pathSyncErrorCount;
+
+    enum SyncStatus {
+        OFFLINE,
+        ONLINE,
+        ONGOING
+    }
 
     public MainGui() {
         super("Flohmarkt Kassensystem");
@@ -164,11 +173,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     }
 
     private void addComponentsToPane(Container pane) {
-        JLabel title = new JLabel("Flohmarkt");
-        title.setFont(title.getFont().deriveFont(50.0f));
-        title.setHorizontalAlignment(SwingConstants.CENTER);
-        pane.add(title, BorderLayout.NORTH);
-
         fc = new JFileChooser();
 
         JPanel panel = new JPanel();
@@ -323,11 +327,32 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         panel.add(reportsButton);
         panel.add(helpButton);
 
-        statusLine = new JLabel("", SwingConstants.CENTER);
-        updateStatusLine();
-        panel.add(statusLine);
+        JPanel statusPanel = new JPanel();
+        statusLabel = new JLabel("", SwingConstants.CENTER);
+        folderSyncLabel = new JLabel("SYNC", SwingConstants.RIGHT);
+        updateStatusLabel();
+        updateFolderSyncLabel(SyncStatus.OFFLINE);
+        statusPanel.add(statusLabel);
+        statusPanel.add(folderSyncLabel);
+        panel.add(statusPanel);
 
         pane.add(panel, BorderLayout.SOUTH);
+    }
+
+    private void updateFolderSyncLabel(SyncStatus syncStatus) {
+        switch(syncStatus) {
+            case OFFLINE:
+                folderSyncLabel.setForeground(Color.RED);
+                break;
+            case ONLINE:
+                folderSyncLabel.setForeground(Color.GREEN.darker());
+                break;
+            case ONGOING:
+                folderSyncLabel.setForeground(Color.BLUE);
+
+                break;
+        }
+        folderSyncLabel.setText(String.format("SYNC (%d)", pathSyncErrorCount));
     }
 
     private void createPayoutReceipt() throws IOException, DocumentException {
@@ -411,7 +436,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     @Override
     public void connected(final Peer peer) {
         LOG.info("Connected with peer " + peer.getAddress());
-        updateStatusLine();
+        updateStatusLabel();
         reportsGui.update();
         peer.send("HELP-" + (helpButton.isSelected() ? "ON" : "OFF"));
         new Thread(new Runnable() {
@@ -429,15 +454,16 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     @Override
     public void disconnected() {
         LOG.info("Disconnected from a peer");
-        updateStatusLine();
+        updateStatusLabel();
         reportsGui.update();
     }
 
-    private void updateStatusLine() {
-        String status = (network == null || network.getNumberOfPeers() == 0) ?
-                "Keine Verbindungen mit anderen Systemen" :
-                "Verbunden mit " + network.getNumberOfPeers() + " anderen System(en)";
-        if (statusLine != null) statusLine.setText(status);
+    private void updateStatusLabel() {
+        if (network == null) {
+            statusLabel.setText("Keine Verbindung");
+            return;
+        }
+        statusLabel.setText(String.format("Verbunden mit %d System(en)", network.getNumberOfPeers()));
     }
 
     @Override
@@ -452,5 +478,30 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     public void push(de.obfusco.secondhand.net.dto.Event event) {
         JsonEventConverter converter = new JsonEventConverter();
         network.send("DATA" + converter.toJson(event));
+    }
+
+    @Override
+    public void syncPathNotAvailable() {
+        updateFolderSyncLabel(SyncStatus.OFFLINE);
+    }
+
+    @Override
+    public void syncPathAvailable() {
+        updateFolderSyncLabel(SyncStatus.ONLINE);
+    }
+
+    @Override
+    public void synchronizationStarted() {
+        updateFolderSyncLabel(SyncStatus.ONGOING);
+    }
+
+    @Override
+    public void synchronizationFinished() {
+        updateFolderSyncLabel(SyncStatus.ONLINE);
+    }
+
+    @Override
+    public void synchronizationError() {
+        pathSyncErrorCount ++;
     }
 }
