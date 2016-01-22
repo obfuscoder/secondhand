@@ -422,10 +422,13 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     }
 
     private void parseDataMessage(Peer peer, String message) {
-        String json = message.substring(4);
         JsonEventConverter converter = new JsonEventConverter();
-        de.obfusco.secondhand.net.dto.Event event = converter.parse(json);
-        storageConverter.storeEvent(event);
+        try {
+            de.obfusco.secondhand.net.dto.Event event = converter.parseBase64Compressed(message.substring(4));
+            storageConverter.storeEvent(event);
+        } catch (IOException e) {
+            LOG.error("Could not properly parse DATA message", e);
+        }
     }
 
     private void parseHelpMessage(Peer peer, String message) {
@@ -475,9 +478,9 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     }
 
     @Override
-    public void push(de.obfusco.secondhand.net.dto.Event event) {
+    public void push(de.obfusco.secondhand.net.dto.Event event) throws IOException {
         JsonEventConverter converter = new JsonEventConverter();
-        network.send("DATA" + converter.toJson(event));
+        network.send("DATA" + converter.toBase64CompressedJson(event));
     }
 
     @Override

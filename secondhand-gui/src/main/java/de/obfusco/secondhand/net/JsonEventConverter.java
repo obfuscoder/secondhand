@@ -3,16 +3,26 @@ package de.obfusco.secondhand.net;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonWriter;
 import de.obfusco.secondhand.net.dto.Event;
+import org.apache.commons.codec.binary.Base64InputStream;
+import org.apache.commons.codec.binary.Base64OutputStream;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class JsonEventConverter {
     public Event parse(String string) {
         return parse(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    public Event parseBase64Compressed(String string) throws IOException {
+        ByteArrayInputStream bis = new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8));
+        Base64InputStream base64Stream = new Base64InputStream(bis);
+        GZIPInputStream gzipStream = new GZIPInputStream(base64Stream);
+        return parse(gzipStream);
     }
 
     public Event parse(InputStream inputStream) {
@@ -29,5 +39,16 @@ public class JsonEventConverter {
     public String toJson(Event event) {
         Gson gson = createGson();
         return gson.toJson(event);
+    }
+
+    public String toBase64CompressedJson(Event event) throws IOException {
+        Gson gson = createGson();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        Base64OutputStream base64Stream = new Base64OutputStream(bos, true, -1, null);
+        GZIPOutputStream gzipOutputStream = new GZIPOutputStream(base64Stream);
+        JsonWriter writer = new JsonWriter(new OutputStreamWriter(gzipOutputStream, StandardCharsets.UTF_8));
+        gson.toJson(event, Event.class, writer);
+        writer.close();
+        return bos.toString();
     }
 }

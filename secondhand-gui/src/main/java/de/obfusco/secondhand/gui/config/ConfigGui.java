@@ -15,8 +15,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 
 @Component
@@ -140,7 +142,14 @@ public class ConfigGui extends JDialog {
                 "Sind Sie sicher?";
         int dialogResult = JOptionPane.showConfirmDialog(null, question, "Achtung", dialogOptions);
         if (dialogResult == JOptionPane.YES_OPTION) {
-            pushDatabase();
+            try {
+                pushDatabase();
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null,
+                        "Fehler beim Übertragen der Daten.",
+                        "Übertragungsfehler",
+                        JOptionPane.WARNING_MESSAGE);
+            }
         }
     }
 
@@ -159,7 +168,7 @@ public class ConfigGui extends JDialog {
         }
     }
 
-    private void pushDatabase() {
+    private void pushDatabase() throws IOException {
         Event event = storageConverter.convertToEvent();
         dataPusher.push(event);
     }
