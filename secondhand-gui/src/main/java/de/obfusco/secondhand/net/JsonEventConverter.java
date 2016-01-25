@@ -41,14 +41,18 @@ public class JsonEventConverter {
         return gson.toJson(event);
     }
 
-    public String toBase64CompressedJson(Event event) throws IOException {
+    public void writeCompressedJsonToStream(Event event, OutputStream outputStream) throws IOException {
         Gson gson = createGson();
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        Base64OutputStream base64Stream = new Base64OutputStream(bos, true, -1, null);
-        GZIPOutputStream gzipOutputStream = new GZIPOutputStream(base64Stream);
+        GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream);
         JsonWriter writer = new JsonWriter(new OutputStreamWriter(gzipOutputStream, StandardCharsets.UTF_8));
         gson.toJson(event, Event.class, writer);
         writer.close();
+    }
+
+    public String toBase64CompressedJson(Event event) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        Base64OutputStream base64Stream = new Base64OutputStream(bos, true, -1, null);
+        writeCompressedJsonToStream(event, base64Stream);
         return bos.toString();
     }
 }
