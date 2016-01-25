@@ -21,8 +21,7 @@ public class JsonEventConverter {
     public Event parseBase64Compressed(String string) throws IOException {
         ByteArrayInputStream bis = new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8));
         Base64InputStream base64Stream = new Base64InputStream(bis);
-        GZIPInputStream gzipStream = new GZIPInputStream(base64Stream);
-        return parse(gzipStream);
+        return parseCompressedStream(base64Stream);
     }
 
     public Event parse(InputStream inputStream) {
@@ -54,5 +53,10 @@ public class JsonEventConverter {
         Base64OutputStream base64Stream = new Base64OutputStream(bos, true, -1, null);
         writeCompressedJsonToStream(event, base64Stream);
         return bos.toString();
+    }
+
+    public Event parseCompressedStream(InputStream inputStream) throws IOException {
+        GZIPInputStream gzipStream = new GZIPInputStream(inputStream);
+        return parse(gzipStream);
     }
 }

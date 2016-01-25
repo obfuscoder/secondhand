@@ -139,9 +139,34 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         pack();
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        importDataWhenPresent();
         if (!initializeNetwork()) return;
         startPathSync();
         setVisible(true);
+    }
+
+    private void importDataWhenPresent() {
+        File importFile = new File("flohmarkthelfer.data");
+        if (!importFile.canRead()) {
+            return;
+        }
+        int dialogResult = JOptionPane.showConfirmDialog(this, "Es wurden Daten zum Importieren gefunden.\n" +
+                "Sollen diese importiert werden?\n" +
+                "Sollten lokal bereits Verkäufe getätigt worden sein,\ndie noch nicht zum Online-System " +
+                "synchronisiert wurden,\ngehen diese verloren.", "Daten importieren", JOptionPane.YES_NO_OPTION);
+        if (dialogResult != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        JsonEventConverter converter = new JsonEventConverter();
+        try (FileInputStream fileInputStream = new FileInputStream(importFile)) {
+            de.obfusco.secondhand.net.dto.Event event = converter.parseCompressedStream(fileInputStream);
+            storageConverter.storeEvent(event);
+            importFile.delete();
+            JOptionPane.showMessageDialog(this, "Daten erfolgreich importiert", "Import erfolgreich", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void startPathSync() {
@@ -426,6 +451,9 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         try {
             de.obfusco.secondhand.net.dto.Event event = converter.parseBase64Compressed(message.substring(4));
             storageConverter.storeEvent(event);
+            JOptionPane.showMessageDialog(this,
+                    String.format("Daten erfolgreich von [%s] importiert", peer.getPeerName()),
+                    "Import erfolgreich", JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException e) {
             LOG.error("Could not properly parse DATA message", e);
         }
