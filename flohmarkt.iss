@@ -640,7 +640,7 @@ Source: "java\lib\zi\SystemV\PST8"; DestDir: "{app}\java\lib\zi\SystemV"; Flags:
 Source: "java\lib\zi\SystemV\PST8PDT"; DestDir: "{app}\java\lib\zi\SystemV"; Flags: ignoreversion
 Source: "java\lib\zi\SystemV\YST9"; DestDir: "{app}\java\lib\zi\SystemV"; Flags: ignoreversion
 Source: "java\lib\zi\SystemV\YST9YDT"; DestDir: "{app}\java\lib\zi\SystemV"; Flags: ignoreversion
-Source: "flohmarkthelfer.data"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist external
+Source: "{src}\flohmarkthelfer.data"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist external
 
 [Dirs]
 Name: "{app}\java\bin"
