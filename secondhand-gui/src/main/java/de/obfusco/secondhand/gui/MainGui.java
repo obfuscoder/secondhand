@@ -158,15 +158,17 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             return;
         }
 
-        JsonEventConverter converter = new JsonEventConverter();
         try (FileInputStream fileInputStream = new FileInputStream(importFile)) {
+            JsonEventConverter converter = new JsonEventConverter();
             de.obfusco.secondhand.net.dto.Event event = converter.parseCompressedStream(fileInputStream);
             storageConverter.storeEvent(event);
-            importFile.delete();
             JOptionPane.showMessageDialog(this, "Daten erfolgreich importiert", "Import erfolgreich", JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Die Daten konnten leider nicht erfolgreich importiert werden", "Importfehler", JOptionPane.WARNING_MESSAGE);
+            LOG.error("Error while importing data from disk", e);
+            return;
         }
+        importFile.delete();
     }
 
     private void startPathSync() {
