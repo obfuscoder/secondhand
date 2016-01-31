@@ -22,13 +22,14 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
     private List<String> localHostAddresses;
     private MessageBroker broker;
     private String name;
+    private NetworkInterface networkInterface;
 
     public Network(int port, MessageBroker broker, String name) throws IOException {
         this.broker = broker;
         this.port = port;
         this.name = name;
         localHostAddresses = getLocalHostAddresses();
-        discovery = new Discovery(port, this, name);
+        discovery = new Discovery(port, this, name, networkInterface);
         server = new PeerListener(port, this);
     }
     public void start() {
@@ -81,10 +82,13 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
         List<String> hostAddresses = new ArrayList<>();
         for (Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces(); interfaces.hasMoreElements(); ) {
             NetworkInterface networkInterface = interfaces.nextElement();
-
             for (Enumeration<InetAddress> addresses = networkInterface.getInetAddresses(); addresses.hasMoreElements(); ) {
                 InetAddress address = addresses.nextElement();
                 hostAddresses.add(address.getHostAddress());
+            }
+            if (!networkInterface.isLoopback() && networkInterface.isUp()) {
+                LOG.info("Using network interface {}");
+                this.networkInterface = networkInterface;
             }
         }
         return hostAddresses;

@@ -7,6 +7,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.NetworkInterface;
 
 public class Discovery implements Closeable {
 
@@ -17,8 +18,9 @@ public class Discovery implements Closeable {
     private MulticastSocket socket;
     private InetAddress multicastAddress = InetAddress.getByName("239.42.13.37");
 
-    public Discovery(int port, DiscoveryObserver observer, String name) throws IOException {
+    public Discovery(int port, DiscoveryObserver observer, String name, NetworkInterface networkInterface) throws IOException {
         socket = new MulticastSocket(port);
+        socket.setNetworkInterface(networkInterface);
         socket.setBroadcast(true);
         socket.joinGroup(multicastAddress);
         discoveryListener = new DiscoveryListener(socket, observer);
