@@ -1,8 +1,6 @@
 package de.obfusco.secondhand.labelgenerator;
 
 import com.itextpdf.text.DocumentException;
-import de.obfusco.secondhand.storage.model.Event;
-import de.obfusco.secondhand.storage.repository.EventRepository;
 import de.obfusco.secondhand.storage.repository.ReservationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +32,6 @@ public class LabelGeneratorGui extends JFrame implements ActionListener {
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
-    private EventRepository eventRepository;
-    @Autowired
     private BarCodeSheet barCodeSheet;
     @Autowired
     private LabelSheet labelSheet;
@@ -66,11 +62,8 @@ public class LabelGeneratorGui extends JFrame implements ActionListener {
 
         etiquettesLabel = new JLabel();
         etiquettesLink = new JLabel();
-        etiquettesLink
-                .setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
+        etiquettesLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         etiquettesLink.addMouseListener(new MouseListener() {
-
             @Override
             public void mouseReleased(MouseEvent arg0) {
             }
@@ -111,10 +104,9 @@ public class LabelGeneratorGui extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        final Event event = eventRepository.find();
         if (actionEvent.getSource() == justBarcode) {
             try {
-                targetPath = barCodeSheet.createPDFFile(basePath,
+                targetPath = barCodeSheet.createPdfFile(basePath,
                         reservationRepository.findByNumber(Integer.parseInt(customerNr.getText()))
                 );
 
@@ -125,8 +117,7 @@ public class LabelGeneratorGui extends JFrame implements ActionListener {
             }
         } else if (actionEvent.getSource() == etiquettes) {
             try {
-
-                targetPath = labelSheet.createPDFFile(basePath,
+                targetPath = labelSheet.createPdfFile(basePath,
                         reservationRepository.findByNumber(Integer.parseInt(customerNr.getText())));
 
                 etiquettesLabel.setText("Etiketten für " + customerNr.getText());

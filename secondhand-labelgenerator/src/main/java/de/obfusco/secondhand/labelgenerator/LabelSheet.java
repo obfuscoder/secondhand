@@ -50,7 +50,7 @@ public class LabelSheet {
         return filePath;
     }
 
-    public Path createPDFFile(Path basePath, Reservation reservation) throws DocumentException, IOException {
+    public Path createPdfFile(Path basePath, Reservation reservation) throws DocumentException, IOException {
         String customer = new DecimalFormat("000").format(reservation.number);
         Path targetPath = Paths.get(basePath.toString(), customer);
         Files.createDirectories(targetPath);
