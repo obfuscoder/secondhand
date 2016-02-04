@@ -108,17 +108,17 @@ public class SearchGui extends JFrame {
             public void mouseExited(MouseEvent mouseEvent) {
             }
         });
+        resultTable.setAutoCreateRowSorter(true);
         pane.add(new JScrollPane(resultTable));
         pane.add(new JLabel("Doppelklick zum Kopieren der Artikelnummer"), BorderLayout.SOUTH);
     }
 
     private static class ResultsModel extends AbstractTableModel {
 
-        private final List<Item> results;
-
         private final static NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
         private final static String[] COLUMN_NAMES = new String[] {
                 "ArtNr", "Kategorie", "Bezeichnung", "Größe", "Preis", "verkauft" };
+        private final List<Item> results;
 
         public ResultsModel(List<Item> results) {
             this.results = results;
