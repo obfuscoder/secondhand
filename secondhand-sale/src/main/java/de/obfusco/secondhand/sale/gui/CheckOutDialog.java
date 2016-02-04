@@ -38,7 +38,7 @@ public class CheckOutDialog extends JDialog implements ActionListener {
 
     JButton okButton = new JButton("OK");
     JButton cancelButton = new JButton("Cancel");
-    JButton printButton = new JButton("Drucken");
+    JButton printButton = new JButton("OK + Drucken");
 
     JLabel title = new JLabel("Verkauf abschließen");
 
@@ -277,15 +277,9 @@ public class CheckOutDialog extends JDialog implements ActionListener {
             this.dispose();
         } else if (e.getSource() == printButton) {
             try {
-                Double bar;
-                if (getBarString() != null && !getBarString().equals("")) {
-                    bar = Double.parseDouble(getBarString());
-                } else {
-                    bar = Double.parseDouble(frame.getPrice().replace(",", "."));
-                }
-                File pdfFile = new BillPDFCreator().createPdf(basePath, frame.getTableData()
-                );
+                File pdfFile = new BillPDFCreator().createPdf(basePath, frame.getTableData());
                 Desktop.getDesktop().open(pdfFile);
+                completeOrder();
             } catch (DocumentException | IOException ex) {
                 JOptionPane.showMessageDialog(this, "Fehler",
                         "Es trat ein Fehler beim Erstellen der Rechnung auf.",
