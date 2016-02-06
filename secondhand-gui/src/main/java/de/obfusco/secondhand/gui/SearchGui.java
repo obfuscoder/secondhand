@@ -53,7 +53,7 @@ public class SearchGui extends JFrame {
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                String[] keywords = searchText.getText().split(" ");
+                String[] keywords = searchText.getText().split(" +");
                 List<Item> results;
                 switch (keywords.length) {
                     case 0:
