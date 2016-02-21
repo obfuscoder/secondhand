@@ -104,7 +104,7 @@ public class SellerPayOff extends BasePayOff {
     private PdfPTable createItemTable(List<Item> items) throws DocumentException {
         PdfPTable table = new PdfPTable(NUMBER_OF_COLUMNS * NUMBER_OF_ITEMS_PER_LINE);
         table.setWidthPercentage(100f);
-        table.setWidths(new int[]{1, 8, 3, 1, 8, 3});
+        table.setWidths(new int[]{1, 7, 3, 1, 7, 3});
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
         if (!items.isEmpty()) {
             addItemHeader(table);
