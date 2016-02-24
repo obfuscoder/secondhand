@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.obfusco.secondhand</groupId>
     <artifactId>secondhand</artifactId>
-    <version>3.4.2</version>
+    <version>3.4.3</version>
     <packaging>pom</packaging>
     <name>secondhand</name>
     <modules>
