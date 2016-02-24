@@ -88,12 +88,10 @@ public class StorageService {
                                          String[] itemCodes) {
         List<Item> items = new ArrayList<>();
         for (String itemCode : itemCodes) {
-            LOG.debug("get item with code {}", itemCode);
             Item item = getItem(itemCode);
             if (item == null) {
                 continue;
             }
-            LOG.debug("GOT item with id {}", item.id);
             switch (type) {
                 case PURCHASE:
                     item.sold = date;

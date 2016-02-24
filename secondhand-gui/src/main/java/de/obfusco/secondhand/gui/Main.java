@@ -12,6 +12,7 @@ public class Main {
     private final static Logger LOG = LoggerFactory.getLogger(Main.class);
 
     private Main() {
+        setupUncaughtExceptionHandler();
         LOG.info("Starting application");
         try {
             ApplicationContext context = new AnnotationConfigApplicationContext(MainConfiguration.class);
@@ -30,5 +31,10 @@ public class Main {
 
     public static void main(String args[]) {
         new Main();
+    }
+
+    private void setupUncaughtExceptionHandler() {
+        Thread.setDefaultUncaughtExceptionHandler(new LoggingExceptionHandler());
+        System.setProperty("sun.awt.exception.handler", LoggingExceptionHandler.class.getName());
     }
 }

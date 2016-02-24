@@ -82,8 +82,10 @@ public class ReceiptFile {
                             + reservation.seller.firstName));
             table.addCell(cell);
             if (payoutTitle != null) {
-                table.addCell(new PdfPCell(new Phrase(new Chunk(payouts.get(reservation.number),
-                        FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)))));
+                PdfPCell payoutCell = new PdfPCell(new Phrase(new Chunk(payouts.get(reservation.number),
+                        FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14))));
+                payoutCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                table.addCell(payoutCell);
             }
             cell = new PdfPCell();
             table.addCell(cell);
