@@ -101,12 +101,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     private StorageService storageService;
     private int pathSyncErrorCount;
 
-    enum SyncStatus {
-        OFFLINE,
-        ONLINE,
-        ONGOING
-    }
-
     public MainGui() {
         super("Flohmarkt Kassensystem");
         loadProperties();
@@ -336,7 +330,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             }
         });
         transactionsButton.setFont(transactionsButton.getFont().deriveFont(BUTTON_FONT_SIZE));
-        
+
         panel.add(sale);
         panel.add(refund);
         panel.add(search);
@@ -412,6 +406,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     }
 
     private void helpNeeded(boolean isNeeded) {
+        if (network == null) return;
         network.send("HELP-" + (isNeeded ? "ON" : "OFF"));
     }
 
@@ -433,10 +428,10 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     }
 
     public void transactionReceived(Transaction transaction) {
-        LOG.debug("Received transaction: {}", transaction);
         if (transaction == null) {
-            LOG.warn("Transaction could not be parsed. Probably not containing known items");
+            return;
         } else {
+            LOG.debug("Received transaction: {}", transaction);
             synchronized (transactionRepository) {
                 if (!transactionRepository.exists(transaction.id)) {
                     transactionRepository.save(transaction);
@@ -476,7 +471,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
             @Override
             public void run() {
-                for(Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
+                for (Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
                     LOG.info("Syncing transaction " + transaction.id + " with peer " + peer.getAddress());
                     peer.send(transaction.toString());
                 }
@@ -503,12 +498,13 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     public void notify(Transaction transaction) {
         LOG.info("Notifying all peers about transaction " + transaction.id);
         String message = transaction.toString();
-        network.send(message);
+        if (network != null) network.send(message);
         reportsGui.update();
     }
 
     @Override
     public void push(de.obfusco.secondhand.net.dto.Event event) throws IOException {
+        if (network == null) throw new IOException("Network is not available.");
         JsonEventConverter converter = new JsonEventConverter();
         network.send("DATA" + converter.toBase64CompressedJson(event));
     }
@@ -536,5 +532,11 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     @Override
     public void synchronizationError() {
         pathSyncErrorCount ++;
+    }
+
+    enum SyncStatus {
+        OFFLINE,
+        ONLINE,
+        ONGOING
     }
 }

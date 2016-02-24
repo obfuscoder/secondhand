@@ -75,12 +75,25 @@ public class StorageService {
         Transaction.Type type = Transaction.Type.valueOf(messageParts[1]);
         Date date = new Date(Long.parseLong(messageParts[2]));
         String zipCode = messageParts[3];
+        String[] itemCodes = messageParts[4].split(",");
+        if (transactionRepository.exists(id)) {
+            LOG.debug("Skipping transaction {} as it is already known", id);
+            return null;
+        }
+        return createTransaction(id, type, date, zipCode, itemCodes);
+    }
+
+
+    public Transaction createTransaction(String id, Transaction.Type type, Date date, String zipCode,
+                                         String[] itemCodes) {
         List<Item> items = new ArrayList<>();
-        for (String itemCode : messageParts[4].split(",")) {
+        for (String itemCode : itemCodes) {
+            LOG.debug("get item with code {}", itemCode);
             Item item = getItem(itemCode);
             if (item == null) {
                 continue;
             }
+            LOG.debug("GOT item with id {}", item.id);
             switch (type) {
                 case PURCHASE:
                     item.sold = date;
