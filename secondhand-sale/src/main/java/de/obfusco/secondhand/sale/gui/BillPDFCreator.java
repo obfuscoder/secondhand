@@ -13,7 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -65,11 +66,6 @@ public class BillPDFCreator {
             sum += item.price.doubleValue();
         }
 
-        cell = new PdfPCell(new Phrase("------------------------------------------------------------"));
-        cell.setColspan(5);
-        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        table.addCell(cell);
-
         cell = new PdfPCell(new Phrase(new Chunk("Summe", FontFactory.getFont(
                 FontFactory.HELVETICA_BOLD, 12))));
         table.addCell(cell);
@@ -93,11 +89,7 @@ public class BillPDFCreator {
                 new FileOutputStream(targetPath.toFile()));
         document.open();
 
-        Calendar cal = Calendar.getInstance();
-        String date = cal.get(Calendar.DATE) + "." + cal.get(Calendar.MONTH + 1)
-                + "." + cal.get(Calendar.YEAR) + " "
-                + cal.get(Calendar.HOUR_OF_DAY) + ":"
-                + cal.get(Calendar.MINUTE);
+        String date = SimpleDateFormat.getDateInstance(0, Locale.GERMAN).format(new Date());
 
         document.add(new Phrase(new Chunk("Rechnung Flohmarkt ",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 24))));
