@@ -68,17 +68,17 @@ public class SellerPayOff extends BasePayOff {
             totalPrice += item.price.doubleValue();
         }
         double pricePrecision = event.pricePrecision.doubleValue();
-        double commissionCutSum = totalPrice * (1 - event.commissionRate.doubleValue());
+        double commissionCutSum = totalPrice * (1 - reservation.commissionRate.doubleValue());
         commissionCutSum = Math.floor(commissionCutSum/pricePrecision) * pricePrecision;
-        double totalSum = commissionCutSum - event.sellerFee.doubleValue();
+        double totalSum = commissionCutSum - reservation.fee.doubleValue();
 
         PdfPTable table = createItemTable(soldItems);
         addTotalLine(table, "Summe", currency.format(totalPrice), true, 10);
         String commissionText = String.format("Kommissionsanteil (%s - hinsichtlich Auszahlung auf %s bereinigt)",
-                percent.format(event.commissionRate.doubleValue()),
+                percent.format(reservation.commissionRate.doubleValue()),
                 currency.format(pricePrecision));
         addTotalLine(table, commissionText, currency.format(commissionCutSum-totalPrice), false, 10);
-        addTotalLine(table, "Reservierungsgebühr", currency.format(-event.sellerFee.doubleValue()), false, 10);
+        addTotalLine(table, "Reservierungsgebühr", currency.format(-reservation.fee.doubleValue()), false, 10);
         addTotalLine(table, "Auszuzahlender Betrag", currency.format(totalSum), true, 12);
         document.add(table);
         document.add(new Phrase("\n"));

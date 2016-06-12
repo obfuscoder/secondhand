@@ -90,19 +90,19 @@ public class TotalPayOff extends BasePayOff {
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
 
         double pricePrecision = event.pricePrecision.doubleValue();
-        double sellerFee = event.sellerFee.doubleValue();
 
         double commissionSum = 0.0;
         double feeSum = 0.0;
         double soldSum = 0.0;
         List<Payout> payouts = new ArrayList<>();
         for (Reservation reservation : reservations) {
+            double sellerFee = reservation.fee.doubleValue();
             double sum = 0;
             for (Item item : itemRepository.findByReservationAndSoldNotNullOrderByNumberAsc(reservation)) {
                 sum += item.price.doubleValue();
             }
             soldSum += sum;
-            double commissionCutSum = sum * (1 - event.commissionRate.doubleValue());
+            double commissionCutSum = sum * (1 - reservation.commissionRate.doubleValue());
 
             commissionCutSum = Math.floor(commissionCutSum / pricePrecision) * pricePrecision;
             commissionSum += sum - commissionCutSum;
@@ -113,7 +113,7 @@ public class TotalPayOff extends BasePayOff {
         int soldItemCount = itemRepository.findBySoldNotNull().size();
         addTotalLine(table, "Anzahl verkaufter Artikel", Integer.toString(soldItemCount), true, 12);
         addTotalLine(table, "Summe verkaufter Artikel", currency.format(soldSum), true, 12);
-        addTotalLine(table, "Kommissionsanteil (" + percent.format(event.commissionRate) + ")", currency.format(commissionSum), false, 12);
+        addTotalLine(table, "Kommissionsanteil", currency.format(commissionSum), false, 12);
         addTotalLine(table, "Teilnahmegebühren für " + reservationCount + " Teilnehmer", currency.format(feeSum), false, 12);
         addTotalLine(table, "Gewinn insgesamt", currency.format(commissionSum + feeSum), true, 14);
 

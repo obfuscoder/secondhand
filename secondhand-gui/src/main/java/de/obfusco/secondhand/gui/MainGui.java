@@ -388,15 +388,14 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             Map<Integer, String> payouts = new HashMap<>();
             Event event = eventRepository.find();
             double pricePrecision = event.pricePrecision.doubleValue();
-            double sellerFee = event.sellerFee.doubleValue();
             for (Reservation reservation : reservationRepository.findAll()) {
                 double sum = 0;
                 for (Item item : itemRepository.findByReservationAndSoldNotNullOrderByNumberAsc(reservation)) {
                     sum += item.price.doubleValue();
                 }
-                double commissionCutSum = sum * (1 - event.commissionRate.doubleValue());
+                double commissionCutSum = sum * (1 - reservation.commissionRate.doubleValue());
                 commissionCutSum = Math.floor(commissionCutSum / pricePrecision) * pricePrecision;
-                payouts.put(reservation.number, currency.format(commissionCutSum - sellerFee));
+                payouts.put(reservation.number, currency.format(commissionCutSum - reservation.fee.doubleValue()));
             }
             file = receiptFile.createFile(fileBasePath, title, introText, "Betrag", payouts);
         } else {

@@ -49,7 +49,7 @@ public class EventImporterTest {
         assertEquals(event.sellers.get(0).id, sellerRepository.findAll().iterator().next().id);
         assertEquals(event.reservations.size(), reservationRepository.count());
         de.obfusco.secondhand.storage.model.Reservation firstReservation =
-                reservationRepository.findAll().iterator().next();
+                reservationRepository.findByNumber(1);
         assertEquals(1, firstReservation.number);
         assertEquals(265, firstReservation.seller.id);
         assertEquals(event.items.size(), itemRepository.count());
@@ -72,14 +72,6 @@ public class EventImporterTest {
         parseAndCheckInputStream(fileStream);
     }
 
-    @Test
-    public void downloadAndParseJsonGz() throws IOException, ParseException {
-        String token = "qM232m9bokk";
-        String baseUrl = "flohmarkt-koenigsbach.de";
-        InputStream response = new EventDownloader().downloadEventData(baseUrl, token);
-        parseAndCheckInputStream(response);
-    }
-
     private void parseAndCheckInputStream(InputStream inputStream) throws ParseException {
         Event event = parse(inputStream);
         checkEvent(event);
@@ -98,6 +90,8 @@ public class EventImporterTest {
         Reservation firstReservation = reservations.get(0);
         assertEquals(313, firstReservation.id);
         assertEquals(33, firstReservation.number);
+        assertEquals(new BigDecimal("5.0"), firstReservation.fee);
+        assertEquals(new BigDecimal("0.3"), firstReservation.commissionRate);
     }
 
     private void checkItems(List<Item> items) throws ParseException {
