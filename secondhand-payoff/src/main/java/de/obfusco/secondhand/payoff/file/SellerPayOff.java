@@ -33,17 +33,17 @@ public class SellerPayOff extends BasePayOff {
     @Autowired
     EventRepository eventRepository;
 
-    public File createFile(Path basePath, Reservation reservation) throws DocumentException, IOException {
+    public File createFile(Path basePath, Reservation reservation, boolean considerSellerFee) throws DocumentException, IOException {
         Path targetPath = Paths.get(basePath.toString(), Integer.toString(reservation.number));
         Files.createDirectories(targetPath);
         Path fullPath = Paths.get(targetPath.toString(), "payoff.pdf");
         Document document = createPdfDocument(fullPath);
-        addContentToPdf(document, reservation);
+        addContentToPdf(document, reservation, considerSellerFee);
         document.close();
         return fullPath.toFile();
     }
 
-    private void addContentToPdf(Document document, Reservation reservation) throws DocumentException {
+    private void addContentToPdf(Document document, Reservation reservation, boolean considerSellerFee) throws DocumentException {
         addHeader(document, eventRepository.find());
         document.add(new Phrase("\n\n"));
 
@@ -70,7 +70,10 @@ public class SellerPayOff extends BasePayOff {
         double pricePrecision = event.pricePrecision.doubleValue();
         double commissionCutSum = totalPrice * (1 - reservation.commissionRate.doubleValue());
         commissionCutSum = Math.floor(commissionCutSum/pricePrecision) * pricePrecision;
-        double totalSum = commissionCutSum - reservation.fee.doubleValue();
+        double totalSum = commissionCutSum;
+        if (considerSellerFee) {
+            totalSum -= reservation.fee.doubleValue();
+        }
 
         PdfPTable table = createItemTable(soldItems);
         addTotalLine(table, "Summe", currency.format(totalPrice), true, 10);
@@ -152,13 +155,13 @@ public class SellerPayOff extends BasePayOff {
         table.setHeaderRows(1);
     }
 
-    public File createFileForAll(Path basePath, Iterable<Reservation> reservations) throws IOException, DocumentException {
+    public File createFileForAll(Path basePath, Iterable<Reservation> reservations, boolean considerSellerFee) throws IOException, DocumentException {
         Path targetPath = Paths.get(basePath.toString());
         Files.createDirectories(targetPath);
         Path fullPath = Paths.get(targetPath.toString(), "allpayoff.pdf");
         Document document = createPdfDocument(fullPath);
         for (Reservation reservation : reservations) {
-            addContentToPdf(document, reservation);
+            addContentToPdf(document, reservation, considerSellerFee);
             document.newPage();
         }
         document.close();

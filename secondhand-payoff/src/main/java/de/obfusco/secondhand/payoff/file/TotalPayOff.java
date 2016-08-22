@@ -15,6 +15,7 @@ import de.obfusco.secondhand.storage.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -83,6 +84,10 @@ public class TotalPayOff extends BasePayOff {
     }
 
     private PdfPTable createTotalTable(Event event) {
+        boolean considerSellerFee = JOptionPane.showConfirmDialog(
+                null, "Soll vom Auszahlbetrag die Reservierungsgebühr abgezogen werden?", "Reservierungsgebühr",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION;
+
         long reservationCount = reservationRepository.count();
         Iterable<Reservation> reservations = reservationRepository.findAll();
 
@@ -107,7 +112,10 @@ public class TotalPayOff extends BasePayOff {
             commissionCutSum = Math.floor(commissionCutSum / pricePrecision) * pricePrecision;
             commissionSum += sum - commissionCutSum;
             feeSum += sellerFee;
-            payouts.add(new Payout(reservation, commissionCutSum - sellerFee));
+            if (considerSellerFee) {
+                commissionCutSum -= sellerFee;
+            }
+            payouts.add(new Payout(reservation, commissionCutSum));
         }
 
         int soldItemCount = itemRepository.findBySoldNotNull().size();

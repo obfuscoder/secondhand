@@ -77,7 +77,10 @@ public class PayOffGui extends JFrame {
         final PdfFileCreator allSellerPayoffCreator = new PdfFileCreator() {
             @Override
             public File create() throws DocumentException, IOException {
-                return sellerPayOff.createFileForAll(basePath, reservations);
+                boolean considerSellerFee = JOptionPane.showConfirmDialog(
+                        null, "Soll vom Auszahlbetrag die Reservierungsgebühr abgezogen werden?", "Reservierungsgebühr",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION;
+                return sellerPayOff.createFileForAll(basePath, reservations, considerSellerFee);
             }
         };
 
@@ -103,7 +106,10 @@ public class PayOffGui extends JFrame {
             final PdfFileCreator sellerPayoffCreator = new PdfFileCreator() {
                 @Override
                 public File create() throws DocumentException, IOException {
-                    return sellerPayOff.createFile(basePath, reservation);
+                    boolean considerSellerFee = JOptionPane.showConfirmDialog(
+                            null, "Soll vom Auszahlbetrag die Reservierungsgebühr abgezogen werden?", "Reservierungsgebühr",
+                            JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION;
+                    return sellerPayOff.createFile(basePath, reservation, considerSellerFee);
                 }
             };
             JLabel customerPayoffNr = createPdfLink(
