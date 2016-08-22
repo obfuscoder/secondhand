@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.obfusco.secondhand</groupId>
         <artifactId>secondhand</artifactId>
-        <version>3.4.4</version>
+        <version>3.5.0</version>
     </parent>
     <artifactId>secondhand-testscan</artifactId>
     <name>secondhand-testscan</name>
