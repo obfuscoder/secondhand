@@ -44,7 +44,6 @@ public class PushDataTest {
         assertEquals(reservationRepository.count(), event.reservations.size());
         assertEquals(281, event.reservations.get(0).id);
         assertEquals(itemRepository.count(), event.items.size());
-        assertEquals(731, event.items.get(0).id);
     }
 
     @Test
@@ -59,7 +58,7 @@ public class PushDataTest {
         category.id = 3;
         category.name = "Categoryname";
         event.categories.add(category);
-        JsonEventConverter converter = new JsonEventConverter();
+        JsonDataConverter converter = new JsonDataConverter();
         String json = converter.toJson(event);
         assertEquals("{\"id\":2,\"name\":\"Eventname\",\"price_precision\":0.5,\"donation_of_unsold_items_enabled\":true," +
                 "\"categories\":[{\"id\":3,\"name\":\"Categoryname\"}]}", json);
@@ -72,7 +71,7 @@ public class PushDataTest {
         String json = "{\"id\":2,\"name\":\"Eventname\",\"price_precision\":0.5,\"donation_of_unsold_items_enabled\":true," +
                 "\"categories\":[{\"id\":3,\"name\":\"Categoryname\"}]}";
         String encodedJson = "H4sIAAAAAAAAAD2NQQrCMBBF7zLrIKK4yVY8hcgQk68MtDMlmQql9O6WCO7+48N7K0mheAqkaQRFun2g3negqUoGTxVZmphSPB4ugYpp8h3ZXjxrs6GwOMbG0PQcsNu8zgiUk+NtVdAo3teeOf8z19+5dNwe2xeuEkjohwAAAA==";
-        JsonEventConverter converter = new JsonEventConverter();
+        JsonDataConverter converter = new JsonDataConverter();
         checkEvent(converter.parse(json));
         checkEvent(converter.parseBase64Compressed(encodedJson));
     }

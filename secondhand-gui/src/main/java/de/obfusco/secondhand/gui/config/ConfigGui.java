@@ -126,7 +126,7 @@ public class ConfigGui extends JDialog {
         File exportPath = fileChooser.getSelectedFile();
         File exportFile = new File(exportPath, "flohmarkthelfer.data");
         Event event = storageConverter.convertToEvent();
-        JsonEventConverter converter = new JsonEventConverter();
+        JsonDataConverter converter = new JsonDataConverter();
         try (FileOutputStream fileOutputStream = new FileOutputStream(exportFile)) {
             converter.writeCompressedJsonToStream(event, fileOutputStream);
             JOptionPane.showMessageDialog(null,
@@ -220,7 +220,7 @@ public class ConfigGui extends JDialog {
 
     private void downloadDatabase(String baseUrl, String token) throws IOException {
         InputStream inputStream = new EventDownloader().downloadEventData(baseUrl, token);
-        Event event = new JsonEventConverter().parse(inputStream);
+        Event event = new JsonDataConverter().parse(inputStream);
         event.token = token;
         storageConverter.storeEvent(event);
     }

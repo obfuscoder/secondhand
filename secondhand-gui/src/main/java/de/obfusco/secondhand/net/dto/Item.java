@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.sql.Date;
 
 public class Item {
-    public int id;
     public int categoryId;
     public int reservationId;
     public String description;
@@ -14,4 +13,5 @@ public class Item {
     public String code;
     public Date sold;
     public boolean donation;
+    public boolean adhoc;
 }

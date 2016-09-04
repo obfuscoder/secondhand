@@ -38,4 +38,5 @@ public interface ItemRepository extends CrudRepository<Item, Integer> {
             "and (lower(i.code) like lower(?3) or lower(i.description) like lower(?3) or lower(i.size) like lower(?3) or lower(c.name) like lower(?3))")
     List<Item> findByKeywords(String keyword1, String keyword2, String keyword3);
 
+    List<Item> findAllByAdhocTrue();
 }

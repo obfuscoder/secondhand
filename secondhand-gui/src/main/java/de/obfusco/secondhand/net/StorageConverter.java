@@ -1,6 +1,11 @@
 package de.obfusco.secondhand.net;
 
-import de.obfusco.secondhand.net.dto.*;
+import de.obfusco.secondhand.net.dto.Category;
+import de.obfusco.secondhand.net.dto.Event;
+import de.obfusco.secondhand.net.dto.Item;
+import de.obfusco.secondhand.net.dto.Reservation;
+import de.obfusco.secondhand.net.dto.Seller;
+import de.obfusco.secondhand.net.dto.Transaction;
 import de.obfusco.secondhand.storage.repository.*;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MapperFacade;
@@ -11,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class StorageConverter {
@@ -28,13 +35,14 @@ public class StorageConverter {
     @Autowired
     TransactionRepository transactionRepository;
 
+    Map<Integer, de.obfusco.secondhand.storage.model.Category> categoryMap;
+    Map<Integer, de.obfusco.secondhand.storage.model.Seller> sellerMap;
+    Map<Integer, de.obfusco.secondhand.storage.model.Reservation> reservationMap;
+
+
     public void storeEvent(Event event) {
-        transactionRepository.deleteAll();
-        itemRepository.deleteAll();
-        reservationRepository.deleteAll();
-        sellerRepository.deleteAll();
-        categoryRepository.deleteAll();
-        eventRepository.deleteAll();
+        initHashMaps();
+        emptyDatabase();
         MapperFactory mapperFactory = createMapperFactory();
         MapperFacade mapper = mapperFactory.getMapperFacade();
         eventRepository.save(mapper.map(event, de.obfusco.secondhand.storage.model.Event.class));
@@ -42,6 +50,27 @@ public class StorageConverter {
         storeSellers(event.sellers, mapper);
         storeReservations(event.reservations, mapper);
         storeItems(event.items, mapper);
+    }
+
+    private void initHashMaps() {
+        categoryMap = new HashMap<>();
+        sellerMap = new HashMap<>();
+        reservationMap = new HashMap<>();
+    }
+
+    private void emptyDatabase() {
+        transactionRepository.deleteAll();
+        itemRepository.deleteAll();
+        reservationRepository.deleteAll();
+        sellerRepository.deleteAll();
+        categoryRepository.deleteAll();
+        eventRepository.deleteAll();
+    }
+
+    public void storeItem(Item item) {
+        MapperFactory mapperFactory = createMapperFactory();
+        MapperFacade mapper = mapperFactory.getMapperFacade();
+        itemRepository.save(mapper.map(item, de.obfusco.secondhand.storage.model.Item.class));
     }
 
     private MapperFactory createMapperFactory() {
@@ -59,14 +88,14 @@ public class StorageConverter {
                         new CustomMapper<Item, de.obfusco.secondhand.storage.model.Item>() {
                             @Override
                             public void mapAtoB(Item a, de.obfusco.secondhand.storage.model.Item b, MappingContext context) {
-                                b.category = categoryRepository.findOne(a.categoryId);
-                                b.reservation = reservationRepository.findOne(a.reservationId);
+                                b.category = categoryMap.get(a.categoryId);
+                                b.reservation = reservationMap.get(a.reservationId);
                             }
 
                             @Override
                             public void mapBtoA(de.obfusco.secondhand.storage.model.Item b, Item a, MappingContext context) {
-                                a.categoryId = b.category.id;
-                                a.reservationId = b.reservation.id;
+                                a.categoryId = b.category.getId();
+                                a.reservationId = b.reservation.getId();
                             }
                         })
                 .register();
@@ -79,12 +108,12 @@ public class StorageConverter {
                         new CustomMapper<Reservation, de.obfusco.secondhand.storage.model.Reservation>() {
                             @Override
                             public void mapAtoB(Reservation a, de.obfusco.secondhand.storage.model.Reservation b, MappingContext context) {
-                                b.seller = sellerRepository.findOne(a.sellerId);
+                                b.seller = sellerMap.get(a.sellerId);
                             }
 
                             @Override
                             public void mapBtoA(de.obfusco.secondhand.storage.model.Reservation b, Reservation a, MappingContext context) {
-                                a.sellerId = b.seller.id;
+                                a.sellerId = b.seller.getId();
                             }
                         })
                 .register();
@@ -110,7 +139,7 @@ public class StorageConverter {
                                 a.date = b.created;
                                 a.items = new ArrayList<>();
                                 for (de.obfusco.secondhand.storage.model.Item item : b.items) {
-                                    a.items.add(item.id);
+                                    a.items.add(item.getId());
                                 }
                             }
                         })
@@ -119,19 +148,19 @@ public class StorageConverter {
 
     private void storeCategories(List<Category> categories, MapperFacade mapper) {
         for (Category category : categories) {
-            categoryRepository.save(mapper.map(category, de.obfusco.secondhand.storage.model.Category.class));
+            categoryMap.put(category.id, categoryRepository.save(mapper.map(category, de.obfusco.secondhand.storage.model.Category.class)));
         }
     }
 
     private void storeSellers(List<Seller> sellers, MapperFacade mapper) {
         for (Seller seller : sellers) {
-            sellerRepository.save(mapper.map(seller, de.obfusco.secondhand.storage.model.Seller.class));
+            sellerMap.put(seller.id, sellerRepository.save(mapper.map(seller, de.obfusco.secondhand.storage.model.Seller.class)));
         }
     }
 
     private void storeReservations(List<Reservation> reservations, MapperFacade mapper) {
         for (Reservation reservation : reservations) {
-            reservationRepository.save(mapper.map(reservation, de.obfusco.secondhand.storage.model.Reservation.class));
+            reservationMap.put(reservation.id, reservationRepository.save(mapper.map(reservation, de.obfusco.secondhand.storage.model.Reservation.class)));
         }
     }
 
@@ -162,6 +191,12 @@ public class StorageConverter {
             event.items.add(mapper.map(item, Item.class));
         }
         return event;
+    }
+
+    public Item convertItem(de.obfusco.secondhand.storage.model.Item item) {
+        MapperFactory mapperFactory = createMapperFactory();
+        MapperFacade mapper = mapperFactory.getMapperFacade();
+        return mapper.map(item, Item.class);
     }
 
     public List<Transaction> convertToTransactions(Iterable<de.obfusco.secondhand.storage.model.Transaction> transactions) {

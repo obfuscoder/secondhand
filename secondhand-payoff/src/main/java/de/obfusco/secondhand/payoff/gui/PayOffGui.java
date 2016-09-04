@@ -112,6 +112,8 @@ public class PayOffGui extends JFrame {
                     return sellerPayOff.createFile(basePath, reservation, considerSellerFee);
                 }
             };
+            if (reservation == null) throw new RuntimeException("Shiit");
+            if (reservation.seller == null) throw new RuntimeException(String.valueOf(reservation.number));
             JLabel customerPayoffNr = createPdfLink(
                     reservation.number + " | " + reservation.seller.getName(),
                     14.0f, sellerPayoffCreator);

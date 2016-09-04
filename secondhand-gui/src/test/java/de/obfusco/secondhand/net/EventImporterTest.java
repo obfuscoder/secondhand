@@ -42,21 +42,21 @@ public class EventImporterTest {
         Event event = parse(getClass().getResourceAsStream("/test.json"));
         storageConverter.storeEvent(event);
         de.obfusco.secondhand.storage.model.Event dataEvent = eventRepository.find();
-        assertEquals(4, dataEvent.id.intValue());
+        assertEquals(4, dataEvent.getId().intValue());
         assertEquals(event.categories.size(), categoryRepository.count());
         assertEquals(event.categories.get(0).name, categoryRepository.findAll().iterator().next().name);
         assertEquals(event.sellers.size(), sellerRepository.count());
-        assertEquals(event.sellers.get(0).id, sellerRepository.findAll().iterator().next().id.intValue());
+        assertEquals(event.sellers.get(0).id, sellerRepository.findAll().iterator().next().getId().intValue());
         assertEquals(event.reservations.size(), reservationRepository.count());
         de.obfusco.secondhand.storage.model.Reservation firstReservation =
                 reservationRepository.findByNumber(1);
         assertEquals(1, firstReservation.number);
-        assertEquals(265, firstReservation.seller.id.intValue());
+        assertEquals(265, firstReservation.seller.getId().intValue());
         assertEquals(event.items.size(), itemRepository.count());
         de.obfusco.secondhand.storage.model.Item firstItem = itemRepository.findAll().iterator().next();
-        assertEquals(731, firstItem.id.intValue());
-        assertEquals(2, firstItem.category.id.intValue());
-        assertEquals(301, firstItem.reservation.id.intValue());
+        assertEquals(731, firstItem.getId().intValue());
+        assertEquals(2, firstItem.category.getId().intValue());
+        assertEquals(301, firstItem.reservation.getId().intValue());
     }
 
     @Test
@@ -82,7 +82,7 @@ public class EventImporterTest {
     }
 
     private Event parse(InputStream inputStream) {
-        return new JsonEventConverter().parse(inputStream);
+        return new JsonDataConverter().parse(inputStream);
     }
 
     private void checkReservations(List<Reservation> reservations) throws ParseException {
@@ -97,7 +97,6 @@ public class EventImporterTest {
     private void checkItems(List<Item> items) throws ParseException {
         assertEquals(5060, items.size());
         Item item = items.get(0);
-        assertEquals(4683, item.id);
         assertEquals(8, item.categoryId);
         assertEquals("s. Oliver pink", item.description);
         assertEquals("116/122", item.size);

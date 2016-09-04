@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
 import de.obfusco.secondhand.net.dto.Event;
+import de.obfusco.secondhand.net.dto.Item;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.codec.binary.Base64OutputStream;
 
@@ -13,9 +14,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-public class JsonEventConverter {
+public class JsonDataConverter {
     public Event parse(String string) {
         return parse(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    public Item parseItem(String string) {
+        return parseItem(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
     }
 
     public Event parseBase64Compressed(String string) throws IOException {
@@ -29,15 +34,20 @@ public class JsonEventConverter {
         return gson.fromJson(new InputStreamReader(inputStream, StandardCharsets.UTF_8), Event.class);
     }
 
+    public Item parseItem(InputStream inputStream) {
+        Gson gson = createGson();
+        return gson.fromJson(new InputStreamReader(inputStream, StandardCharsets.UTF_8), Item.class);
+    }
+
     private Gson createGson() {
         return new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").create();
     }
 
-    public String toJson(Event event) {
+    public String toJson(Object object) {
         Gson gson = createGson();
-        return gson.toJson(event);
+        return gson.toJson(object);
     }
 
     public void writeCompressedJsonToStream(Event event, OutputStream outputStream) throws IOException {

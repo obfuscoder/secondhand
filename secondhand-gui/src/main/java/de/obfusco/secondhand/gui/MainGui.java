@@ -13,6 +13,9 @@ import de.obfusco.secondhand.reports.ReportsGui;
 import de.obfusco.secondhand.sale.gui.CashBoxGui;
 import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.*;
+import de.obfusco.secondhand.storage.model.Item;
+import de.obfusco.secondhand.storage.model.Reservation;
+import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.repository.*;
 import de.obfusco.secondhand.storage.service.ItemLearner;
 import de.obfusco.secondhand.storage.service.StorageService;
@@ -106,6 +109,8 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     private StorageService storageService;
     private int pathSyncErrorCount;
 
+    JsonDataConverter converter = new JsonDataConverter();
+
     public MainGui() {
         super("Flohmarkt Kassensystem");
         loadProperties();
@@ -158,7 +163,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         }
 
         try (FileInputStream fileInputStream = new FileInputStream(importFile)) {
-            JsonEventConverter converter = new JsonEventConverter();
             de.obfusco.secondhand.net.dto.Event event = converter.parseCompressedStream(fileInputStream);
             storageConverter.storeEvent(event);
             JOptionPane.showMessageDialog(this, "Daten erfolgreich importiert", "Import erfolgreich", JOptionPane.INFORMATION_MESSAGE);
@@ -431,6 +435,8 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
                 parseHelpMessage(peer, message);
             } else if(message.startsWith("DATA")) {
                 parseDataMessage(peer, message);
+            } else if(message.startsWith("ITEM")) {
+                parseItemMessage(peer, message);
             } else {
                 transactionReceived(storageService.parseTransactionMessage(message));
             }
@@ -457,7 +463,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     }
 
     private void parseDataMessage(Peer peer, String message) {
-        JsonEventConverter converter = new JsonEventConverter();
         try {
             de.obfusco.secondhand.net.dto.Event event = converter.parseBase64Compressed(message.substring(4));
             storageConverter.storeEvent(event);
@@ -467,6 +472,12 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         } catch (IOException e) {
             LOG.error("Could not properly parse DATA message", e);
         }
+    }
+
+    private void parseItemMessage(Peer peer, String message) {
+        de.obfusco.secondhand.net.dto.Item item = converter.parseItem(message.substring(4));
+        storageConverter.storeItem(item);
+        reportsGui.update();
     }
 
     private void parseHelpMessage(Peer peer, String message) {
@@ -480,14 +491,14 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         updateStatusLabel();
         reportsGui.update();
         peer.send("HELP-" + (helpButton.isSelected() ? "ON" : "OFF"));
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                for (Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
-                    LOG.info("Syncing transaction " + transaction.id + " with peer " + peer.getAddress());
-                    peer.send(transaction.toString());
-                }
+        new Thread(() -> {
+            for (Item item : itemRepository.findAllByAdhocTrue()) {
+                LOG.info("Syncing item with code {} with peer {}", item.code, peer.getAddress());
+                peer.send(createItemMessage(item));
+            }
+            for (Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
+                LOG.info("Syncing transaction " + transaction.id + " with peer " + peer.getAddress());
+                peer.send(transaction.toString());
             }
         }).start();
     }
@@ -515,10 +526,21 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         reportsGui.update();
     }
 
+    public void notifyNewItem(Item item) {
+        reportsGui.update();
+        if (network == null) return;
+        LOG.info("Notifying all peers about new item with code " + item.code);
+        network.send(createItemMessage(item));
+    }
+
+    private String createItemMessage(Item item) {
+        String data = converter.toJson(storageConverter.convertItem(item));
+        return "ITEM" + data;
+    }
+
     @Override
     public void push(de.obfusco.secondhand.net.dto.Event event) throws IOException {
         if (network == null) throw new IOException("Network is not available.");
-        JsonEventConverter converter = new JsonEventConverter();
         network.send("DATA" + converter.toBase64CompressedJson(event));
     }
 
@@ -581,11 +603,14 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         item.code = code;
         item.number = itemNumber;
         item.reservation = reservation;
+        item.adhoc = true;
         LearnGui learnGui = new LearnGui(item, categoryRepository.findAllByOrderByNameAsc());
         learnGui.setVisible(true);
         if (learnGui.wasCancelled()) return null;
 
-        return itemRepository.save(item);
+        item = itemRepository.save(item);
+        notifyNewItem(item);
+        return item;
     }
 
     enum SyncStatus {

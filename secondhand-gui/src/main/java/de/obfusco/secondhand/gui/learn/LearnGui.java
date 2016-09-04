@@ -37,6 +37,7 @@ public class LearnGui extends JDialog {
         categories.forEach(cat -> category.addItem(cat));
         pack();
         getRootPane().setDefaultButton(buttonOK);
+        price.requestFocusInWindow();
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
