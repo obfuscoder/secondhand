@@ -27,6 +27,9 @@ public class StorageService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private ItemLearner itemLearner;
+
     @Transactional
     public Transaction storeSoldInformation(List<Item> items, String zipCode) {
         Date soldDate = new Date();
@@ -107,6 +110,10 @@ public class StorageService {
     }
 
     public Item getItem(String code) {
-        return itemRepository.findByCode(code);
+        Item item = itemRepository.findByCode(code);
+        if (item == null) {
+            return itemLearner.learn(code);
+        }
+        return item;
     }
 }

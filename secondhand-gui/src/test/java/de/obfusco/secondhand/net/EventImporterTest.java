@@ -42,21 +42,21 @@ public class EventImporterTest {
         Event event = parse(getClass().getResourceAsStream("/test.json"));
         storageConverter.storeEvent(event);
         de.obfusco.secondhand.storage.model.Event dataEvent = eventRepository.find();
-        assertEquals(4, dataEvent.id);
+        assertEquals(4, dataEvent.id.intValue());
         assertEquals(event.categories.size(), categoryRepository.count());
         assertEquals(event.categories.get(0).name, categoryRepository.findAll().iterator().next().name);
         assertEquals(event.sellers.size(), sellerRepository.count());
-        assertEquals(event.sellers.get(0).id, sellerRepository.findAll().iterator().next().id);
+        assertEquals(event.sellers.get(0).id, sellerRepository.findAll().iterator().next().id.intValue());
         assertEquals(event.reservations.size(), reservationRepository.count());
         de.obfusco.secondhand.storage.model.Reservation firstReservation =
                 reservationRepository.findByNumber(1);
         assertEquals(1, firstReservation.number);
-        assertEquals(265, firstReservation.seller.id);
+        assertEquals(265, firstReservation.seller.id.intValue());
         assertEquals(event.items.size(), itemRepository.count());
         de.obfusco.secondhand.storage.model.Item firstItem = itemRepository.findAll().iterator().next();
-        assertEquals(731, firstItem.id);
-        assertEquals(2, firstItem.category.id);
-        assertEquals(301, firstItem.reservation.id);
+        assertEquals(731, firstItem.id.intValue());
+        assertEquals(2, firstItem.category.id.intValue());
+        assertEquals(301, firstItem.reservation.id.intValue());
     }
 
     @Test

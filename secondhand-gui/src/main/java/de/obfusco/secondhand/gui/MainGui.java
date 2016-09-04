@@ -2,6 +2,7 @@ package de.obfusco.secondhand.gui;
 
 import com.itextpdf.text.DocumentException;
 import de.obfusco.secondhand.gui.config.ConfigGui;
+import de.obfusco.secondhand.gui.learn.LearnGui;
 import de.obfusco.secondhand.gui.transactions.TransactionsGui;
 import de.obfusco.secondhand.labelgenerator.LabelGeneratorGui;
 import de.obfusco.secondhand.net.*;
@@ -12,10 +13,8 @@ import de.obfusco.secondhand.reports.ReportsGui;
 import de.obfusco.secondhand.sale.gui.CashBoxGui;
 import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.*;
-import de.obfusco.secondhand.storage.repository.EventRepository;
-import de.obfusco.secondhand.storage.repository.ItemRepository;
-import de.obfusco.secondhand.storage.repository.ReservationRepository;
-import de.obfusco.secondhand.storage.repository.TransactionRepository;
+import de.obfusco.secondhand.storage.repository.*;
+import de.obfusco.secondhand.storage.service.ItemLearner;
 import de.obfusco.secondhand.storage.service.StorageService;
 import de.obfusco.secondhand.sync.PathSyncListener;
 import de.obfusco.secondhand.sync.PathSyncer;
@@ -44,11 +43,15 @@ import java.util.Map;
 import java.util.Properties;
 
 @Component
-public class MainGui extends JFrame implements MessageBroker, TransactionListener, DataPusher, PathSyncListener {
+public class MainGui extends JFrame implements MessageBroker, TransactionListener, DataPusher, PathSyncListener, ItemLearner {
 
     public static final float BUTTON_FONT_SIZE = 25.0f;
     private final static Logger LOG = LoggerFactory.getLogger(MainGui.class);
     private static final long serialVersionUID = 4961295225628108431L;
+    public static final int CODE_LENGTH_EXCLUDING_PREFIX = 9;
+    public static final int EVENT_PART_LENGTH = 2;
+    public static final int SELLER_PART_LENGTH = 3;
+    public static final int ITEM_PART_LENGTH = 3;
     public JButton sale;
     public JButton billGenerator;
     public JButton barcodeGenerator;
@@ -84,6 +87,8 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     ReservationRepository reservationRepository;
     @Autowired
     EventRepository eventRepository;
+    @Autowired
+    CategoryRepository categoryRepository;
     @Autowired
     ConfigGui configGui;
     JFileChooser fc;
@@ -540,6 +545,47 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     @Override
     public void synchronizationError() {
         pathSyncErrorCount ++;
+    }
+
+    @Override
+    public Item learn(String code) {
+        if (! "true".equals(properties.getProperty("autolearn"))) return null;
+
+        int prefixLength = code.length() - CODE_LENGTH_EXCLUDING_PREFIX;
+        if (prefixLength < 0) return null;
+
+        int eventPartStart = prefixLength;
+        String eventPart = code.substring(eventPartStart, eventPartStart + EVENT_PART_LENGTH);
+        int eventId = Integer.parseInt(eventPart);
+        Event event = eventRepository.findOne(eventId);
+        if (event == null) {
+            JOptionPane.showMessageDialog(null, "Der Code ist ungültig. Dies ist kein Artikel, der für den aktuellen Verkauf erstellt wurde.", "Lernen nicht möglich", JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
+
+        int sellerPartStart = prefixLength + EVENT_PART_LENGTH;
+        String sellerPart = code.substring(sellerPartStart, sellerPartStart + SELLER_PART_LENGTH);
+        int reservationNumber = Integer.parseInt(sellerPart);
+        Reservation reservation = reservationRepository.findByNumber(reservationNumber);
+        if (reservation == null) {
+            JOptionPane.showMessageDialog(null, "Der Code ist ungültig. Für diesen Artikel existiert keine Reservierung.", "Lernen nicht möglich", JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
+        // or do we want to support auto learning sellers ??
+
+        int itemPartStart = prefixLength + EVENT_PART_LENGTH + SELLER_PART_LENGTH;
+        String itemPart = code.substring(itemPartStart, itemPartStart + ITEM_PART_LENGTH);
+        int itemNumber = Integer.parseInt(itemPart);
+
+        Item item = new Item();
+        item.code = code;
+        item.number = itemNumber;
+        item.reservation = reservation;
+        LearnGui learnGui = new LearnGui(item, categoryRepository.findAllByOrderByNameAsc());
+        learnGui.setVisible(true);
+        if (learnGui.wasCancelled()) return null;
+
+        return itemRepository.save(item);
     }
 
     enum SyncStatus {
