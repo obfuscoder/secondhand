@@ -2,6 +2,7 @@ package de.obfusco.secondhand.testscan.gui;
 
 import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.repository.ItemRepository;
+import de.obfusco.secondhand.storage.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +30,7 @@ public class TestScanGui extends JFrame implements ActionListener {
     JButton clearButton = new JButton("Tabelle leeren");
 
     @Autowired
-    private ItemRepository itemRepository;
+    private StorageService storageService;
 
     public TestScanGui() {
         super("Barcode Test");
@@ -140,12 +141,11 @@ public class TestScanGui extends JFrame implements ActionListener {
 
     public void addItem() {
         setErrorText(" ");
-        Item item = itemRepository.findByCode(itemNr.getText());
+        Item item = storageService.getItem(itemNr.getText());
         if (item != null) {
             tablemodel.addRow(item);
         } else {
-            setErrorText("Artikel mit Nummer \"" + itemNr.getText()
-                    + "\" existiert nicht!");
+            setErrorText("Artikel mit Nummer \"" + itemNr.getText() + "\" existiert nicht!");
         }
 
         itemNr.setText("");

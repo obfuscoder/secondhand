@@ -8,6 +8,6 @@ wine ~/.wine/drive_c/Program\ Files\ \(x86\)/Inno\ Setup\ 5/ISCC.exe flohmarkt_i
 git commit -a -m "Bump version to $VERSION"
 git tag $VERSION
 git remote | xargs -L1 git push
-gpa remote | xargs -L1 git push --tags
-scp Output/flohmarkthelfer-setup.exe flohmarkthelfer:html/download
+git remote | xargs -L1 git push --tags
+scp Output/flohmarkthelfer-setup.exe flohmarkthelfer:www/shared/public/download
 
