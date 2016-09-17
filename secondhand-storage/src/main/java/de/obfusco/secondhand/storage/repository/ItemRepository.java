@@ -20,6 +20,8 @@ public interface ItemRepository extends CrudRepository<Item, Integer> {
 
     List<Item> findBySoldNotNull();
 
+    List<Item> findByCodeIn(List<String> codes);
+
     long countBySoldNotNull();
 
     @Query("select sum(i.price) from items i where i.sold is not null")

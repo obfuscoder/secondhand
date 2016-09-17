@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class StorageConverter {
@@ -129,18 +130,14 @@ public class StorageConverter {
                             public void mapAtoB(Transaction a, de.obfusco.secondhand.storage.model.Transaction b, MappingContext context) {
                                 b.created = a.date;
                                 b.items = new ArrayList<>();
-                                for (de.obfusco.secondhand.storage.model.Item item : itemRepository.findAll(a.items)) {
-                                    b.items.add(item);
-                                }
+                                b.items.addAll(itemRepository.findByCodeIn(a.items));
                             }
 
                             @Override
                             public void mapBtoA(de.obfusco.secondhand.storage.model.Transaction b, Transaction a, MappingContext context) {
                                 a.date = b.created;
                                 a.items = new ArrayList<>();
-                                for (de.obfusco.secondhand.storage.model.Item item : b.items) {
-                                    a.items.add(item.getId());
-                                }
+                                a.items.addAll(b.items.stream().map(item -> item.code).collect(Collectors.toList()));
                             }
                         })
                 .register();
