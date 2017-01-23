@@ -122,7 +122,7 @@ public class TotalPayOff extends BasePayOff {
         addTotalLine(table, "Anzahl verkaufter Artikel", Integer.toString(soldItemCount), true, 12);
         addTotalLine(table, "Summe verkaufter Artikel", currency.format(soldSum), true, 12);
         addTotalLine(table, "Kommissionsanteil", currency.format(commissionSum), false, 12);
-        addTotalLine(table, "Teilnahmegebühren für " + reservationCount + " Teilnehmer", currency.format(feeSum), false, 12);
+        addTotalLine(table, "Reservierungsgebühren für " + reservationCount + " Reservierungen", currency.format(feeSum), false, 12);
         addTotalLine(table, "Gewinn insgesamt", currency.format(commissionSum + feeSum), true, 14);
 
         addTotalLine(table, "Auszahlbeträge", "", true, 14);
