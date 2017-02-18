@@ -33,17 +33,17 @@ public class SellerPayOff extends BasePayOff {
     @Autowired
     EventRepository eventRepository;
 
-    public File createFile(Path basePath, Reservation reservation, boolean considerSellerFee) throws DocumentException, IOException {
+    public File createFile(Path basePath, Reservation reservation) throws DocumentException, IOException {
         Path targetPath = Paths.get(basePath.toString(), Integer.toString(reservation.number));
         Files.createDirectories(targetPath);
         Path fullPath = Paths.get(targetPath.toString(), "payoff.pdf");
         Document document = createPdfDocument(fullPath);
-        addContentToPdf(document, reservation, considerSellerFee);
+        addContentToPdf(document, reservation);
         document.close();
         return fullPath.toFile();
     }
 
-    private void addContentToPdf(Document document, Reservation reservation, boolean considerSellerFee) throws DocumentException {
+    private void addContentToPdf(Document document, Reservation reservation) throws DocumentException {
         addHeader(document, eventRepository.find());
         document.add(new Phrase("\n\n"));
 
@@ -71,7 +71,7 @@ public class SellerPayOff extends BasePayOff {
         double commissionCutSum = totalPrice * (1 - reservation.commissionRate.doubleValue());
         commissionCutSum = Math.floor(commissionCutSum/pricePrecision) * pricePrecision;
         double totalSum = commissionCutSum;
-        if (considerSellerFee) {
+        if (event.incorporateReservationFee()) {
             totalSum -= reservation.fee.doubleValue();
         }
 
@@ -81,7 +81,9 @@ public class SellerPayOff extends BasePayOff {
                 percent.format(reservation.commissionRate.doubleValue()),
                 currency.format(pricePrecision));
         addTotalLine(table, commissionText, currency.format(commissionCutSum-totalPrice), false, 10);
-        addTotalLine(table, "Reservierungsgebühr", currency.format(-reservation.fee.doubleValue()), false, 10);
+        if (event.incorporateReservationFee()) {
+            addTotalLine(table, "Reservierungsgebühr", currency.format(-reservation.fee.doubleValue()), false, 10);
+        }
         addTotalLine(table, "Auszuzahlender Betrag", currency.format(totalSum), true, 12);
         document.add(table);
         document.add(new Phrase("\n"));
@@ -155,13 +157,13 @@ public class SellerPayOff extends BasePayOff {
         table.setHeaderRows(1);
     }
 
-    public File createFileForAll(Path basePath, Iterable<Reservation> reservations, boolean considerSellerFee) throws IOException, DocumentException {
+    public File createFileForAll(Path basePath, Iterable<Reservation> reservations) throws IOException, DocumentException {
         Path targetPath = Paths.get(basePath.toString());
         Files.createDirectories(targetPath);
         Path fullPath = Paths.get(targetPath.toString(), "allpayoff.pdf");
         Document document = createPdfDocument(fullPath);
         for (Reservation reservation : reservations) {
-            addContentToPdf(document, reservation, considerSellerFee);
+            addContentToPdf(document, reservation);
             document.newPage();
         }
         document.close();

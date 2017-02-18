@@ -389,12 +389,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         boolean withPayouts = JOptionPane.showConfirmDialog(
                 null, "Soll eine Spalte für den Auszahlbetrag mit enthalten sein?", "Auszahlbetrag",
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION;
-        boolean considerSellerFee = false;
-        if (withPayouts) {
-            considerSellerFee = JOptionPane.showConfirmDialog(
-                    null, "Soll vom Auszahlbetrag die Reservierungsgebühr abgezogen werden?", "Reservierungsgebühr",
-                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION;
-        }
         File file;
         Path fileBasePath = Paths.get("data/pdfs/receipts");
         String title = "Rückgabe Verkäufer";
@@ -410,7 +404,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
                 }
                 double commissionCutSum = sum * (1 - reservation.commissionRate.doubleValue());
                 commissionCutSum = Math.floor(commissionCutSum / pricePrecision) * pricePrecision;
-                if (considerSellerFee) {
+                if (event.incorporateReservationFee()) {
                     commissionCutSum -= reservation.fee.doubleValue();
                 }
                 payouts.put(reservation.number, currency.format(commissionCutSum));

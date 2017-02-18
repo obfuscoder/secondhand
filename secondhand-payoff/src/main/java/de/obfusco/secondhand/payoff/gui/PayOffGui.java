@@ -65,30 +65,15 @@ public class PayOffGui extends JFrame {
         pane.add(hint);
 
         final Event event = eventRepository.find();
-        final PdfFileCreator totalPayoffCreator = new PdfFileCreator() {
-            @Override
-            public File create() throws DocumentException, IOException {
-                return totalPayOff.createTotalPayoffFile(basePath, event);
-            }
-        };
+        final PdfFileCreator totalPayoffCreator = () -> totalPayOff.createTotalPayoffFile(basePath, event);
 
         final Iterable<Reservation> reservations = reservationRepository.findAll();
 
-        final PdfFileCreator allSellerPayoffCreator = new PdfFileCreator() {
-            @Override
-            public File create() throws DocumentException, IOException {
-                boolean considerSellerFee = JOptionPane.showConfirmDialog(
-                        null, "Soll vom Auszahlbetrag die Reservierungsgebühr abgezogen werden?", "Reservierungsgebühr",
-                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION;
-                return sellerPayOff.createFileForAll(basePath, reservations, considerSellerFee);
-            }
-        };
+        final PdfFileCreator allSellerPayoffCreator = () -> sellerPayOff.createFileForAll(basePath, reservations);
 
-        totalPayoff = createPdfLink("Gesamtübersicht",
-                20.0f, totalPayoffCreator);
+        totalPayoff = createPdfLink("Gesamtübersicht", 20.0f, totalPayoffCreator);
 
-        JLabel allPayOff = createPdfLink("Alle Verkäufer",
-                20.0f, allSellerPayoffCreator);
+        JLabel allPayOff = createPdfLink("Alle Verkäufer", 20.0f, allSellerPayoffCreator);
 
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new GridLayout(0, 2, 10, 10));
@@ -103,15 +88,7 @@ public class PayOffGui extends JFrame {
 
         for (final Reservation reservation : reservations) {
 
-            final PdfFileCreator sellerPayoffCreator = new PdfFileCreator() {
-                @Override
-                public File create() throws DocumentException, IOException {
-                    boolean considerSellerFee = JOptionPane.showConfirmDialog(
-                            null, "Soll vom Auszahlbetrag die Reservierungsgebühr abgezogen werden?", "Reservierungsgebühr",
-                            JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION;
-                    return sellerPayOff.createFile(basePath, reservation, considerSellerFee);
-                }
-            };
+            final PdfFileCreator sellerPayoffCreator = () -> sellerPayOff.createFile(basePath, reservation);
             if (reservation == null) throw new RuntimeException("Shiit");
             if (reservation.seller == null) throw new RuntimeException(String.valueOf(reservation.number));
             JLabel customerPayoffNr = createPdfLink(

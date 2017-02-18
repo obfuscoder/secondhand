@@ -84,10 +84,6 @@ public class TotalPayOff extends BasePayOff {
     }
 
     private PdfPTable createTotalTable(Event event) {
-        boolean considerSellerFee = JOptionPane.showConfirmDialog(
-                null, "Soll vom Auszahlbetrag die Reservierungsgebühr abgezogen werden?", "Reservierungsgebühr",
-                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION;
-
         long reservationCount = reservationRepository.count();
         Iterable<Reservation> reservations = reservationRepository.findAll();
 
@@ -112,7 +108,7 @@ public class TotalPayOff extends BasePayOff {
             commissionCutSum = Math.floor(commissionCutSum / pricePrecision) * pricePrecision;
             commissionSum += sum - commissionCutSum;
             feeSum += sellerFee;
-            if (considerSellerFee) {
+            if (event.incorporateReservationFee()) {
                 commissionCutSum -= sellerFee;
             }
             payouts.add(new Payout(reservation, commissionCutSum));
