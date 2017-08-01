@@ -129,14 +129,14 @@ public class StorageConverter {
                             @Override
                             public void mapAtoB(Transaction a, de.obfusco.secondhand.storage.model.Transaction b, MappingContext context) {
                                 b.created = a.date;
-                                b.setItems(itemRepository.findByCodeIn(a.itemCodes));
-                                b.setStockItems(stockItemRepository.findByCodeIn(a.itemCodes));
+                                b.setItems(itemRepository.findByCodeIn(a.items));
+                                b.setStockItems(stockItemRepository.findByCodeIn(a.items));
                             }
 
                             @Override
                             public void mapBtoA(de.obfusco.secondhand.storage.model.Transaction b, Transaction a, MappingContext context) {
                                 a.date = b.created;
-                                a.itemCodes = b.getAllItemCodes();
+                                a.items = b.getAllItemCodes();
                             }
                         })
                 .register();
