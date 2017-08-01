@@ -3,7 +3,9 @@ package de.obfusco.secondhand.reports;
 import de.obfusco.secondhand.net.Network;
 import de.obfusco.secondhand.net.Peer;
 import de.obfusco.secondhand.storage.repository.ItemRepository;
+import de.obfusco.secondhand.storage.repository.StockItemRepository;
 import de.obfusco.secondhand.storage.repository.TransactionRepository;
+import de.obfusco.secondhand.storage.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,9 +26,17 @@ public class ReportsGui extends JFrame {
     @Autowired
     private ItemRepository itemRepository;
 
+    @Autowired
+    private StockItemRepository stockItemRepository;
+
+    @Autowired
+    StorageService storageService;
+
     private JLabel itemCount;
+    private JLabel stockItemCount;
     private JLabel transactionCount;
-    private JLabel soldCount;
+    private JLabel soldItemCount;
+    private JLabel soldStockItemCount;
     private JLabel soldSum;
     private JLabel connections;
 
@@ -49,11 +59,15 @@ public class ReportsGui extends JFrame {
         panel.setLayout(layout);
         panel.add(new JLabel("Anzahl Artikel:"));
         panel.add(itemCount = new JLabel());
+        panel.add(new JLabel("Anzahl Stammartikel:"));
+        panel.add(stockItemCount = new JLabel());
         panel.add(new JLabel("Anzahl Transaktionen:"));
         panel.add(transactionCount = new JLabel());
         panel.add(new JLabel("Anzahl verkaufter Artikel:"));
-        panel.add(soldCount = new JLabel());
-        panel.add(new JLabel("Summe verkaufter Artikel:"));
+        panel.add(soldItemCount = new JLabel());
+        panel.add(new JLabel("Anzahl verkaufter Stammartikel:"));
+        panel.add(soldStockItemCount = new JLabel());
+        panel.add(new JLabel("Umsatz:"));
         panel.add(soldSum = new JLabel());
         panel.add(new JLabel("Verbunden mit:"));
         panel.add(connections = new JLabel());
@@ -63,9 +77,11 @@ public class ReportsGui extends JFrame {
 
     public void update() {
         itemCount.setText("" + itemRepository.count());
+        stockItemCount.setText("" + stockItemRepository.count());
         transactionCount.setText("" + transactionRepository.count());
-        soldCount.setText("" + itemRepository.countBySoldNotNull());
-        Double sumOfSoldItems = itemRepository.sumOfSoldItems();
+        soldItemCount.setText("" + itemRepository.countBySoldNotNull());
+        soldStockItemCount.setText("" +  stockItemRepository.countOfSoldItems());
+        Double sumOfSoldItems = storageService.sumOfSoldItems();
         if (sumOfSoldItems == null) sumOfSoldItems = 0.0;
         soldSum.setText(currencyFormat.format(sumOfSoldItems));
 

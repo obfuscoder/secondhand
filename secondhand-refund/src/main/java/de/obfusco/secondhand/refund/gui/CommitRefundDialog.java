@@ -1,7 +1,7 @@
 package de.obfusco.secondhand.refund.gui;
 
 import com.itextpdf.text.DocumentException;
-import de.obfusco.secondhand.storage.model.Item;
+import de.obfusco.secondhand.storage.model.BaseItem;
 import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.model.TransactionListener;
 import de.obfusco.secondhand.storage.repository.ItemRepository;
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CommitRefundDialog extends JDialog implements ActionListener {
 
@@ -40,7 +41,7 @@ public class CommitRefundDialog extends JDialog implements ActionListener {
 
     StorageService storageService;
     ItemRepository itemRepository;
-    List<Item> items;
+    List<BaseItem> items;
 
     private Path basePath = Paths.get("data/pdfs/refund");
     private TransactionListener transactionListener;
@@ -152,8 +153,8 @@ public class CommitRefundDialog extends JDialog implements ActionListener {
     }
 
     private void completeRefund() {
-
-        Transaction transaction = storageService.storeRefundInformation(items);
+        List<String> itemCodes = items.stream().map(it -> it.code).collect(Collectors.toList());
+        Transaction transaction = storageService.storeRefundInformation(itemCodes);
         transactionListener.notify(transaction);
 
         frame.getReadyButton().setEnabled(false);

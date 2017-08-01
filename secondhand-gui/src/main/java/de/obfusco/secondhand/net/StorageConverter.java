@@ -1,11 +1,6 @@
 package de.obfusco.secondhand.net;
 
-import de.obfusco.secondhand.net.dto.Category;
-import de.obfusco.secondhand.net.dto.Event;
-import de.obfusco.secondhand.net.dto.Item;
-import de.obfusco.secondhand.net.dto.Reservation;
-import de.obfusco.secondhand.net.dto.Seller;
-import de.obfusco.secondhand.net.dto.Transaction;
+import de.obfusco.secondhand.net.dto.*;
 import de.obfusco.secondhand.storage.repository.*;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MapperFacade;
@@ -19,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class StorageConverter {
@@ -27,6 +21,8 @@ public class StorageConverter {
     EventRepository eventRepository;
     @Autowired
     CategoryRepository categoryRepository;
+    @Autowired
+    StockItemRepository stockItemRepository;
     @Autowired
     SellerRepository sellerRepository;
     @Autowired
@@ -39,6 +35,7 @@ public class StorageConverter {
     Map<Integer, de.obfusco.secondhand.storage.model.Category> categoryMap;
     Map<Integer, de.obfusco.secondhand.storage.model.Seller> sellerMap;
     Map<Integer, de.obfusco.secondhand.storage.model.Reservation> reservationMap;
+    Map<Integer, de.obfusco.secondhand.storage.model.StockItem> stockItemMap;
 
 
     public void storeEvent(Event event) {
@@ -51,12 +48,14 @@ public class StorageConverter {
         storeSellers(event.sellers, mapper);
         storeReservations(event.reservations, mapper);
         storeItems(event.items, mapper);
+        storeStockItems(event.stockItems, mapper);
     }
 
     private void initHashMaps() {
         categoryMap = new HashMap<>();
         sellerMap = new HashMap<>();
         reservationMap = new HashMap<>();
+        stockItemMap = new HashMap<>();
     }
 
     private void emptyDatabase() {
@@ -66,6 +65,7 @@ public class StorageConverter {
         sellerRepository.deleteAll();
         categoryRepository.deleteAll();
         eventRepository.deleteAll();
+        stockItemRepository.deleteAll();
     }
 
     public void storeItem(Item item) {
@@ -89,14 +89,14 @@ public class StorageConverter {
                         new CustomMapper<Item, de.obfusco.secondhand.storage.model.Item>() {
                             @Override
                             public void mapAtoB(Item a, de.obfusco.secondhand.storage.model.Item b, MappingContext context) {
-                                b.category = categoryMap.get(a.categoryId);
-                                b.reservation = reservationMap.get(a.reservationId);
+                                b.setCategory(categoryMap.get(a.categoryId));
+                                b.setReservation(reservationMap.get(a.reservationId));
                             }
 
                             @Override
                             public void mapBtoA(de.obfusco.secondhand.storage.model.Item b, Item a, MappingContext context) {
-                                a.categoryId = b.category.getId();
-                                a.reservationId = b.reservation.getId();
+                                a.categoryId = b.getCategory().getId();
+                                a.reservationId = b.getReservation().getId();
                             }
                         })
                 .register();
@@ -129,15 +129,14 @@ public class StorageConverter {
                             @Override
                             public void mapAtoB(Transaction a, de.obfusco.secondhand.storage.model.Transaction b, MappingContext context) {
                                 b.created = a.date;
-                                b.items = new ArrayList<>();
-                                b.items.addAll(itemRepository.findByCodeIn(a.items));
+                                b.setItems(itemRepository.findByCodeIn(a.itemCodes));
+                                b.setStockItems(stockItemRepository.findByCodeIn(a.itemCodes));
                             }
 
                             @Override
                             public void mapBtoA(de.obfusco.secondhand.storage.model.Transaction b, Transaction a, MappingContext context) {
                                 a.date = b.created;
-                                a.items = new ArrayList<>();
-                                a.items.addAll(b.items.stream().map(item -> item.code).collect(Collectors.toList()));
+                                a.itemCodes = b.getAllItemCodes();
                             }
                         })
                 .register();
@@ -167,6 +166,12 @@ public class StorageConverter {
         }
     }
 
+    private void storeStockItems(List<StockItem> stockItems, MapperFacade mapper) {
+        for (StockItem stockItem : stockItems) {
+            stockItemRepository.save(mapper.map(stockItem, de.obfusco.secondhand.storage.model.StockItem.class));
+        }
+    }
+
     public Event convertToEvent() {
         MapperFactory mapperFactory = createMapperFactory();
         MapperFacade mapper = mapperFactory.getMapperFacade();
@@ -186,6 +191,10 @@ public class StorageConverter {
         event.items = new ArrayList<>();
         for (de.obfusco.secondhand.storage.model.Item item : itemRepository.findAll()) {
             event.items.add(mapper.map(item, Item.class));
+        }
+        event.stockItems = new ArrayList<>();
+        for (de.obfusco.secondhand.storage.model.StockItem stockItem : stockItemRepository.findAll()) {
+            event.stockItems.add(mapper.map(stockItem, StockItem.class));
         }
         return event;
     }

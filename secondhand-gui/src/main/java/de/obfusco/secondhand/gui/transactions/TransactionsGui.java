@@ -71,7 +71,7 @@ public class TransactionsGui extends JDialog {
             @Override
             public void valueChanged(ListSelectionEvent listSelectionEvent) {
                 selectedTransaction = transactionsTableModel.getAt(transactionTable.getSelectedRow());
-                itemsTable.setModel(new ItemTableModel(selectedTransaction.items));
+                itemsTable.setModel(new ItemTableModel(selectedTransaction.getAllItems()));
             }
         });
     }
@@ -89,7 +89,7 @@ public class TransactionsGui extends JDialog {
         Path basePath = Paths.get("data/pdfs/sale");
         File pdfFile = null;
         try {
-            pdfFile = new BillPDFCreator().createPdf(basePath, selectedTransaction.items);
+            pdfFile = new BillPDFCreator().createPdf(basePath, selectedTransaction.getAllItems());
             Desktop.getDesktop().open(pdfFile);
         } catch (IOException | DocumentException e) {
             JOptionPane.showMessageDialog(this, "Fehler",

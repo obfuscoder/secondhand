@@ -2,7 +2,6 @@ package de.obfusco.secondhand.gui;
 
 import com.itextpdf.text.DocumentException;
 import de.obfusco.secondhand.gui.config.ConfigGui;
-import de.obfusco.secondhand.gui.learn.LearnGui;
 import de.obfusco.secondhand.gui.transactions.TransactionsGui;
 import de.obfusco.secondhand.labelgenerator.LabelGeneratorGui;
 import de.obfusco.secondhand.net.*;
@@ -17,7 +16,6 @@ import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Reservation;
 import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.repository.*;
-import de.obfusco.secondhand.storage.service.ItemLearner;
 import de.obfusco.secondhand.storage.service.StorageService;
 import de.obfusco.secondhand.sync.PathSyncListener;
 import de.obfusco.secondhand.sync.PathSyncer;
@@ -46,7 +44,7 @@ import java.util.Map;
 import java.util.Properties;
 
 @Component
-public class MainGui extends JFrame implements MessageBroker, TransactionListener, DataPusher, PathSyncListener, ItemLearner {
+public class MainGui extends JFrame implements MessageBroker, TransactionListener, DataPusher, PathSyncListener {
 
     public static final float BUTTON_FONT_SIZE = 25.0f;
     private final static Logger LOG = LoggerFactory.getLogger(MainGui.class);
@@ -429,8 +427,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
                 parseHelpMessage(peer, message);
             } else if(message.startsWith("DATA")) {
                 parseDataMessage(peer, message);
-            } else if(message.startsWith("ITEM")) {
-                parseItemMessage(peer, message);
             } else {
                 transactionReceived(storageService.parseTransactionMessage(message));
             }
@@ -468,12 +464,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         }
     }
 
-    private void parseItemMessage(Peer peer, String message) {
-        de.obfusco.secondhand.net.dto.Item item = converter.parseItem(message.substring(4));
-        storageConverter.storeItem(item);
-        reportsGui.update();
-    }
-
     private void parseHelpMessage(Peer peer, String message) {
         String[] parts = message.split("-");
         reportsGui.helpNeeded(peer, parts.length == 2 && parts[1].equals("ON"));
@@ -486,10 +476,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         reportsGui.update();
         peer.send("HELP-" + (helpButton.isSelected() ? "ON" : "OFF"));
         new Thread(() -> {
-            for (Item item : itemRepository.findAllByAdhocTrue()) {
-                LOG.info("Syncing item with code {} with peer {}", item.code, peer.getAddress());
-                peer.send(createItemMessage(item));
-            }
             for (Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
                 LOG.info("Syncing transaction " + transaction.id + " with peer " + peer.getAddress());
                 peer.send(transaction.toString());
@@ -518,18 +504,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         String message = transaction.toString();
         if (network != null) network.send(message);
         reportsGui.update();
-    }
-
-    public void notifyNewItem(Item item) {
-        reportsGui.update();
-        if (network == null) return;
-        LOG.info("Notifying all peers about new item with code " + item.code);
-        network.send(createItemMessage(item));
-    }
-
-    private String createItemMessage(Item item) {
-        String data = converter.toJson(storageConverter.convertItem(item));
-        return "ITEM" + data;
     }
 
     @Override
@@ -561,50 +535,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     @Override
     public void synchronizationError() {
         pathSyncErrorCount ++;
-    }
-
-    @Override
-    public Item learn(String code) {
-        if (! "true".equals(properties.getProperty("autolearn"))) return null;
-
-        int prefixLength = code.length() - CODE_LENGTH_EXCLUDING_PREFIX;
-        if (prefixLength < 0) return null;
-
-        int eventPartStart = prefixLength;
-        String eventPart = code.substring(eventPartStart, eventPartStart + EVENT_PART_LENGTH);
-        int eventId = Integer.parseInt(eventPart);
-        Event event = eventRepository.findOne(eventId);
-        if (event == null) {
-            JOptionPane.showMessageDialog(null, "Der Code ist ungültig. Dies ist kein Artikel, der für den aktuellen Verkauf erstellt wurde.", "Lernen nicht möglich", JOptionPane.WARNING_MESSAGE);
-            return null;
-        }
-
-        int sellerPartStart = prefixLength + EVENT_PART_LENGTH;
-        String sellerPart = code.substring(sellerPartStart, sellerPartStart + SELLER_PART_LENGTH);
-        int reservationNumber = Integer.parseInt(sellerPart);
-        Reservation reservation = reservationRepository.findByNumber(reservationNumber);
-        if (reservation == null) {
-            JOptionPane.showMessageDialog(null, "Der Code ist ungültig. Für diesen Artikel existiert keine Reservierung.", "Lernen nicht möglich", JOptionPane.WARNING_MESSAGE);
-            return null;
-        }
-        // or do we want to support auto learning sellers ??
-
-        int itemPartStart = prefixLength + EVENT_PART_LENGTH + SELLER_PART_LENGTH;
-        String itemPart = code.substring(itemPartStart, itemPartStart + ITEM_PART_LENGTH);
-        int itemNumber = Integer.parseInt(itemPart);
-
-        Item item = new Item();
-        item.code = code;
-        item.number = itemNumber;
-        item.reservation = reservation;
-        item.adhoc = true;
-        LearnGui learnGui = new LearnGui(item, categoryRepository.findAllByOrderByNameAsc());
-        learnGui.setVisible(true);
-        if (learnGui.wasCancelled()) return null;
-
-        item = itemRepository.save(item);
-        notifyNewItem(item);
-        return item;
     }
 
     enum SyncStatus {

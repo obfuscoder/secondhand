@@ -42,7 +42,7 @@ public class TransactionsTableModel extends AbstractTableModel {
         switch(column) {
             case 0: return transaction.created;
             case 1: return transaction.type;
-            case 2: return transaction.items.size();
+            case 2: return transaction.getAllItems().size();
         }
         return null;
     }

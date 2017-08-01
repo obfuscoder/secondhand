@@ -147,15 +147,15 @@ public class SearchGui extends JFrame {
                 case 0:
                     return result.code;
                 case 1:
-                    return result.category.name;
+                    return result.getCategoryName();
                 case 2:
                     return result.description;
                 case 3:
-                    return result.size;
+                    return result.getSize();
                 case 4:
                     return currency.format(result.price);
                 case 5:
-                    return result.sold != null ? "ja" : "nein";
+                    return result.wasSold() ? "ja" : "nein";
                 default:
                     return "";
             }

@@ -75,7 +75,7 @@ public class LabelSheet {
 
         int colSpanForDetails = table.getNumberOfColumns();
         int colSpanForDonation = 2;
-        if (item.donation) {
+        if (item.isDonation()) {
             PdfPCell donationCell = createDonationCell();
             donationCell.setColspan(colSpanForDonation);
             table.addCell(donationCell);
@@ -128,12 +128,12 @@ public class LabelSheet {
 
     private PdfPCell createDetailsCell(Item item) {
         StringBuilder sb = new StringBuilder();
-        sb.append(item.category.name);
+        sb.append(item.getCategoryName());
         sb.append("\n");
         sb.append(item.description);
-        if (item.size != null && item.size.length() > 0) {
+        if (item.getSize() != null && item.getSize().length() > 0) {
             sb.append("\nGröße: ");
-            sb.append(item.size);
+            sb.append(item.getSize());
         }
         PdfPCell cell = new PdfPCell(new Phrase(new Chunk(sb.toString(),
                 FontFactory.getFont(FontFactory.HELVETICA, 12))));
@@ -145,7 +145,7 @@ public class LabelSheet {
 
     private PdfPCell createNumberCell(Item item) {
         PdfPCell cell = new PdfPCell(new Phrase(new Chunk(
-                String.format("%d - %d", item.reservation.number, item.number),
+                String.format("%d - %d", item.getReservation().number, item.number),
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20))));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setBorderColor(BaseColor.BLACK);

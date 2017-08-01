@@ -1,6 +1,7 @@
 package de.obfusco.secondhand.sale.gui;
 
 import com.itextpdf.text.DocumentException;
+import de.obfusco.secondhand.storage.model.BaseItem;
 import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.model.TransactionListener;
@@ -22,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 public class CheckOutDialog extends JDialog implements ActionListener {
 
@@ -45,7 +47,7 @@ public class CheckOutDialog extends JDialog implements ActionListener {
     CashBoxGui frame;
 
     StorageService storageService;
-    List<Item> items;
+    List<BaseItem> items;
 
     boolean showPostCode;
 
@@ -301,7 +303,8 @@ public class CheckOutDialog extends JDialog implements ActionListener {
             return;
         }
 
-        Transaction transaction = storageService.storeSoldInformation(items, postCode);
+        List<String> itemCodes = items.stream().map(it -> it.code).collect(Collectors.toList());
+        Transaction transaction = storageService.storeSoldInformation(itemCodes, postCode);
         transactionListener.notify(transaction);
 
         frame.newCustomer();

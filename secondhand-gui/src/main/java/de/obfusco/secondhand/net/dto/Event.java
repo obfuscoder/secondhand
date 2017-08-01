@@ -16,4 +16,5 @@ public class Event {
     public List<Seller> sellers;
     public List<Reservation> reservations;
     public List<Item> items;
+    public List<StockItem> stockItems;
 }

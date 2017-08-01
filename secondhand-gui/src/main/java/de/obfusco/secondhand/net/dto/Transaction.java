@@ -7,7 +7,7 @@ public class Transaction {
     public enum Type { PURCHASE, REFUND };
     public String id;
     public String zipCode;
-    public List<String> items;
+    public List<String> itemCodes;
     public Type type;
     public Date date;
 }

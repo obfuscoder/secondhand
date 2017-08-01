@@ -1,5 +1,6 @@
 package de.obfusco.secondhand.sale.gui;
 
+import de.obfusco.secondhand.storage.model.BaseItem;
 import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.TransactionListener;
 import de.obfusco.secondhand.storage.service.StorageService;
@@ -116,13 +117,6 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
                             && cashTable.getModel().getRowCount() > 0) {
                         itemNr.setText("");
                         openDialog();
-                        return;
-                    }
-
-                    if (tablemodel.findItemNr(itemNr.getText())) {
-                        setErrorText("Artikelnummer " + itemNr.getText()
-                                + " bereits eingescannt!");
-                        itemNr.setText("");
                         return;
                     }
 
@@ -275,7 +269,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         countLabel.setText(Integer.toString(rowCount));
     }
 
-    List<Item> getTableData() {
+    List<BaseItem> getTableData() {
         return tablemodel.getData();
     }
 
@@ -283,14 +277,13 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         String code = itemNr.getText();
         itemNr.setText("");
         setErrorText("");
-        Item item = storageService.getItem(code);
+        BaseItem item = storageService.getItem(code);
         if (item == null) {
             setErrorText("Artikel mit Nummer \"" + code + "\" existiert nicht!");
             return;
         }
-        if (item.sold != null) {
-            setErrorText("Artikel mit Nummer \"" + code
-                    + "\" wurde bereits verkauft!");
+        if (!item.canSell()) {
+            setErrorText("Artikel mit Nummer \"" + code + "\" wurde bereits verkauft!");
             return;
         }
         tablemodel.addRow(item);
@@ -324,9 +317,9 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         private List<String> columnNames = new ArrayList<>(Arrays.asList(
                 "ArtNr", "Kategorie", "Bezeichnung", "Groesse", "Preis"));
 
-        private List<Item> data = new ArrayList<>();
+        private List<BaseItem> data = new ArrayList<>();
 
-        public List<Item> getData() {
+        public List<BaseItem> getData() {
             return data;
         }
 
@@ -342,16 +335,16 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
 
         @Override
         public Object getValueAt(int row, int col) {
-            Item item = data.get(row);
+            BaseItem item = data.get(row);
             switch (col) {
                 case 0:
                     return item.code;
                 case 1:
-                    return item.category.name;
+                    return item.getCategoryName();
                 case 2:
                     return item.description;
                 case 3:
-                    return item.size;
+                    return item.getSize();
                 case 4:
                     return currency.format(item.price);
                 default:
@@ -366,7 +359,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
 
         public Boolean findItemNr(String nr) {
 
-            for (Item item : data) {
+            for (BaseItem item : data) {
                 if (item.code.equals(nr)) {
                     return true;
                 }
@@ -374,8 +367,8 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
             return false;
         }
 
-        public void addRow(Item item) {
-            if (findItemNr(item.code)) {
+        public void addRow(BaseItem item) {
+            if (item.isUnique() && findItemNr(item.code)) {
                 setErrorText("Artikel schon vorhanden!");
             } else {
                 data.add(item);

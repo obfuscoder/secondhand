@@ -4,6 +4,7 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import de.obfusco.secondhand.storage.model.BaseItem;
 import de.obfusco.secondhand.storage.model.Item;
 
 import java.io.File;
@@ -21,7 +22,7 @@ public class RefundPDFCreator {
 
     private static NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
-    public static PdfPTable insertItemTable(List<Item> data, Double sum) {
+    public static PdfPTable insertItemTable(List<BaseItem> data, Double sum) {
 
         PdfPTable table = new PdfPTable(5);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -45,13 +46,13 @@ public class RefundPDFCreator {
         table.addCell(cell);
 
         for (int i = 0; i < data.size(); i++) {
-            Item item = data.get(i);
+            BaseItem item = data.get(i);
             table.addCell(Integer.toString(i + 1));
             cell = new PdfPCell(new Phrase(item.code));
             table.addCell(cell);
-            cell = new PdfPCell(new Phrase(item.category.name));
+            cell = new PdfPCell(new Phrase(item.getCategoryName()));
             table.addCell(cell);
-            cell = new PdfPCell(new Phrase(item.size));
+            cell = new PdfPCell(new Phrase(item.getSize()));
             table.addCell(cell);
             cell = new PdfPCell(new Phrase(currency.format(item.price)));
             cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -79,7 +80,7 @@ public class RefundPDFCreator {
         return table;
     }
 
-    public File createPdf(Path basePath, List<Item> data, Double sum)
+    public File createPdf(Path basePath, List<BaseItem> data, Double sum)
             throws IOException, DocumentException {
 
         Files.createDirectories(basePath);

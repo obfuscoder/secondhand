@@ -1,20 +1,22 @@
 package de.obfusco.secondhand.storage.service;
 
+import de.obfusco.secondhand.storage.model.BaseItem;
 import de.obfusco.secondhand.storage.model.Item;
+import de.obfusco.secondhand.storage.model.StockItem;
 import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.repository.ItemRepository;
+import de.obfusco.secondhand.storage.repository.StockItemRepository;
 import de.obfusco.secondhand.storage.repository.TransactionRepository;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Service
 public class StorageService {
@@ -25,48 +27,30 @@ public class StorageService {
     private ItemRepository itemRepository;
 
     @Autowired
-    private TransactionRepository transactionRepository;
+    private StockItemRepository stockItemRepository;
 
     @Autowired
-    private ItemLearner itemLearner;
+    private TransactionRepository transactionRepository;
 
     @Transactional
-    public Transaction storeSoldInformation(List<Item> items, String zipCode) {
-        Date soldDate = new Date();
-        LOG.info("SALE: {}", getItemCodes(items));
-        Transaction transaction = Transaction.create(Transaction.Type.PURCHASE, items, zipCode);
-        for (Item item : items) {
-            try {
-                item.sold = soldDate;
-                itemRepository.save(item);
-            } catch (DataAccessException ex) {
-                LOG.error("sold information could not be stored", ex);
-            }
-        }
-        return transactionRepository.save(transaction);
+    public Transaction storeSoldInformation(List<String> itemCodes, String zipCode) {
+        LOG.info("SALE: {}", itemCodes);
+        return createTransaction(Transaction.Type.PURCHASE, itemCodes, zipCode);
     }
 
-    private String getItemCodes(List<Item> items) {
-        List<String> codes = new ArrayList<String>();
-        for(Item item : items) {
-            codes.add(item.code);
+    private void saveItem(BaseItem item) {
+        if (item instanceof Item) {
+            itemRepository.save((Item) item);
         }
-        return StringUtils.join(codes);
+        if (item instanceof StockItem) {
+            stockItemRepository.save((StockItem) item);
+        }
     }
 
     @Transactional
-    public Transaction storeRefundInformation(List<Item> items) {
-        LOG.info("REFUND: {}", getItemCodes(items));
-        Transaction transaction = Transaction.create(Transaction.Type.REFUND, items, null);
-        for (Item item : items) {
-            try {
-                item.sold = null;
-                itemRepository.save(item);
-            } catch (DataAccessException ex) {
-                LOG.error("Refund information could not be stored", ex);
-            }
-        }
-        return transactionRepository.save(transaction);
+    public Transaction storeRefundInformation(List<String> itemCodes) {
+        LOG.info("REFUND: {}", itemCodes);
+        return createTransaction(Transaction.Type.REFUND, itemCodes, null);
     }
 
     public Transaction parseTransactionMessage(String message) {
@@ -83,37 +67,65 @@ public class StorageService {
             LOG.debug("Skipping transaction {} as it is already known", id);
             return null;
         }
-        return createTransaction(id, type, date, zipCode, itemCodes);
+        return createTransaction(id, type, date, Arrays.asList(itemCodes), zipCode);
     }
 
 
-    public Transaction createTransaction(String id, Transaction.Type type, Date date, String zipCode,
-                                         String[] itemCodes) {
-        List<Item> items = new ArrayList<>();
-        for (String itemCode : itemCodes) {
-            Item item = getItem(itemCode);
-            if (item == null) {
-                continue;
-            }
-            switch (type) {
-                case PURCHASE:
-                    item.sold = date;
-                    break;
-                case REFUND:
-                    item.sold = null;
-                    break;
-            }
-            items.add(item);
-        }
+    public Transaction createTransaction(String id, Transaction.Type type, Date date, List<String> itemCodes, String zipCode) {
+        List<BaseItem> items = fetchAndUpdateItemsFromCodes(type, itemCodes);
         if (items.isEmpty()) return null;
         return Transaction.create(id, date, type, items, zipCode);
     }
 
-    public Item getItem(String code) {
-        Item item = itemRepository.findByCode(code);
-        if (item == null) {
-            return itemLearner.learn(code);
+    private Transaction createTransaction(Transaction.Type type, List<String> itemCodes, String zipCode) {
+        List<BaseItem> items = fetchAndUpdateItemsFromCodes(type, itemCodes);
+        if (items.isEmpty()) return null;
+        return transactionRepository.save(Transaction.create(type, items, zipCode));
+    }
+
+    private List<BaseItem> fetchAndUpdateItemsFromCodes(Transaction.Type type, List<String> itemCodes) {
+        List<BaseItem> items = new ArrayList<>();
+        for (String itemCode : itemCodes) {
+            BaseItem item = getItem(itemCode);
+            if (item == null) {
+                continue;
+            }
+            sellOrRefund(type, item);
+            items.add(item);
         }
-        return item;
+        return items;
+    }
+
+    private void sellOrRefund(Transaction.Type type, BaseItem item) {
+        switch (type) {
+            case PURCHASE:
+                item.sold();
+                break;
+            case REFUND:
+                item.refund();
+                break;
+        }
+        saveItem(item);
+    }
+
+    public BaseItem getItem(String code) {
+        Item item = itemRepository.findByCode(code);
+        if (item != null) return item;
+        StockItem stockItem = stockItemRepository.findByCode(code);
+        return stockItem;
+    }
+
+
+    public double sumOfSoldItems() {
+        Double itemSum = itemRepository.sumOfSoldItems();
+        if (itemSum == null) itemSum = 0.0;
+        itemSum += sumOfSoldStockItems();
+        return itemSum;
+    }
+
+    public double sumOfSoldStockItems() {
+        Stream<StockItem> stream = StreamSupport.stream(stockItemRepository.findAll().spliterator(), false);
+        Optional<BigDecimal> stockItemSum = stream.map(it -> it.price.multiply(BigDecimal.valueOf(it.sold))).reduce(BigDecimal::add);
+        return (stockItemSum.isPresent()) ? stockItemSum.get().doubleValue() : 0.0;
     }
 }

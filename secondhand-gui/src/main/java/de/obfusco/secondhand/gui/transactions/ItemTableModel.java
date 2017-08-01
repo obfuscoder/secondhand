@@ -1,14 +1,15 @@
 package de.obfusco.secondhand.gui.transactions;
 
+import de.obfusco.secondhand.storage.model.BaseItem;
 import de.obfusco.secondhand.storage.model.Item;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.List;
 
 public class ItemTableModel extends AbstractTableModel {
-    private List<Item> items;
+    private List<BaseItem> items;
 
-    public ItemTableModel(List<Item> items) {
+    public ItemTableModel(List<BaseItem> items) {
         this.items = items;
     }
 
@@ -36,12 +37,12 @@ public class ItemTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int row, int column) {
-        Item item = items.get(row);
+        BaseItem item = items.get(row);
         switch(column) {
             case 0: return item.code;
-            case 1: return item.category.name;
+            case 1: return item.getCategoryName();
             case 2: return item.description;
-            case 3: return item.size;
+            case 3: return item.getSize();
             case 4: return item.price;
         }
         return null;

@@ -9,9 +9,12 @@ import com.itextpdf.text.pdf.PdfWriter;
 import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Reservation;
+import de.obfusco.secondhand.storage.model.StockItem;
 import de.obfusco.secondhand.storage.repository.EventRepository;
 import de.obfusco.secondhand.storage.repository.ItemRepository;
 import de.obfusco.secondhand.storage.repository.ReservationRepository;
+import de.obfusco.secondhand.storage.repository.StockItemRepository;
+import de.obfusco.secondhand.storage.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,16 +22,25 @@ import javax.swing.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Component
 public class TotalPayOff extends BasePayOff {
 
     @Autowired
     ItemRepository itemRepository;
+
+    @Autowired
+    StockItemRepository stockItemRepository;
+
+    @Autowired
+    StorageService storageService;
 
     @Autowired
     ReservationRepository reservationRepository;
@@ -45,12 +57,24 @@ public class TotalPayOff extends BasePayOff {
         document.open();
         addHeader(document, event);
         document.add(createTotalTable(event));
+        document.add(createSoldStockItemsTable(event));
         if (event.donationOfUnsoldItemsEnabled) {
             document.newPage();
             document.add(createDonatorsTable(event));
         }
         document.close();
         return fullPath.toFile();
+    }
+
+    private PdfPTable createSoldStockItemsTable(Event event) {
+        Stream<StockItem> stream = StreamSupport.stream(stockItemRepository.findAll().spliterator(), false);
+        PdfPTable table = new PdfPTable(6);
+        table.setHorizontalAlignment(Element.ALIGN_LEFT);
+        addTotalLine(table, "verkaufte Stammartikel", String.valueOf(stockItemRepository.countOfSoldItems()), true, 14);
+        stream.filter(it -> it.sold > 0).forEach(
+                it -> addTotalLine(table, it.description, String.valueOf(it.sold), false, 12)
+        );
+        return table;
     }
 
     private PdfPTable createDonatorsTable(Event event) {
@@ -114,12 +138,16 @@ public class TotalPayOff extends BasePayOff {
             payouts.add(new Payout(reservation, commissionCutSum));
         }
 
-        int soldItemCount = itemRepository.findBySoldNotNull().size();
-        addTotalLine(table, "Anzahl verkaufter Artikel", Integer.toString(soldItemCount), true, 12);
+        long soldItemCount = itemRepository.countBySoldNotNull();
+        long soldStockItemCount = stockItemRepository.countOfSoldItems();
+        double soldStockItemSum = storageService.sumOfSoldStockItems();
+        addTotalLine(table, "Anzahl verkaufter Stammartikel", Long.toString(soldStockItemCount), true, 12);
+        addTotalLine(table, "Summe verkaufter Stammartikel", currency.format(soldStockItemSum), true, 12);
+        addTotalLine(table, "Anzahl verkaufter Artikel", Long.toString(soldItemCount), true, 12);
         addTotalLine(table, "Summe verkaufter Artikel", currency.format(soldSum), true, 12);
         addTotalLine(table, "Kommissionsanteil", currency.format(commissionSum), false, 12);
         addTotalLine(table, "Reservierungsgebühren für " + reservationCount + " Reservierungen", currency.format(feeSum), false, 12);
-        addTotalLine(table, "Gewinn insgesamt", currency.format(commissionSum + feeSum), true, 14);
+        addTotalLine(table, "Gewinn insgesamt", currency.format(commissionSum + feeSum + soldStockItemSum), true, 14);
 
         addTotalLine(table, "Auszahlbeträge", "", true, 14);
         Map<Integer, Integer> totalCoins = new HashMap<>();
