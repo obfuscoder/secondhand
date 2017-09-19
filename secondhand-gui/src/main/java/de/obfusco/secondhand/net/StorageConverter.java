@@ -91,12 +91,14 @@ public class StorageConverter {
                             public void mapAtoB(Item a, de.obfusco.secondhand.storage.model.Item b, MappingContext context) {
                                 b.setCategory(categoryMap.get(a.categoryId));
                                 b.setReservation(reservationMap.get(a.reservationId));
+                                b.setSize(a.size);
                             }
 
                             @Override
                             public void mapBtoA(de.obfusco.secondhand.storage.model.Item b, Item a, MappingContext context) {
                                 a.categoryId = b.getCategory().getId();
                                 a.reservationId = b.getReservation().getId();
+                                a.size = b.getSize();
                             }
                         })
                 .register();

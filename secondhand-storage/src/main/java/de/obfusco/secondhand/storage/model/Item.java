@@ -84,4 +84,8 @@ public class Item extends BaseItem {
     public boolean wasSold() {
         return sold != null;
     }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
 }

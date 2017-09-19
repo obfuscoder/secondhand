@@ -11,5 +11,5 @@ public interface StockItemRepository extends CrudRepository<StockItem, Integer> 
     List<StockItem> findByCodeIn(List<String> codes);
 
     @Query("select sum(si.sold) from stock_items si")
-    long countOfSoldItems();
+    Long countOfSoldItems();
 }

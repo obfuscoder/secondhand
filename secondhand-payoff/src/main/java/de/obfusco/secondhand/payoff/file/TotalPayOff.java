@@ -70,7 +70,9 @@ public class TotalPayOff extends BasePayOff {
         Stream<StockItem> stream = StreamSupport.stream(stockItemRepository.findAll().spliterator(), false);
         PdfPTable table = new PdfPTable(6);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
-        addTotalLine(table, "verkaufte Stammartikel", String.valueOf(stockItemRepository.countOfSoldItems()), true, 14);
+        Long soldStockItems = stockItemRepository.countOfSoldItems();
+        if (soldStockItems == null) soldStockItems = new Long(0);
+        addTotalLine(table, "verkaufte Stammartikel", String.valueOf(soldStockItems), true, 14);
         stream.filter(it -> it.sold > 0).forEach(
                 it -> addTotalLine(table, it.description, String.valueOf(it.sold), false, 12)
         );
@@ -139,7 +141,8 @@ public class TotalPayOff extends BasePayOff {
         }
 
         long soldItemCount = itemRepository.countBySoldNotNull();
-        long soldStockItemCount = stockItemRepository.countOfSoldItems();
+        Long soldStockItemCount = stockItemRepository.countOfSoldItems();
+        if (soldStockItemCount == null) soldStockItemCount = new Long(0);
         double soldStockItemSum = storageService.sumOfSoldStockItems();
         addTotalLine(table, "Anzahl verkaufter Stammartikel", Long.toString(soldStockItemCount), true, 12);
         addTotalLine(table, "Summe verkaufter Stammartikel", currency.format(soldStockItemSum), true, 12);
