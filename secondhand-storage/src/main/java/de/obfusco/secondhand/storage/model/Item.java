@@ -88,4 +88,8 @@ public class Item extends BaseItem {
     public void setSize(String size) {
         this.size = size;
     }
+
+    public void setDonation(boolean donation) {
+        this.donation = donation;
+    }
 }
