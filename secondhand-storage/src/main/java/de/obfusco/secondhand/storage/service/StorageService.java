@@ -125,7 +125,7 @@ public class StorageService {
 
     public double sumOfSoldStockItems() {
         Stream<StockItem> stream = StreamSupport.stream(stockItemRepository.findAll().spliterator(), false);
-        Optional<BigDecimal> stockItemSum = stream.map(it -> it.price.multiply(BigDecimal.valueOf(it.sold))).reduce(BigDecimal::add);
+        Optional<BigDecimal> stockItemSum = stream.map(it -> it.price.multiply(BigDecimal.valueOf(it.getSold()))).reduce(BigDecimal::add);
         return (stockItemSum.isPresent()) ? stockItemSum.get().doubleValue() : 0.0;
     }
 }

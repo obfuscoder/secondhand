@@ -73,8 +73,8 @@ public class TotalPayOff extends BasePayOff {
         Long soldStockItems = stockItemRepository.countOfSoldItems();
         if (soldStockItems == null) soldStockItems = new Long(0);
         addTotalLine(table, "verkaufte Stammartikel", String.valueOf(soldStockItems), true, 14);
-        stream.filter(it -> it.sold > 0).forEach(
-                it -> addTotalLine(table, it.description, String.valueOf(it.sold), false, 12)
+        stream.filter(it -> it.getSold() > 0).forEach(
+                it -> addTotalLine(table, it.description, String.valueOf(it.getSold()), false, 12)
         );
         return table;
     }

@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 @Entity(name = "stock_items")
 public class StockItem extends BaseItem {
 
-    public int sold;
+    private int sold;
 
     @Override
     public void sold() {
@@ -40,5 +40,13 @@ public class StockItem extends BaseItem {
     @Override
     public boolean isUnique() {
         return false;
+    }
+
+    public int getSold() {
+        return sold;
+    }
+
+    public void setSold(int sold) {
+        this.sold = sold;
     }
 }
