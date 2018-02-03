@@ -43,7 +43,6 @@ public class TransactionUploader {
         Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").create();
-        transactionRepository.findAll();
         StorageConverter storageConverter = new StorageConverter();
         List<Transaction> transactions = storageConverter.convertToTransactions(transactionRepository.findAll());
         return gson.toJson(transactions);
