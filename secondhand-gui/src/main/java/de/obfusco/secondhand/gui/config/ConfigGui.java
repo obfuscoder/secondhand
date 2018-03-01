@@ -6,6 +6,8 @@ import com.intellij.uiDesigner.core.Spacer;
 import de.obfusco.secondhand.net.*;
 import de.obfusco.secondhand.net.dto.Event;
 import de.obfusco.secondhand.storage.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,8 @@ import java.net.MalformedURLException;
 
 @Component
 public class ConfigGui extends JDialog {
+    private final static Logger LOG = LoggerFactory.getLogger(ConfigGui.class);
+
     @Autowired
     StorageConverter storageConverter;
     @Autowired
@@ -134,6 +138,7 @@ public class ConfigGui extends JDialog {
                     "Export erfolgreich",
                     JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException e) {
+            LOG.error("Error while exporting database", e);
             JOptionPane.showMessageDialog(null,
                     "Fehler beim Exportieren der Daten. Bitte wählen Sie ein Verzeichnis, in das geschrieben werden kann",
                     "Exportfehler",
@@ -155,6 +160,7 @@ public class ConfigGui extends JDialog {
                 reportSuccess();
             }
         } catch (MalformedURLException e) {
+            LOG.error("Error while downloading database", e);
             JOptionPane.showMessageDialog(null,
                     "Angabe der Homepage nicht korrekt. Bitte korrigieren Sie Ihre Eingabe",
                     "Eingabefehler",
@@ -177,6 +183,7 @@ public class ConfigGui extends JDialog {
             try {
                 pushDatabase();
             } catch (IOException e) {
+                LOG.error("Error while pushing database", e);
                 JOptionPane.showMessageDialog(null,
                         "Fehler beim Übertragen der Daten.",
                         "Übertragungsfehler",
@@ -193,17 +200,20 @@ public class ConfigGui extends JDialog {
             return;
         }
         try {
-            transactionUploader.upload(rootUrlField.getText(), tokenField.getText());
-            String message = String.format("%d Transaktionen für den Termin \"%s\" erfolgreich hochgeladen.",
-                    transactionRepository.count(), eventRepository.find().name);
-            JOptionPane.showMessageDialog(this, message, "Upload erfolgreich", JOptionPane.INFORMATION_MESSAGE);
-
+            boolean success = transactionUploader.upload(rootUrlField.getText(), tokenField.getText());
+            if (success) {
+                String message = String.format("%d Transaktionen für den Termin \"%s\" erfolgreich hochgeladen.",
+                        transactionRepository.count(), eventRepository.find().name);
+                JOptionPane.showMessageDialog(this, message, "Upload erfolgreich", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(null,
-                    "Fehler beim Hochladen der Daten. Bitte prüfen Sie die Internetverbindung und Eingabe.",
-                    "Uploadfehler",
-                    JOptionPane.WARNING_MESSAGE);
+            LOG.error("Error while uploading transactions", e);
         }
+        JOptionPane.showMessageDialog(null,
+                "Fehler beim Hochladen der Daten. Bitte prüfen Sie die Internetverbindung und Eingabe.",
+                "Uploadfehler",
+                JOptionPane.WARNING_MESSAGE);
     }
 
     private void pushDatabase() throws IOException {

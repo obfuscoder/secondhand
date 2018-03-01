@@ -10,4 +10,5 @@ git tag $VERSION
 git remote | xargs -L1 git push
 git remote | xargs -L1 git push --tags
 scp Output/flohmarkthelfer-setup.exe flohmarkthelfer:www/shared/public/download
+scp Output/flohmarkthelfer-setup.exe flohmarkthelfer@netcup:www/shared/public/download
 
