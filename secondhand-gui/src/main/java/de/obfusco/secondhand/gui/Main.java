@@ -7,7 +7,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import javax.swing.*;
 
-public class Main {
+class Main {
 
     private final static Logger LOG = LoggerFactory.getLogger(Main.class);
 

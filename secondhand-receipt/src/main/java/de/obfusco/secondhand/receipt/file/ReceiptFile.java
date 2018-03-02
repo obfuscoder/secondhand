@@ -33,7 +33,7 @@ public class ReceiptFile {
         return createFile(basePath, title, introText, null, null);
     }
 
-    protected void addHeader(Document document, String title) throws DocumentException {
+    private void addHeader(Document document, String title) throws DocumentException {
         document.add(new Phrase(new Chunk(title, FontFactory
                 .getFont(FontFactory.HELVETICA_BOLD, 24))));
     }

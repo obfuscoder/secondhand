@@ -13,9 +13,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.text.NumberFormat;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 
 @Component
 public class ReportsGui extends JFrame {

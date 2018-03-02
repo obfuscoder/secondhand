@@ -1,7 +1,6 @@
 package de.obfusco.secondhand.net.dto;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 
 public class StockItem {
     public String description;

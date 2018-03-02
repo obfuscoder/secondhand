@@ -19,7 +19,7 @@ public class AbstractEntity implements Serializable {
     public Date created;
     @LastModifiedDate
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    public Date modified;
+    private Date modified;
 
     @Override
     public String toString() {

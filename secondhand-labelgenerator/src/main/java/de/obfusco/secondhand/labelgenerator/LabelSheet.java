@@ -18,17 +18,17 @@ import java.util.List;
 import java.util.Locale;
 
 @Component
-public class LabelSheet {
+class LabelSheet {
 
-    public static final int NUMBER_OF_COLUMNS = 3;
-    public static final int NUMBER_OF_ROWS = 5;
+    private static final int NUMBER_OF_COLUMNS = 3;
+    private static final int NUMBER_OF_ROWS = 5;
 
-    List<Item> items;
+    private List<Item> items;
 
     @Autowired
     de.obfusco.secondhand.storage.repository.ItemRepository ItemRepository;
 
-    public Path createPdf(Path targetPath) throws DocumentException, IOException {
+    private Path createPdf(Path targetPath) throws DocumentException, IOException {
 
         Document document = new Document(PageSize.A4,
                 Utilities.millimetersToPoints(3), Utilities.millimetersToPoints(5),
@@ -39,8 +39,8 @@ public class LabelSheet {
         document.open();
 
         PdfPTable table = createTable();
-        for (int i = 0; i < items.size(); i++) {
-            PdfPCell cell = createTableCell(writer, items.get(i));
+        for (Item item : items) {
+            PdfPCell cell = createTableCell(writer, item);
             cell.setPadding(6);
             table.addCell(cell);
         }
@@ -153,7 +153,7 @@ public class LabelSheet {
         return cell;
     }
 
-    private PdfPCell createTableCell(PdfWriter writer, Item item) throws IOException, DocumentException {
+    private PdfPCell createTableCell(PdfWriter writer, Item item) {
         PdfPCell cell = new PdfPCell(new Paragraph(""));
         cell.setBorder(0);
         cell.addElement(createCellContent(writer, item));

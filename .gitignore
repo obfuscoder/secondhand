@@ -1,8 +1,4 @@
-nbproject
 target
-.project
-.settings
-.classpath
 data
 log
 dependency-reduced-pom.xml

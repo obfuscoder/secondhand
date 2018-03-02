@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class Transaction extends AbstractEntityWithUuid {
 
     @Column(name = "zip_code")
-    public String zipCode;
+    private String zipCode;
     @Enumerated(EnumType.STRING)
     public Type type;
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
@@ -46,14 +46,11 @@ public class Transaction extends AbstractEntityWithUuid {
     }
 
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder
-                .append(id).append(";")
-                .append(type.name()).append(";")
-                .append(created.getTime()).append(";")
-                .append(zipCode).append(";");
-        stringBuilder.append(StringUtils.arrayToCommaDelimitedString(getAllItemCodes().toArray()));
-        return stringBuilder.toString();
+        return id + ";" +
+                type.name() + ";" +
+                created.getTime() + ";" +
+                zipCode + ";" +
+                StringUtils.arrayToCommaDelimitedString(getAllItemCodes().toArray());
     }
 
     public void setItems(List<Item> items) {
@@ -65,7 +62,7 @@ public class Transaction extends AbstractEntityWithUuid {
     }
 
     public List<String> getAllItemCodes() {
-        return new ArrayList<>(getAllItems().stream().map(it -> it.code).collect(Collectors.toList()));
+        return getAllItems().stream().map(it -> it.code).collect(Collectors.toList());
     }
 
     @Transient

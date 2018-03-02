@@ -1,7 +1,6 @@
 package de.obfusco.secondhand.refund.gui;
 
 import de.obfusco.secondhand.storage.model.BaseItem;
-import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.TransactionListener;
 import de.obfusco.secondhand.storage.repository.ItemRepository;
 import de.obfusco.secondhand.storage.service.StorageService;
@@ -25,14 +24,13 @@ import java.util.Locale;
 @Component
 public class RefundGui extends JFrame implements ActionListener, TableModelListener {
 
-    protected NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
+    private NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
-    JTextField itemNr;
-    ItemTableModel tableModel;
-    JLabel errorLabel;
-    JLabel priceLabel;
-    JTable itemTable;
-    String sum;
+    private JTextField itemNr;
+    private ItemTableModel tableModel;
+    private JLabel errorLabel;
+    private JLabel priceLabel;
+    private JTable itemTable;
 
     @Autowired
     ItemRepository itemRepository;
@@ -43,9 +41,9 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
     @Autowired
     TransactionListener transactionListener;
 
-    JButton readyButton = new JButton("Fertig");
+    private JButton readyButton = new JButton("Fertig");
 
-    CommitRefundDialog checkout = null;
+    private CommitRefundDialog checkout = null;
     private JLabel countLabel;
 
     public RefundGui() {
@@ -199,10 +197,6 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
         pane.add(southPanel, BorderLayout.SOUTH);
     }
 
-    public ItemRepository getItemRepository() {
-        return itemRepository;
-    }
-
     public String getPrice() {
         return priceLabel.getText();
     }
@@ -279,7 +273,7 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
         return storageService;
     }
 
-    public void addItem() {
+    private void addItem() {
         String code = itemNr.getText();
         itemNr.setText("");
         setErrorText("");
@@ -295,14 +289,14 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
         tableModel.addRow(item);
     }
 
-    public void setErrorText(String text) {
+    private void setErrorText(String text) {
         errorLabel.setText(text);
         errorLabel.getParent().invalidate();
         errorLabel.getParent().validate();
         this.validate();
     }
 
-    public void deleteSelectedRow() {
+    private void deleteSelectedRow() {
         tableModel.delRow(itemTable.getSelectedRow());
         itemNr.requestFocus();
     }
@@ -314,7 +308,7 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
 
         private List<BaseItem> data = new ArrayList<>();
 
-        public List<BaseItem> getData() {
+        List<BaseItem> getData() {
             return data;
         }
 
@@ -352,7 +346,7 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
             return columnNames.get(index);
         }
 
-        public Boolean findItemNr(String nr) {
+        Boolean findItemNr(String nr) {
 
             for (BaseItem item : data) {
                 if (item.code.equals(nr)) {
@@ -362,7 +356,7 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
             return false;
         }
 
-        public void addRow(BaseItem item) {
+        void addRow(BaseItem item) {
             if (item.isUnique() && findItemNr(item.code)) {
                 setErrorText("Artikel schon vorhanden!");
             } else {
@@ -371,7 +365,7 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
             }
         }
 
-        public void delRow(int row) {
+        void delRow(int row) {
             data.remove(row);
             this.fireTableDataChanged();
         }

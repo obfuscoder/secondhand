@@ -1,7 +1,6 @@
 package de.obfusco.secondhand.sale.gui;
 
 import de.obfusco.secondhand.storage.model.BaseItem;
-import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.TransactionListener;
 import de.obfusco.secondhand.storage.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +25,13 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
 
     private static final long serialVersionUID = -698049510249510666L;
 
-    protected NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
+    private NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
-    JTextField itemNr;
-    CashTableModel tablemodel;
-    JLabel errorLabel;
-    JLabel priceLabel;
-    JTable cashTable;
+    private JTextField itemNr;
+    private CashTableModel tablemodel;
+    private JLabel errorLabel;
+    private JLabel priceLabel;
+    private JTable cashTable;
 
     @Autowired
     StorageService storageService;
@@ -40,9 +39,9 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
     @Autowired
     TransactionListener transactionListener;
 
-    JButton readyButton = new JButton("Fertig");
+    private JButton readyButton = new JButton("Fertig");
 
-    CheckOutDialog checkout = null;
+    private CheckOutDialog checkout = null;
     private JLabel countLabel;
 
     public CashBoxGui() {
@@ -204,16 +203,8 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         return priceLabel.getText();
     }
 
-    public JButton getReadyButton() {
-        return readyButton;
-    }
-
     public JTextField getItemNr() {
         return itemNr;
-    }
-
-    public JTable getCashTable() {
-        return cashTable;
     }
 
     @Override
@@ -273,7 +264,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         return tablemodel.getData();
     }
 
-    public void addItem() {
+    private void addItem() {
         String code = itemNr.getText();
         itemNr.setText("");
         setErrorText("");
@@ -289,14 +280,14 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         tablemodel.addRow(item);
     }
 
-    public void setErrorText(String text) {
+    private void setErrorText(String text) {
         errorLabel.setText(text);
         errorLabel.getParent().invalidate();
         errorLabel.getParent().validate();
         this.validate();
     }
 
-    public void deleteSelectedRow() {
+    private void deleteSelectedRow() {
         int n = JOptionPane.showConfirmDialog(
                 this,
                 "Möchten sie den Artikel \""
@@ -319,7 +310,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
 
         private List<BaseItem> data = new ArrayList<>();
 
-        public List<BaseItem> getData() {
+        List<BaseItem> getData() {
             return data;
         }
 
@@ -357,7 +348,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
             return columnNames.get(index);
         }
 
-        public Boolean findItemNr(String nr) {
+        Boolean findItemNr(String nr) {
 
             for (BaseItem item : data) {
                 if (item.code.equals(nr)) {
@@ -367,7 +358,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
             return false;
         }
 
-        public void addRow(BaseItem item) {
+        void addRow(BaseItem item) {
             if (item.isUnique() && findItemNr(item.code)) {
                 setErrorText("Artikel schon vorhanden!");
             } else {
@@ -376,7 +367,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
             }
         }
 
-        public void delRow(int row) {
+        void delRow(int row) {
             data.remove(row);
             this.fireTableDataChanged();
         }

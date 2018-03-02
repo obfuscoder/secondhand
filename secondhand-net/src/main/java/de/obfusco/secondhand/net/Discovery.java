@@ -9,7 +9,7 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 
-public class Discovery implements Closeable {
+class Discovery implements Closeable {
 
     private final static Logger LOG = LoggerFactory.getLogger(Discovery.class);
 
@@ -33,7 +33,7 @@ public class Discovery implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         LOG.info("Closing network discovery");
         if (discoveryListener != null) {
             discoveryListener.close();

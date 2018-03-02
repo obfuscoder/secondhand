@@ -3,7 +3,7 @@ package de.obfusco.secondhand.gui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoggingExceptionHandler implements Thread.UncaughtExceptionHandler {
+class LoggingExceptionHandler implements Thread.UncaughtExceptionHandler {
     private final static Logger LOG = LoggerFactory.getLogger(MainGui.class);
 
     @Override

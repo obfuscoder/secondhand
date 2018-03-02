@@ -26,8 +26,8 @@ import java.util.List;
 @Component
 public class SellerPayOff extends BasePayOff {
 
-    public static final int NUMBER_OF_COLUMNS = 3;
-    public static final int NUMBER_OF_ITEMS_PER_LINE = 2;
+    private static final int NUMBER_OF_COLUMNS = 3;
+    private static final int NUMBER_OF_ITEMS_PER_LINE = 2;
     @Autowired
     ItemRepository ItemRepository;
     @Autowired

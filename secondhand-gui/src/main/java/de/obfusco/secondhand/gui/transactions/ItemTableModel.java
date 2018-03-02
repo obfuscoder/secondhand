@@ -1,12 +1,11 @@
 package de.obfusco.secondhand.gui.transactions;
 
 import de.obfusco.secondhand.storage.model.BaseItem;
-import de.obfusco.secondhand.storage.model.Item;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.List;
 
-public class ItemTableModel extends AbstractTableModel {
+class ItemTableModel extends AbstractTableModel {
     private List<BaseItem> items;
 
     public ItemTableModel(List<BaseItem> items) {

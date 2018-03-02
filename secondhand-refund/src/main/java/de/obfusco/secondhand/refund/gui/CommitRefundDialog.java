@@ -21,7 +21,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CommitRefundDialog extends JDialog implements ActionListener {
+class CommitRefundDialog extends JDialog implements ActionListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(CommitRefundDialog.class);
 

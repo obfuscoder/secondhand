@@ -21,14 +21,14 @@ import java.nio.file.Paths;
 public class LabelGeneratorGui extends JFrame implements ActionListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(LabelGeneratorGui.class);
-    public JButton justBarcode;
-    public JButton etiquettes;
-    public JLabel customerNrLabel;
-    public JTextField customerNr;
-    public JLabel etiquettesLabel;
-    public JLabel etiquettesLink;
-    Path basePath = Paths.get("data/pdfs/labels");
-    Path targetPath;
+    private JButton justBarcode;
+    private JButton etiquettes;
+    private JLabel customerNrLabel;
+    private JTextField customerNr;
+    private JLabel etiquettesLabel;
+    private JLabel etiquettesLink;
+    private Path basePath = Paths.get("data/pdfs/labels");
+    private Path targetPath;
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired

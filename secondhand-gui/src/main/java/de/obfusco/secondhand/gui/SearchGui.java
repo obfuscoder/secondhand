@@ -19,9 +19,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Component
-public class SearchGui extends JFrame {
-
-    private final static org.slf4j.Logger LOG = LoggerFactory.getLogger(SearchGui.class);
+class SearchGui extends JFrame {
 
     private static final String TITLE = "Artikelsuche";
 
@@ -30,7 +28,7 @@ public class SearchGui extends JFrame {
     private JTextField searchText;
     private JTable resultTable;
 
-    public SearchGui() {
+    private SearchGui() {
         super(TITLE);
         setSize(500, 600);
         setLocationRelativeTo(null);
@@ -120,7 +118,7 @@ public class SearchGui extends JFrame {
                 "ArtNr", "Kategorie", "Bezeichnung", "Größe", "Preis", "verkauft" };
         private final List<Item> results;
 
-        public ResultsModel(List<Item> results) {
+        ResultsModel(List<Item> results) {
             this.results = results;
         }
 

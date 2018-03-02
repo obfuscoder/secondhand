@@ -2,7 +2,6 @@ package de.obfusco.secondhand.sale.gui;
 
 import com.itextpdf.text.DocumentException;
 import de.obfusco.secondhand.storage.model.BaseItem;
-import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.model.TransactionListener;
 import de.obfusco.secondhand.storage.service.StorageService;
@@ -25,33 +24,33 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-public class CheckOutDialog extends JDialog implements ActionListener {
+class CheckOutDialog extends JDialog implements ActionListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(CheckOutDialog.class);
 
     private static final long serialVersionUID = -9004809235134991240L;
 
-    JLabel priceLabel;
-    JLabel changeBarlabel;
-    JTextField barTextField;
-    JFormattedTextField postCodeTextField;
-    Double change;
-    JLabel errorLabel;
+    private JLabel priceLabel;
+    private JLabel changeBarlabel;
+    private JTextField barTextField;
+    private JFormattedTextField postCodeTextField;
+    private Double change;
+    private JLabel errorLabel;
 
-    JButton okButton = new JButton("OK");
-    JButton cancelButton = new JButton("Cancel");
-    JButton printButton = new JButton("OK + Drucken");
+    private JButton okButton = new JButton("OK");
+    private JButton cancelButton = new JButton("Cancel");
+    private JButton printButton = new JButton("OK + Drucken");
 
-    JLabel title = new JLabel("Verkauf abschließen");
+    private JLabel title = new JLabel("Verkauf abschließen");
 
-    CashBoxGui frame;
+    private CashBoxGui frame;
 
-    StorageService storageService;
-    List<BaseItem> items;
+    private StorageService storageService;
+    private List<BaseItem> items;
 
-    boolean showPostCode;
+    private boolean showPostCode;
 
-    String postCode = null;
+    private String postCode = null;
     private Path basePath = Paths.get("data/pdfs/sale");
     private TransactionListener transactionListener;
 
@@ -319,20 +318,9 @@ public class CheckOutDialog extends JDialog implements ActionListener {
         Double bar = Double.parseDouble(barTextField.getText().replace(",", "."));
         Double price = Double.parseDouble(priceLabel.getText().replace(",", "."));
         change = bar - price;
-        if (change == null) {
-            change = 0.0;
-        }
 
         String back = String.format("%.2f", change);
         changeBarlabel.setText(back);
-    }
-
-    public String getBarString() {
-        return barTextField.getText();
-    }
-
-    public Double getChange() {
-        return change;
     }
 
 }

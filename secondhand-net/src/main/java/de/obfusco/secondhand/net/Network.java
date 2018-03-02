@@ -74,7 +74,7 @@ public class Network implements Closeable,DiscoveryObserver,PeerObserver, Connec
         }
     }
 
-    public boolean isLocalAddress(String hostAddress) {
+    private boolean isLocalAddress(String hostAddress) {
         return localHostAddresses.contains(hostAddress);
     }
 

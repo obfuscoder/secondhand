@@ -17,14 +17,14 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 @Component
-public class BarCodeSheet {
+class BarCodeSheet {
 
-    public static final int NUMBER_OF_COLUMNS = 4;
+    private static final int NUMBER_OF_COLUMNS = 4;
     @Autowired
     ItemRepository itemRepository;
-    List<Item> items;
+    private List<Item> items;
 
-    public Path createPdf(Path targetPath) throws IOException,
+    private Path createPdf(Path targetPath) throws IOException,
             DocumentException {
 
         Files.createDirectories(targetPath);
@@ -39,8 +39,8 @@ public class BarCodeSheet {
 
         float cellHeight = 56;
         PdfPTable table = createTableLine();
-        for (int i = 0; i < items.size(); i++) {
-            table.addCell(createTableCell(writer, items.get(i), cellHeight));
+        for (Item item : items) {
+            table.addCell(createTableCell(writer, item, cellHeight));
         }
         for (int i=0; i<(NUMBER_OF_COLUMNS-(items.size() % NUMBER_OF_COLUMNS)) % NUMBER_OF_COLUMNS; i++) {
             PdfPCell cell = new PdfPCell(new Paragraph(""));

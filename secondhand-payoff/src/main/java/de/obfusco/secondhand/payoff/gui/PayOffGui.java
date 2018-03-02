@@ -16,7 +16,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,7 +25,7 @@ public class PayOffGui extends JFrame {
 
     private final static org.slf4j.Logger LOG = LoggerFactory.getLogger(PayOffGui.class);
     private static final String TITLE = "Abrechnung";
-    public JLabel totalPayoff;
+    private JLabel totalPayoff;
     @Autowired
     TotalPayOff totalPayOff;
 
@@ -39,7 +38,7 @@ public class PayOffGui extends JFrame {
     @Autowired
     EventRepository eventRepository;
 
-    Path basePath = Paths.get("data/pdfs/payoff");
+    private Path basePath = Paths.get("data/pdfs/payoff");
 
     public PayOffGui() {
         super(TITLE);

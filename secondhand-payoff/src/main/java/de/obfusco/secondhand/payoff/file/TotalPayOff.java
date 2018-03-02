@@ -18,11 +18,9 @@ import de.obfusco.secondhand.storage.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -57,21 +55,21 @@ public class TotalPayOff extends BasePayOff {
         document.open();
         addHeader(document, event);
         document.add(createTotalTable(event));
-        document.add(createSoldStockItemsTable(event));
+        document.add(createSoldStockItemsTable());
         if (event.donationOfUnsoldItemsEnabled) {
             document.newPage();
-            document.add(createDonatorsTable(event));
+            document.add(createDonatorsTable());
         }
         document.close();
         return fullPath.toFile();
     }
 
-    private PdfPTable createSoldStockItemsTable(Event event) {
+    private PdfPTable createSoldStockItemsTable() {
         Stream<StockItem> stream = StreamSupport.stream(stockItemRepository.findAll().spliterator(), false);
         PdfPTable table = new PdfPTable(6);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
         Long soldStockItems = stockItemRepository.countOfSoldItems();
-        if (soldStockItems == null) soldStockItems = new Long(0);
+        if (soldStockItems == null) soldStockItems = 0L;
         addTotalLine(table, "verkaufte Stammartikel", String.valueOf(soldStockItems), true, 14);
         stream.filter(it -> it.getSold() > 0).forEach(
                 it -> addTotalLine(table, it.description, String.valueOf(it.getSold()), false, 12)
@@ -79,7 +77,7 @@ public class TotalPayOff extends BasePayOff {
         return table;
     }
 
-    private PdfPTable createDonatorsTable(Event event) {
+    private PdfPTable createDonatorsTable() {
         List<Donator> donators = new ArrayList<>();
         List<Returner> returns = new ArrayList<>();
         Iterable<Reservation> reservations = reservationRepository.findAllByOrderByNumberAsc();
@@ -142,7 +140,7 @@ public class TotalPayOff extends BasePayOff {
 
         long soldItemCount = itemRepository.countBySoldNotNull();
         Long soldStockItemCount = stockItemRepository.countOfSoldItems();
-        if (soldStockItemCount == null) soldStockItemCount = new Long(0);
+        if (soldStockItemCount == null) soldStockItemCount = 0L;
         double soldStockItemSum = storageService.sumOfSoldStockItems();
         addTotalLine(table, "Anzahl verkaufter Stammartikel", Long.toString(soldStockItemCount), true, 12);
         addTotalLine(table, "Summe verkaufter Stammartikel", currency.format(soldStockItemSum), true, 12);
@@ -174,9 +172,9 @@ public class TotalPayOff extends BasePayOff {
     }
 
     private class ReservationReference {
-        public Reservation reservation;
+        Reservation reservation;
 
-        public ReservationReference(Reservation reservation) {
+        ReservationReference(Reservation reservation) {
             this.reservation = reservation;
         }
 
@@ -191,22 +189,22 @@ public class TotalPayOff extends BasePayOff {
     private class ReservationReferenceWithCount extends ReservationReference {
         int count;
 
-        public ReservationReferenceWithCount(Reservation reservation, int count) {
+        ReservationReferenceWithCount(Reservation reservation, int count) {
             super(reservation);
             this.count = count;
         }
     }
 
     private class Payout extends ReservationReference {
-        public double value;
-        public Map<Integer, Integer> coins;
-        public Payout(Reservation reservation, double value) {
+        double value;
+        Map<Integer, Integer> coins;
+        Payout(Reservation reservation, double value) {
             super(reservation);
             this.value = value;
             this.coins = calculateCoins();
         }
 
-        public Payout() {
+        Payout() {
         }
 
         private Map<Integer, Integer> calculateCoins() {
@@ -226,7 +224,7 @@ public class TotalPayOff extends BasePayOff {
             return String.format("%s (%s)", super.toString(), coinString());
         }
 
-        public String coinString() {
+        String coinString() {
             Integer[] keys = coins.keySet().toArray(new Integer[0]);
             Arrays.sort(keys);
             StringBuilder sb = new StringBuilder();
@@ -241,13 +239,13 @@ public class TotalPayOff extends BasePayOff {
     }
 
     private class Returner extends ReservationReferenceWithCount {
-        public Returner(Reservation reservation, int itemCount) {
+        Returner(Reservation reservation, int itemCount) {
             super(reservation, itemCount);
         }
     }
 
     private class Donator extends ReservationReferenceWithCount {
-        public Donator(Reservation reservation, int count) {
+        Donator(Reservation reservation, int count) {
             super(reservation, count);
         }
     }

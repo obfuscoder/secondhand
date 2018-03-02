@@ -10,12 +10,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-abstract public class BasePayOff {
+abstract class BasePayOff {
 
-    protected NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
-    protected NumberFormat percent = NumberFormat.getPercentInstance(Locale.GERMANY);
+    NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
+    NumberFormat percent = NumberFormat.getPercentInstance(Locale.GERMANY);
 
-    protected void addTotalLine(PdfPTable table, String label, String value, boolean bold, int size) {
+    void addTotalLine(PdfPTable table, String label, String value, boolean bold, int size) {
         Font font = FontFactory.getFont((bold) ? FontFactory.HELVETICA_BOLD : FontFactory.HELVETICA, size);
         PdfPCell cell;
         cell = new PdfPCell(new Phrase(new Chunk(label, font)));
@@ -30,7 +30,7 @@ abstract public class BasePayOff {
         table.addCell(cell);
     }
 
-    protected void addHeader(Document document, Event event) throws DocumentException {
+    void addHeader(Document document, Event event) throws DocumentException {
         document.add(new Phrase("Abrechnung Flohmarkt", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
         document.add(new Phrase("\n" + event.name + "\n", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
         document.add(new Phrase(

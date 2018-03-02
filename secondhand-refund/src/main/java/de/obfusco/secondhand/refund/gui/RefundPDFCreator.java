@@ -5,7 +5,6 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import de.obfusco.secondhand.storage.model.BaseItem;
-import de.obfusco.secondhand.storage.model.Item;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,11 +17,12 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-public class RefundPDFCreator {
+@SuppressWarnings("ALL")
+class RefundPDFCreator {
 
     private static NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
-    public static PdfPTable insertItemTable(List<BaseItem> data, Double sum) {
+    private static PdfPTable insertItemTable(List<BaseItem> data, Double sum) {
 
         PdfPTable table = new PdfPTable(5);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);

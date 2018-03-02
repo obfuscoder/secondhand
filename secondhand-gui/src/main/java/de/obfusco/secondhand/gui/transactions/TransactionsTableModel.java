@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class TransactionsTableModel extends AbstractTableModel {
+class TransactionsTableModel extends AbstractTableModel {
     @Autowired
     TransactionRepository transactionRepository;
 
-    List<Transaction> transactions;
+    private List<Transaction> transactions;
 
     @Override
     public int getRowCount() {

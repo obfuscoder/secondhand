@@ -19,10 +19,6 @@ public class JsonDataConverter {
         return parse(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
     }
 
-    public Item parseItem(String string) {
-        return parseItem(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
-    }
-
     public Event parseBase64Compressed(String string) throws IOException {
         ByteArrayInputStream bis = new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8));
         Base64InputStream base64Stream = new Base64InputStream(bis);
@@ -32,11 +28,6 @@ public class JsonDataConverter {
     public Event parse(InputStream inputStream) {
         Gson gson = createGson();
         return gson.fromJson(new InputStreamReader(inputStream, StandardCharsets.UTF_8), Event.class);
-    }
-
-    public Item parseItem(InputStream inputStream) {
-        Gson gson = createGson();
-        return gson.fromJson(new InputStreamReader(inputStream, StandardCharsets.UTF_8), Item.class);
     }
 
     private Gson createGson() {

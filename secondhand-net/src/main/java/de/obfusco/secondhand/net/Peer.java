@@ -70,7 +70,7 @@ public class Peer extends Thread implements Closeable {
         LOG.debug("Peer {} info update: tdiff={}, name={}", getAddress(), timeDiff, peerName);
     }
 
-    public boolean isConnected() {
+    private boolean isConnected() {
         return !socket.isClosed();
     }
 
@@ -95,7 +95,7 @@ public class Peer extends Thread implements Closeable {
         return socket.getInetAddress().getHostAddress();
     }
 
-    public String getHostName() {
+    private String getHostName() {
         return socket.getInetAddress().getHostName();
     }
 
@@ -120,7 +120,7 @@ public class Peer extends Thread implements Closeable {
         }
     }
 
-    public String getLocalName() {
+    private String getLocalName() {
         return localName;
     }
 
@@ -128,7 +128,7 @@ public class Peer extends Thread implements Closeable {
         private Peer peer;
         private volatile boolean running;
 
-        public Ping(Peer peer) {
+        Ping(Peer peer) {
             this.peer = peer;
         }
 
@@ -150,7 +150,7 @@ public class Peer extends Thread implements Closeable {
             }
         }
 
-        public void quit() {
+        void quit() {
             running = false;
         }
     }

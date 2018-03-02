@@ -2,6 +2,6 @@ package de.obfusco.secondhand.net;
 
 import java.net.InetAddress;
 
-public interface DiscoveryObserver {
+interface DiscoveryObserver {
     void peerDiscovered(InetAddress hostAddress);
 }

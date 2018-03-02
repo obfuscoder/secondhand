@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class PeerListener extends Thread implements Closeable {
+class PeerListener extends Thread implements Closeable {
 
     private final static Logger LOG = LoggerFactory.getLogger(PeerListener.class);
 

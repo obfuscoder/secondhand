@@ -7,7 +7,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.MulticastSocket;
-import java.net.SocketException;
 
 class DiscoveryListener extends Thread implements Closeable {
 

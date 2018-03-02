@@ -21,12 +21,12 @@ import java.util.List;
 public class TestScanGui extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = -698049510249510666L;
-    JTextField itemNr;
-    CashTableModel tablemodel;
-    JLabel errorLabel;
-    JTable cashTable;
+    private JTextField itemNr;
+    private CashTableModel tablemodel;
+    private JLabel errorLabel;
+    private JTable cashTable;
 
-    JButton clearButton = new JButton("Tabelle leeren");
+    private JButton clearButton = new JButton("Tabelle leeren");
 
     @Autowired
     private ItemRepository itemRepository;
@@ -138,7 +138,7 @@ public class TestScanGui extends JFrame implements ActionListener {
 
     }
 
-    public void addItem() {
+    private void addItem() {
         setErrorText(" ");
         Item item = itemRepository.findByCode(itemNr.getText());
         if (item != null) {
@@ -150,7 +150,7 @@ public class TestScanGui extends JFrame implements ActionListener {
         itemNr.setText("");
     }
 
-    public void setErrorText(String text) {
+    private void setErrorText(String text) {
         errorLabel.setText(text);
         errorLabel.getParent().invalidate();
         errorLabel.getParent().validate();
@@ -158,7 +158,7 @@ public class TestScanGui extends JFrame implements ActionListener {
         this.pack();
     }
 
-    public void deleteSelectedRow() {
+    private void deleteSelectedRow() {
         int n = JOptionPane.showConfirmDialog(
                 this,
                 "Möchten sie den Artikel \""
@@ -223,7 +223,7 @@ public class TestScanGui extends JFrame implements ActionListener {
             return columnNames.get(index);
         }
 
-        public Boolean findItemNr(String nr) {
+        Boolean findItemNr(String nr) {
 
             for (int i = 0; i < getRowCount(); i++) {
                 if (getValueAt(i, 0).equals(nr)) {
@@ -233,7 +233,7 @@ public class TestScanGui extends JFrame implements ActionListener {
             return false;
         }
 
-        public void addRow(Item item) {
+        void addRow(Item item) {
 
             if (data.contains(item)) {
                 setErrorText("Artikel schon vorhanden!");
@@ -243,7 +243,7 @@ public class TestScanGui extends JFrame implements ActionListener {
             }
         }
 
-        public void delRow(int row) {
+        void delRow(int row) {
             data.remove(row);
             this.fireTableDataChanged();
         }
