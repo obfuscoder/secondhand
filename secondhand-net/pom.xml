@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.obfusco.secondhand</groupId>
         <artifactId>secondhand</artifactId>
-        <version>4.2.0</version>
+        <version>4.3.0</version>
     </parent>
     <artifactId>secondhand-net</artifactId>
     <name>secondhand-net</name>
