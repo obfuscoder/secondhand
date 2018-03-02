@@ -419,7 +419,12 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     @Override
     public void push(de.obfusco.secondhand.net.dto.Event event) throws IOException {
         if (network == null) throw new IOException("Network is not available.");
+        LOG.info("Sending data to all peers");
         network.send("DATA" + converter.toBase64CompressedJson(event));
+        for (Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
+            LOG.info("Sending transaction " + transaction.id + " to all peers");
+            network.send(transaction.toString());
+        }
     }
 
     @Override
