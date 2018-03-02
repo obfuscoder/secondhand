@@ -15,13 +15,12 @@ public class Discovery implements Closeable {
 
     private DiscoveryListener discoveryListener;
     private DiscoveryAnnouncer discoveryAnnouncer;
-    private MulticastSocket socket;
-    private InetAddress multicastAddress = InetAddress.getByName("239.42.13.37");
 
     public Discovery(int port, DiscoveryObserver observer, String name, NetworkInterface networkInterface) throws IOException {
-        socket = new MulticastSocket(port);
+        MulticastSocket socket = new MulticastSocket(port);
         socket.setNetworkInterface(networkInterface);
         socket.setBroadcast(true);
+        InetAddress multicastAddress = InetAddress.getByName("239.42.13.37");
         socket.joinGroup(multicastAddress);
         discoveryListener = new DiscoveryListener(socket, observer);
         discoveryAnnouncer = new DiscoveryAnnouncer(socket, multicastAddress, name);

@@ -65,9 +65,7 @@ public class Transaction extends AbstractEntityWithUuid {
     }
 
     public List<String> getAllItemCodes() {
-        List<String> codes = new ArrayList<>();
-        codes.addAll(getAllItems().stream().map(it -> it.code).collect(Collectors.toList()));
-        return codes;
+        return new ArrayList<>(getAllItems().stream().map(it -> it.code).collect(Collectors.toList()));
     }
 
     @Transient

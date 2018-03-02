@@ -20,7 +20,7 @@ class DiscoveryAnnouncer extends Thread implements Closeable {
     private InetAddress multicastAddress;
     private String name;
 
-    public DiscoveryAnnouncer(MulticastSocket socket, InetAddress multicastAddress, String name) throws SocketException {
+    public DiscoveryAnnouncer(MulticastSocket socket, InetAddress multicastAddress, String name) {
         this.socket = socket;
         this.multicastAddress = multicastAddress;
         this.name = name;
@@ -60,7 +60,7 @@ class DiscoveryAnnouncer extends Thread implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         socket.close();
         socket = null;
     }

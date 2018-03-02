@@ -16,7 +16,7 @@ class DiscoveryListener extends Thread implements Closeable {
     private volatile MulticastSocket socket;
     private DiscoveryObserver observer;
 
-    public DiscoveryListener(MulticastSocket socket, DiscoveryObserver observer) throws SocketException {
+    public DiscoveryListener(MulticastSocket socket, DiscoveryObserver observer) {
         this.socket = socket;
         this.observer = observer;
     }
@@ -42,7 +42,7 @@ class DiscoveryListener extends Thread implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         socket.close();
         socket = null;
     }

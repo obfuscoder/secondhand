@@ -67,7 +67,7 @@ public class EventImporterTest {
     }
 
     @Test
-    public void parseJson() throws FileNotFoundException, ParseException {
+    public void parseJson() throws ParseException {
         InputStream fileStream = getClass().getResourceAsStream("/test.json");
         parseAndCheckInputStream(fileStream);
     }
@@ -85,7 +85,7 @@ public class EventImporterTest {
         return new JsonDataConverter().parse(inputStream);
     }
 
-    private void checkReservations(List<Reservation> reservations) throws ParseException {
+    private void checkReservations(List<Reservation> reservations) {
         assertEquals(110, reservations.size());
         Reservation firstReservation = reservations.get(0);
         assertEquals(313, firstReservation.id);

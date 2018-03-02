@@ -13,8 +13,6 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
@@ -53,7 +51,7 @@ public class ConfigGui extends JDialog {
     @Autowired
     private TransactionUploader transactionUploader;
 
-    public ConfigGui() {
+    private ConfigGui() {
         setTitle("Einstellungen");
         setContentPane(contentPane);
         setModal(true);
@@ -92,32 +90,12 @@ public class ConfigGui extends JDialog {
             public void windowDeactivated(WindowEvent windowEvent) {
             }
         });
-        downloadButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                download();
-            }
-        });
+        downloadButton.addActionListener(actionEvent -> download());
 
-        uploadButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                upload();
-            }
-        });
+        uploadButton.addActionListener(actionEvent -> upload());
 
-        pushDataButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                push();
-            }
-        });
-        exportDataButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                export();
-            }
-        });
+        pushDataButton.addActionListener(actionEvent -> push());
+        exportDataButton.addActionListener(actionEvent -> export());
     }
 
     private void export() {

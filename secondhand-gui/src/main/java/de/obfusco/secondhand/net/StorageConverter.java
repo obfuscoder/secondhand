@@ -32,11 +32,9 @@ public class StorageConverter {
     @Autowired
     TransactionRepository transactionRepository;
 
-    Map<Integer, de.obfusco.secondhand.storage.model.Category> categoryMap;
-    Map<Integer, de.obfusco.secondhand.storage.model.Seller> sellerMap;
-    Map<Integer, de.obfusco.secondhand.storage.model.Reservation> reservationMap;
-    Map<Integer, de.obfusco.secondhand.storage.model.StockItem> stockItemMap;
-
+    private Map<Integer, de.obfusco.secondhand.storage.model.Category> categoryMap;
+    private Map<Integer, de.obfusco.secondhand.storage.model.Seller> sellerMap;
+    private Map<Integer, de.obfusco.secondhand.storage.model.Reservation> reservationMap;
 
     public void storeEvent(Event event) {
         initHashMaps();
@@ -55,7 +53,6 @@ public class StorageConverter {
         categoryMap = new HashMap<>();
         sellerMap = new HashMap<>();
         reservationMap = new HashMap<>();
-        stockItemMap = new HashMap<>();
     }
 
     private void emptyDatabase() {
@@ -66,12 +63,6 @@ public class StorageConverter {
         categoryRepository.deleteAll();
         eventRepository.deleteAll();
         stockItemRepository.deleteAll();
-    }
-
-    public void storeItem(Item item) {
-        MapperFactory mapperFactory = createMapperFactory();
-        MapperFacade mapper = mapperFactory.getMapperFacade();
-        itemRepository.save(mapper.map(item, de.obfusco.secondhand.storage.model.Item.class));
     }
 
     private MapperFactory createMapperFactory() {
@@ -199,12 +190,6 @@ public class StorageConverter {
             event.stockItems.add(mapper.map(stockItem, StockItem.class));
         }
         return event;
-    }
-
-    public Item convertItem(de.obfusco.secondhand.storage.model.Item item) {
-        MapperFactory mapperFactory = createMapperFactory();
-        MapperFacade mapper = mapperFactory.getMapperFacade();
-        return mapper.map(item, Item.class);
     }
 
     public List<Transaction> convertToTransactions(Iterable<de.obfusco.secondhand.storage.model.Transaction> transactions) {

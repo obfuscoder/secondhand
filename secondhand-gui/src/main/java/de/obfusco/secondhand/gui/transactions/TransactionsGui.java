@@ -10,11 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -39,19 +39,9 @@ public class TransactionsGui extends JDialog {
         getRootPane().setDefaultButton(printButton);
         pack();
 
-        printButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
+        printButton.addActionListener(e -> onOK());
+        closeButton.addActionListener(e -> onCancel());
 
-        closeButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
-
-// call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
@@ -59,20 +49,12 @@ public class TransactionsGui extends JDialog {
             }
         });
 
-// call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         transactionTable.setTableHeader(new JTableHeader());
-        transactionTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent listSelectionEvent) {
-                selectedTransaction = transactionsTableModel.getAt(transactionTable.getSelectedRow());
-                itemsTable.setModel(new ItemTableModel(selectedTransaction.getAllItems()));
-            }
+        transactionTable.getSelectionModel().addListSelectionListener(listSelectionEvent -> {
+            selectedTransaction = transactionsTableModel.getAt(transactionTable.getSelectedRow());
+            itemsTable.setModel(new ItemTableModel(selectedTransaction.getAllItems()));
         });
     }
 
@@ -87,7 +69,7 @@ public class TransactionsGui extends JDialog {
 
     private void onOK() {
         Path basePath = Paths.get("data/pdfs/sale");
-        File pdfFile = null;
+        File pdfFile;
         try {
             pdfFile = new BillPDFCreator().createPdf(basePath, selectedTransaction.getAllItems());
             Desktop.getDesktop().open(pdfFile);
@@ -99,7 +81,6 @@ public class TransactionsGui extends JDialog {
     }
 
     private void onCancel() {
-// add your code here if necessary
         dispose();
     }
 

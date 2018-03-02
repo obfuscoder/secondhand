@@ -12,9 +12,6 @@ import de.obfusco.secondhand.reports.ReportsGui;
 import de.obfusco.secondhand.sale.gui.CashBoxGui;
 import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.*;
-import de.obfusco.secondhand.storage.model.Item;
-import de.obfusco.secondhand.storage.model.Reservation;
-import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.repository.*;
 import de.obfusco.secondhand.storage.service.StorageService;
 import de.obfusco.secondhand.sync.PathSyncListener;
@@ -28,10 +25,7 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -46,24 +40,11 @@ import java.util.Properties;
 @Component
 public class MainGui extends JFrame implements MessageBroker, TransactionListener, DataPusher, PathSyncListener {
 
-    public static final float BUTTON_FONT_SIZE = 25.0f;
+    private static final float BUTTON_FONT_SIZE = 25.0f;
     private final static Logger LOG = LoggerFactory.getLogger(MainGui.class);
     private static final long serialVersionUID = 4961295225628108431L;
-    public static final int CODE_LENGTH_EXCLUDING_PREFIX = 9;
-    public static final int EVENT_PART_LENGTH = 2;
-    public static final int SELLER_PART_LENGTH = 3;
-    public static final int ITEM_PART_LENGTH = 3;
-    public JButton sale;
-    public JButton billGenerator;
-    public JButton barcodeGenerator;
-    public JButton testScan;
-    public JButton createSellerReceipt;
-    public JButton createSellerResultReceipt;
-    public JButton reportsButton;
-    public JButton configButton;
-    public JButton transactionsButton;
-    public JToggleButton helpButton;
-    Network network;
+    private JToggleButton helpButton;
+    private Network network;
     @Autowired
     CashBoxGui cashBoxGui;
     @Autowired
@@ -92,9 +73,8 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     CategoryRepository categoryRepository;
     @Autowired
     ConfigGui configGui;
-    JFileChooser fc;
-    JLabel statusLabel;
-    JLabel folderSyncLabel;
+    private JLabel statusLabel;
+    private JLabel folderSyncLabel;
     private Properties properties = new Properties();
     @Autowired
     private StorageConverter storageConverter;
@@ -107,7 +87,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     private StorageService storageService;
     private int pathSyncErrorCount;
 
-    JsonDataConverter converter = new JsonDataConverter();
+    private JsonDataConverter converter = new JsonDataConverter();
 
     public MainGui() {
         super("Flohmarkt Kassensystem");
@@ -201,141 +181,73 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     }
 
     private void addComponentsToPane(Container pane) {
-        fc = new JFileChooser();
-
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(0, 1, 10, 10));
 
-        sale = new JButton("Verkauf");
-        sale.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                cashBoxGui.setVisible(true);
-            }
-        });
+        JButton sale = new JButton("Verkauf");
+        sale.addActionListener(e -> cashBoxGui.setVisible(true));
         sale.setFont(sale.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         JButton refund = new JButton("Storno");
-        refund.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                refundGui.setVisible(true);
-            }
-        });
+        refund.addActionListener(e -> refundGui.setVisible(true));
         refund.setFont(refund.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         JButton search = new JButton("Artikelsuche");
-        search.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                searchGui.open();
-            }
-        });
+        search.addActionListener(e -> searchGui.open());
         search.setFont(search.getFont().deriveFont(BUTTON_FONT_SIZE));
 
-        billGenerator = new JButton("Abrechnung");
-        billGenerator.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                payOffGui.open();
-            }
-        });
+        JButton billGenerator = new JButton("Abrechnung");
+        billGenerator.addActionListener(e -> payOffGui.open());
         billGenerator.setFont(billGenerator.getFont().deriveFont(BUTTON_FONT_SIZE));
 
-        testScan = new JButton("Barcode-Test");
-        testScan.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                testScanGui.setVisible(true);
-            }
-        });
+        JButton testScan = new JButton("Barcode-Test");
+        testScan.addActionListener(e -> testScanGui.setVisible(true));
         testScan.setFont(testScan.getFont().deriveFont(BUTTON_FONT_SIZE));
 
-        barcodeGenerator = new JButton("Barcodes drucken");
-        barcodeGenerator.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                labelGeneratorGui.setVisible(true);
-            }
-        });
+        JButton barcodeGenerator = new JButton("Barcodes drucken");
+        barcodeGenerator.addActionListener(e -> labelGeneratorGui.setVisible(true));
         barcodeGenerator.setFont(barcodeGenerator.getFont().deriveFont(BUTTON_FONT_SIZE));
 
-        createSellerReceipt = new JButton("Annahme Verkäuferliste");
-        createSellerReceipt.addActionListener(new ActionListener() {
+        JButton createSellerReceipt = new JButton("Annahme Verkäuferliste");
+        createSellerReceipt.addActionListener(e -> {
+            try {
+                Desktop.getDesktop().open(receiptFile.createFile(Paths.get("data/pdfs/receipts"),
+                        "Annahme Flohmarkt",
+                        "Mit meiner Unterschrift bestätige ich die Teilnahmebedingungen."));
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    Desktop.getDesktop().open(receiptFile.createFile(Paths.get("data/pdfs/receipts"),
-                            "Annahme Flohmarkt",
-                            "Mit meiner Unterschrift bestätige ich die Teilnahmebedingungen."));
-
-                } catch (IOException | DocumentException e1) {
-                    LOG.error("Failed to create and open receipts file", e1);
-                }
+            } catch (IOException | DocumentException e1) {
+                LOG.error("Failed to create and open receipts file", e1);
             }
         });
         createSellerReceipt.setFont(createSellerReceipt.getFont().deriveFont(BUTTON_FONT_SIZE));
 
-        createSellerResultReceipt = new JButton("Rückgabe Verkäuferliste");
-        createSellerResultReceipt.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    createPayoutReceipt();
-                } catch (IOException | DocumentException e1) {
-                    LOG.error("Failed to create and open receipts file", e1);
-                }
+        JButton createSellerResultReceipt = new JButton("Rückgabe Verkäuferliste");
+        createSellerResultReceipt.addActionListener(e -> {
+            try {
+                createPayoutReceipt();
+            } catch (IOException | DocumentException e1) {
+                LOG.error("Failed to create and open receipts file", e1);
             }
         });
         createSellerResultReceipt.setFont(createSellerResultReceipt.getFont().deriveFont(BUTTON_FONT_SIZE));
 
-        reportsButton = new JButton("Statistiken");
-        reportsButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                reportsGui.setVisible(true);
-            }
-        });
+        JButton reportsButton = new JButton("Statistiken");
+        reportsButton.addActionListener(e -> reportsGui.setVisible(true));
         reportsButton.setFont(reportsButton.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         helpButton = new JToggleButton("Hilfe");
-        helpButton.addItemListener(new ItemListener() {
-
-            @Override
-            public void itemStateChanged(ItemEvent itemEvent) {
-                helpNeeded(itemEvent.getStateChange() == ItemEvent.SELECTED);
-            }
-        });
+        helpButton.addItemListener(itemEvent -> helpNeeded(itemEvent.getStateChange() == ItemEvent.SELECTED));
         helpButton.setFont(helpButton.getFont().deriveFont(BUTTON_FONT_SIZE));
 
-        configButton = new JButton("Einstellungen");
-        configButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent arg) {
-                configGui.setRootUrl(properties.getProperty("online.root"));
-                configGui.setVisible(true);
-            }
+        JButton configButton = new JButton("Einstellungen");
+        configButton.addActionListener(e -> {
+            configGui.setRootUrl(properties.getProperty("online.root"));
+            configGui.setVisible(true);
         });
         configButton.setFont(configButton.getFont().deriveFont(BUTTON_FONT_SIZE));
 
-        transactionsButton = new JButton("Transaktionen");
-        transactionsButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent arg) {
-                transactionsGui.setVisible(true);
-            }
-        });
+        JButton transactionsButton = new JButton("Transaktionen");
+        transactionsButton.addActionListener(arg -> transactionsGui.setVisible(true));
         transactionsButton.setFont(transactionsButton.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         panel.add(sale);
@@ -437,9 +349,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     }
 
     public void transactionReceived(Transaction transaction) {
-        if (transaction == null) {
-            return;
-        } else {
+        if (transaction != null) {
             LOG.debug("Received transaction: {}", transaction);
             synchronized (transactionRepository) {
                 if (!transactionRepository.exists(transaction.id)) {

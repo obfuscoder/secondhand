@@ -71,7 +71,7 @@ public class StorageService {
     }
 
 
-    public Transaction createTransaction(String id, Transaction.Type type, Date date, List<String> itemCodes, String zipCode) {
+    private Transaction createTransaction(String id, Transaction.Type type, Date date, List<String> itemCodes, String zipCode) {
         List<BaseItem> items = fetchAndUpdateItemsFromCodes(type, itemCodes);
         if (items.isEmpty()) return null;
         return Transaction.create(id, date, type, items, zipCode);
@@ -111,8 +111,7 @@ public class StorageService {
     public BaseItem getItem(String code) {
         Item item = itemRepository.findByCode(code);
         if (item != null) return item;
-        StockItem stockItem = stockItemRepository.findByCode(code);
-        return stockItem;
+        return stockItemRepository.findByCode(code);
     }
 
 
@@ -126,6 +125,6 @@ public class StorageService {
     public double sumOfSoldStockItems() {
         Stream<StockItem> stream = StreamSupport.stream(stockItemRepository.findAll().spliterator(), false);
         Optional<BigDecimal> stockItemSum = stream.map(it -> it.price.multiply(BigDecimal.valueOf(it.getSold()))).reduce(BigDecimal::add);
-        return (stockItemSum.isPresent()) ? stockItemSum.get().doubleValue() : 0.0;
+        return stockItemSum.map(BigDecimal::doubleValue).orElse(0.0);
     }
 }

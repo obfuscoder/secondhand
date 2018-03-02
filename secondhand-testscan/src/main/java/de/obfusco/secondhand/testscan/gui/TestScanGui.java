@@ -220,7 +220,7 @@ public class TestScanGui extends JFrame implements ActionListener {
 
         @Override
         public String getColumnName(int index) {
-            return (String) columnNames.get(index);
+            return columnNames.get(index);
         }
 
         public Boolean findItemNr(String nr) {

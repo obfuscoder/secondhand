@@ -81,10 +81,9 @@ public class ReportsGui extends JFrame {
         transactionCount.setText("" + transactionRepository.count());
         soldItemCount.setText("" + itemRepository.countBySoldNotNull());
         Long soldStockItems = stockItemRepository.countOfSoldItems();
-        if (soldStockItems == null) soldStockItems = new Long(0);
+        if (soldStockItems == null) soldStockItems = 0L;
         soldStockItemCount.setText("" + soldStockItems);
         Double sumOfSoldItems = storageService.sumOfSoldItems();
-        if (sumOfSoldItems == null) sumOfSoldItems = 0.0;
         soldSum.setText(currencyFormat.format(sumOfSoldItems));
 
         StringBuilder sb = new StringBuilder();

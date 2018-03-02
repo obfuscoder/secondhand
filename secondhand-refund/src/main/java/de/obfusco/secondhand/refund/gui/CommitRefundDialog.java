@@ -4,7 +4,6 @@ import com.itextpdf.text.DocumentException;
 import de.obfusco.secondhand.storage.model.BaseItem;
 import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.model.TransactionListener;
-import de.obfusco.secondhand.storage.repository.ItemRepository;
 import de.obfusco.secondhand.storage.service.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,36 +25,31 @@ public class CommitRefundDialog extends JDialog implements ActionListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(CommitRefundDialog.class);
 
-    JLabel priceLabel;
-    JTextField barTextField;
-    Double change;
-    JLabel errorLabel;
+    private JLabel errorLabel;
 
-    JButton okButton = new JButton("OK");
-    JButton cancelButton = new JButton("Cancel");
-    JButton printButton = new JButton("Drucken");
+    private JButton okButton = new JButton("OK");
+    private JButton cancelButton = new JButton("Cancel");
+    private JButton printButton = new JButton("Drucken");
 
-    JLabel title = new JLabel("Storno abschließen");
+    private JLabel title = new JLabel("Storno abschließen");
 
-    RefundGui frame;
+    private RefundGui refundGui;
 
-    StorageService storageService;
-    ItemRepository itemRepository;
-    List<BaseItem> items;
+    private StorageService storageService;
+    private List<BaseItem> items;
 
     private Path basePath = Paths.get("data/pdfs/refund");
     private TransactionListener transactionListener;
 
-    public CommitRefundDialog(JFrame parentFrame, TransactionListener transactionListener) {
+    CommitRefundDialog(JFrame parentFrame, TransactionListener transactionListener) {
 
         super(parentFrame, "Storno abschließen", true);
         setSize(400, 300);
 
-        frame = (RefundGui) parentFrame;
-        itemRepository = frame.getItemRepository();
-        this.storageService = frame.getStorageService();
+        refundGui = (RefundGui) parentFrame;
+        this.storageService = refundGui.getStorageService();
         this.transactionListener = transactionListener;
-        this.items = frame.getTableData();
+        this.items = refundGui.getTableData();
         errorLabel = new JLabel(" ");
         errorLabel.setForeground(new Color(255, 0, 0, 255));
 
@@ -78,7 +72,7 @@ public class CommitRefundDialog extends JDialog implements ActionListener {
 
         JLabel sumLabel = new JLabel("Summe:");
         sumLabel.setFont(title.getFont().deriveFont(20.0f));
-        priceLabel = new JLabel(frame.getPrice());
+        JLabel priceLabel = new JLabel(refundGui.getPrice());
         priceLabel.setFont(title.getFont().deriveFont(20.0f));
         JLabel currencyLabel = new JLabel("Euro");
         currencyLabel.setFont(title.getFont().deriveFont(20.0f));
@@ -115,7 +109,7 @@ public class CommitRefundDialog extends JDialog implements ActionListener {
                 }
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     dispose();
-                    frame.getItemNr().requestFocus();
+                    refundGui.getItemNr().requestFocus();
                 }
             }
         });
@@ -140,8 +134,8 @@ public class CommitRefundDialog extends JDialog implements ActionListener {
             this.dispose();
         } else if (e.getSource() == printButton) {
             try {
-                File pdfFile = new RefundPDFCreator().createPdf(basePath, frame.getTableData(),
-                        Double.parseDouble(frame.getPrice().replace(",", ".")));
+                File pdfFile = new RefundPDFCreator().createPdf(basePath, refundGui.getTableData(),
+                        Double.parseDouble(refundGui.getPrice().replace(",", ".")));
                 Desktop.getDesktop().open(pdfFile);
             } catch (DocumentException | IOException ex) {
                 JOptionPane.showMessageDialog(this, "Fehler",
@@ -157,19 +151,10 @@ public class CommitRefundDialog extends JDialog implements ActionListener {
         Transaction transaction = storageService.storeRefundInformation(itemCodes);
         transactionListener.notify(transaction);
 
-        frame.getReadyButton().setEnabled(false);
-        frame.getItemNr().setEnabled(false);
-        frame.getCashTable().setEnabled(false);
+        refundGui.getReadyButton().setEnabled(false);
+        refundGui.getItemNr().setEnabled(false);
+        refundGui.getCashTable().setEnabled(false);
 
         this.dispose();
     }
-
-    public String getBarString() {
-        return barTextField.getText();
-    }
-
-    public Double getChange() {
-        return change;
-    }
-
 }

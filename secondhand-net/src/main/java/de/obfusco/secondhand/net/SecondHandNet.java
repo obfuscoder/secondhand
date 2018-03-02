@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 
 public class SecondHandNet implements MessageBroker {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
         try (Network network = new Network(31454, new SecondHandNet(), "SOMENAME")) {
             network.start();

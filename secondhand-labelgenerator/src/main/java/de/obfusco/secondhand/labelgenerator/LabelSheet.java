@@ -58,7 +58,7 @@ public class LabelSheet {
         return createPdf(targetPath);
     }
 
-    private Element createCellContent(PdfWriter writer, Item item) throws IOException, DocumentException {
+    private Element createCellContent(PdfWriter writer, Item item) {
         PdfContentByte cb = writer.getDirectContent();
         PdfPTable table = new PdfPTable(12);
         table.setWidthPercentage(100);
