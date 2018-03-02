@@ -43,7 +43,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     private static final float BUTTON_FONT_SIZE = 25.0f;
     private final static Logger LOG = LoggerFactory.getLogger(MainGui.class);
     private static final long serialVersionUID = 4961295225628108431L;
-    private JToggleButton helpButton;
     private Network network;
     @Autowired
     CashBoxGui cashBoxGui;
@@ -235,10 +234,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         reportsButton.addActionListener(e -> reportsGui.setVisible(true));
         reportsButton.setFont(reportsButton.getFont().deriveFont(BUTTON_FONT_SIZE));
 
-        helpButton = new JToggleButton("Hilfe");
-        helpButton.addItemListener(itemEvent -> helpNeeded(itemEvent.getStateChange() == ItemEvent.SELECTED));
-        helpButton.setFont(helpButton.getFont().deriveFont(BUTTON_FONT_SIZE));
-
         JButton configButton = new JButton("Einstellungen");
         configButton.addActionListener(e -> {
             configGui.setRootUrl(properties.getProperty("online.root"));
@@ -265,7 +260,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             panel.add(transactionsButton);
         }
         panel.add(reportsButton);
-        panel.add(helpButton);
 
         JPanel statusPanel = new JPanel();
         statusLabel = new JLabel("", SwingConstants.CENTER);
@@ -326,18 +320,11 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         Desktop.getDesktop().open(file);
     }
 
-    private void helpNeeded(boolean isNeeded) {
-        if (network == null) return;
-        network.send("HELP-" + (isNeeded ? "ON" : "OFF"));
-    }
-
     @Override
     public void messageReceived(Peer peer, String message) {
         LOG.info("Received message from peer " + peer.getAddress() + ": " + message);
         try {
-            if (message.startsWith("HELP")) {
-                parseHelpMessage(peer, message);
-            } else if(message.startsWith("DATA")) {
+            if(message.startsWith("DATA")) {
                 parseDataMessage(peer, message);
             } else {
                 transactionReceived(storageService.parseTransactionMessage(message));
@@ -374,17 +361,11 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         }
     }
 
-    private void parseHelpMessage(Peer peer, String message) {
-        String[] parts = message.split("-");
-        reportsGui.helpNeeded(peer, parts.length == 2 && parts[1].equals("ON"));
-    }
-
     @Override
     public void connected(final Peer peer) {
         LOG.info("Connected with peer " + peer.getAddress());
         updateStatusLabel();
         reportsGui.update();
-        peer.send("HELP-" + (helpButton.isSelected() ? "ON" : "OFF"));
         new Thread(() -> {
             for (Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
                 LOG.info("Syncing transaction " + transaction.id + " with peer " + peer.getAddress());

@@ -43,7 +43,6 @@ public class ReportsGui extends JFrame {
     private Network network;
 
     private NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.GERMANY);
-    private Set<Peer> peersNeedingHelp = new HashSet<>();
 
     public ReportsGui() {
         super("Flohmarkt Reports");
@@ -90,11 +89,8 @@ public class ReportsGui extends JFrame {
         if (network != null) {
             sb.append("<html>");
             for (Peer peer: network.getPeers()) {
-                boolean needsHelp = peersNeedingHelp.contains(peer);
-                if (needsHelp) sb.append("<font color=\"red\">");
                 sb.append(String.format("%s - %s, dT=%.2f s",
                         peer.getPeerName(), peer.getAddress(), ((double)peer.getTimeDiff())/1000.0));
-                if (needsHelp) sb.append("</font>");
                 sb.append("<br/>");
             }
             sb.append("</html>");
@@ -110,14 +106,5 @@ public class ReportsGui extends JFrame {
 
     public void setNetwork(Network network) {
         this.network = network;
-    }
-
-    public void helpNeeded(Peer peer, boolean isHelpNeeded) {
-        if (isHelpNeeded) {
-            peersNeedingHelp.add(peer);
-        } else {
-            peersNeedingHelp.remove(peer);
-        }
-        update();
     }
 }
