@@ -12,7 +12,6 @@ public class EventDownloader {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         String authorization = "Token " + token;
         connection.setRequestProperty("Authorization", authorization);
-        connection.setRequestProperty("Accept-Encoding", "gzip,deflate");
         return new GZIPInputStream(connection.getInputStream());
     }
 }
