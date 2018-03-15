@@ -41,7 +41,6 @@ public class ConfigGui extends JDialog {
     TransactionRepository transactionRepository;
     private JPanel contentPane;
     private JButton downloadButton;
-    private JTextField rootUrlField;
     private JTextField tokenField;
     private JButton pushDataButton;
     private JButton uploadButton;
@@ -50,6 +49,7 @@ public class ConfigGui extends JDialog {
     private DataPusher dataPusher;
     @Autowired
     private TransactionUploader transactionUploader;
+    private String rootUrl;
 
     private ConfigGui() {
         setTitle("Einstellungen");
@@ -134,7 +134,7 @@ public class ConfigGui extends JDialog {
                     "Sind Sie sicher?";
             int dialogResult = JOptionPane.showConfirmDialog(null, question, "Achtung", dialogOptions);
             if (dialogResult == JOptionPane.YES_OPTION) {
-                downloadDatabase(rootUrlField.getText(), tokenField.getText());
+                downloadDatabase(rootUrl, tokenField.getText());
                 reportSuccess();
             }
         } catch (MalformedURLException e) {
@@ -178,7 +178,7 @@ public class ConfigGui extends JDialog {
             return;
         }
         try {
-            boolean success = transactionUploader.upload(rootUrlField.getText(), tokenField.getText());
+            boolean success = transactionUploader.upload(rootUrl, tokenField.getText());
             if (success) {
                 String message = String.format("%d Transaktionen für den Termin \"%s\" erfolgreich hochgeladen.",
                         transactionRepository.count(), eventRepository.find().name);
@@ -200,7 +200,6 @@ public class ConfigGui extends JDialog {
     }
 
     private void reportSuccess() {
-        rootUrlField.getText();
         String message = String.format("Daten für den Termin \"%s\" erfolgreich importiert.\nVerkäufer: %d, Artikel: %d",
                 eventRepository.find().name, sellerRepository.count(), itemRepository.count());
         JOptionPane.showMessageDialog(this, message, "Import erfolgreich", JOptionPane.INFORMATION_MESSAGE);
@@ -211,10 +210,6 @@ public class ConfigGui extends JDialog {
         Event event = new JsonDataConverter().parse(inputStream);
         event.token = token;
         storageConverter.storeEvent(event);
-    }
-
-    public void setRootUrl(String rootUrl) {
-        rootUrlField.setText(rootUrl);
     }
 
     {
@@ -244,9 +239,6 @@ public class ConfigGui extends JDialog {
         final JLabel label1 = new JLabel();
         label1.setText("Homepage");
         panel2.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        rootUrlField = new JTextField();
-        rootUrlField.setText("flohmarkthelfer.de");
-        panel2.add(rootUrlField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JLabel label2 = new JLabel();
         label2.setText("Token");
         panel2.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -277,5 +269,9 @@ public class ConfigGui extends JDialog {
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
+    }
+
+    public void setRootUrl(String rootUrl) {
+        this.rootUrl = rootUrl;
     }
 }

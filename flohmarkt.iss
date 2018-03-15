@@ -208,7 +208,6 @@ Filename: "{app}\config.properties"; Section: "dummy"; Key: "buttons.all"; Strin
 Filename: "{app}\config.properties"; Section: "dummy"; Key: "buttons.all"; String: "false"; Tasks: mode/basic
 Filename: "{app}\config.properties"; Section: "dummy"; Key: "postcode"; String: "true"; Tasks: zipcode/yes
 Filename: "{app}\config.properties"; Section: "dummy"; Key: "postcode"; String: "false"; Tasks: zipcode/no
-Filename: "{app}\config.properties"; Section: "dummy"; Key: "online.root"; String: {code:GetHost}
 Filename: "{app}\config.properties"; Section: "dummy"; Key: "peer.name"; String: {code:GetPeerName}
 Filename: "{app}\config.properties"; Section: "dummy"; Key: "sync.path"; String: {code:GetSyncPath}
 
@@ -240,11 +239,6 @@ begin
   Result := GetValueFromIni('peer.name', 'Kasse 1');
 end;
 
-function GetDefaultHost(): String;
-begin
-  Result := GetValueFromIni('online.host', 'flohmarkthelfer.de');
-end;
-
 function GetDefaultSyncPath(): String;
 begin
   Result := GetValueFromIni('sync.path', 'E:\');
@@ -255,8 +249,6 @@ begin
   InputPage := CreateInputQueryPage(wpSelectProgramGroup, 'Installationsdetails', '', '');
   InputPage.Add('Name der Kasse:', False);
   InputPage.Values[0] := GetDefaultPeerName();
-  InputPage.Add('Hostname des Online-Systems (Adresse ohne "http://"):', False);
-  InputPage.Values[1] := GetDefaultHost();
   InputPage.Add('Verzeichnis zur automatischen Synchronisation:', False);
   InputPage.Values[2] := GetDefaultSyncPath();
 end;
@@ -264,11 +256,6 @@ end;
 function GetPeerName(Param: String): String;
 begin
   Result := InputPage.Values[0];
-end;
-
-function GetHost(Param: String): String;
-begin
-  Result := InputPage.Values[1];
 end;
 
 function GetSyncPath(Param: String): String;
