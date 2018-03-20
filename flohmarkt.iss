@@ -260,5 +260,5 @@ end;
 
 function GetSyncPath(Param: String): String;
 begin
-  Result := InputPage.Values[2];
+  Result := InputPage.Values[1];
 end;
