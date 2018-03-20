@@ -3,7 +3,7 @@
   <parent>
     <groupId>de.obfusco.secondhand</groupId>
     <artifactId>secondhand</artifactId>
-    <version>4.4.0</version>
+    <version>4.4.1</version>
   </parent>
   <artifactId>secondhand-receipt</artifactId>
   <name>secondhand-receipt</name>

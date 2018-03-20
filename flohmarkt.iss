@@ -250,7 +250,7 @@ begin
   InputPage.Add('Name der Kasse:', False);
   InputPage.Values[0] := GetDefaultPeerName();
   InputPage.Add('Verzeichnis zur automatischen Synchronisation:', False);
-  InputPage.Values[2] := GetDefaultSyncPath();
+  InputPage.Values[1] := GetDefaultSyncPath();
 end;
 
 function GetPeerName(Param: String): String;
