@@ -12,7 +12,7 @@ public class Event extends AbstractEntityWithId {
     public boolean donationOfUnsoldItemsEnabled;
     public BigDecimal pricePrecision;
     public BigDecimal sellerFee;
-    private Boolean reservationFeesPayedInAdvance;
+    public Boolean reservationFeesPayedInAdvance;
 
     public boolean incorporateReservationFee() {
         return reservationFeesPayedInAdvance == null || !reservationFeesPayedInAdvance;

@@ -133,5 +133,6 @@ public class EventImporterTest {
         assertEquals(new BigDecimal("0.2"), event.commissionRate);
         assertEquals(new BigDecimal("2.0"), event.sellerFee);
         assertEquals(false, event.donationOfUnsoldItemsEnabled);
+        assertEquals(true, event.reservationFeesPayedInAdvance);
     }
 }
