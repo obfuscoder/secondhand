@@ -8,7 +8,7 @@ import java.util.zip.GZIPInputStream;
 
 public class EventDownloader {
     public InputStream downloadEventData(String baseUrl, String token) throws IOException {
-        URL url = new URL(String.format("http://%s/api/event", baseUrl));
+        URL url = new URL(String.format("https://%s/api/event", baseUrl));
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         String authorization = "Token " + token;
         connection.setRequestProperty("Authorization", authorization);

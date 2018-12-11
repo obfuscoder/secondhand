@@ -20,7 +20,7 @@ public class TransactionUploader {
     TransactionRepository transactionRepository;
 
     public boolean upload(String baseUrl, String token) throws IOException {
-        URL url = new URL(String.format("http://%s/api/event/transactions", baseUrl));
+        URL url = new URL(String.format("https://%s/api/event/transactions", baseUrl));
         return uploadJson(url, token, createJson());
     }
 
