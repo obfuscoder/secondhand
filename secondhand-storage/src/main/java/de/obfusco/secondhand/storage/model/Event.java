@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 @Entity(name = "events")
 public class Event extends AbstractEntityWithId {
 
+    public int number;
     public String name;
     public String token;
     public BigDecimal commissionRate;

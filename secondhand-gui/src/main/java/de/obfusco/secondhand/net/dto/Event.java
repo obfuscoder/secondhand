@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Event {
     public int id;
+    public int number;
     public String name;
     public String token;
     public BigDecimal pricePrecision;
