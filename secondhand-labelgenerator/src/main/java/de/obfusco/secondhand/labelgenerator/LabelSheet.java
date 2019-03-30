@@ -63,8 +63,13 @@ class LabelSheet {
         PdfPTable table = new PdfPTable(12);
         table.setWidthPercentage(100);
 
-        PdfPCell cell = createNumberCell(item);
-        cell.setColspan(6);
+        PdfPCell cell = createReservationCell(item);
+        cell.setColspan(3);
+        cell.setFixedHeight(getLabelCellHeight(writer) / 11 * 2);
+        table.addCell(cell);
+
+        cell = createNumberCell(item);
+        cell.setColspan(3);
         cell.setFixedHeight(getLabelCellHeight(writer) / 11 * 2);
         table.addCell(cell);
 
@@ -143,10 +148,20 @@ class LabelSheet {
         return cell;
     }
 
+    private PdfPCell createReservationCell(Item item) {
+        PdfPCell cell = new PdfPCell(new Phrase(new Chunk(
+                Integer.toString(item.getReservation().number),
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20))));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setBorderColor(BaseColor.BLACK);
+        cell.setBorderWidth(1);
+        return cell;
+    }
+
     private PdfPCell createNumberCell(Item item) {
         PdfPCell cell = new PdfPCell(new Phrase(new Chunk(
-                String.format("%d - %d", item.getReservation().number, item.number),
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20))));
+                Integer.toString(item.number),
+                FontFactory.getFont(FontFactory.HELVETICA, 20))));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setBorderColor(BaseColor.BLACK);
         cell.setBorderWidth(1);
