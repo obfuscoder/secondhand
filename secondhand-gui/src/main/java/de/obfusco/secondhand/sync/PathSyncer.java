@@ -2,6 +2,7 @@ package de.obfusco.secondhand.sync;
 
 import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.model.TransactionListener;
+import de.obfusco.secondhand.storage.repository.EventRepository;
 import de.obfusco.secondhand.storage.repository.TransactionRepository;
 import de.obfusco.secondhand.storage.service.StorageService;
 import org.slf4j.Logger;
@@ -18,6 +19,8 @@ public class PathSyncer {
     @Autowired
     private TransactionRepository transactionRepository;
     @Autowired
+    private EventRepository eventRepository;
+    @Autowired
     private TransactionListener transactionListener;
     @Autowired
     private PathSyncListener pathSyncListener;
@@ -27,6 +30,7 @@ public class PathSyncer {
 
     public void synchronize(final String path, final String localName) {
         new Thread(() -> {
+            int currentEventNumber = eventRepository.find().number;
             while (!stop) {
                 int sleepTime = 10000;
                 File folder = new File(path);
@@ -37,6 +41,7 @@ public class PathSyncer {
                     pathSyncListener.synchronizationStarted();
                     LOG.info("Writing transactions to {}.", localFile);
                     try (PrintWriter writer = new PrintWriter(localFile)) {
+                        writer.println(currentEventNumber);
                         for (Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
                             writer.println(transaction);
                         }
@@ -49,6 +54,7 @@ public class PathSyncer {
                     for (File file : files) {
                         LOG.info("Reading transactions from file {}", file);
                         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                            readFirstLineAndCheckEventNumber(file, reader, currentEventNumber);
                             while (true) {
                                 String line = reader.readLine();
                                 if (line == null) break;
@@ -80,5 +86,14 @@ public class PathSyncer {
                 }
             }
         }).start();
+    }
+
+    private void readFirstLineAndCheckEventNumber(File file, BufferedReader reader, int currentEventNumber) throws IOException {
+        LOG.info("Reading first line with event number from file {}", file);
+        String line = reader.readLine();
+        if (currentEventNumber != Integer.parseInt(line)) {
+            LOG.error("Event number {} from transaction file {} does not match current event number {}", line, file, currentEventNumber);
+            throw new IllegalArgumentException("Wrong event number");
+        }
     }
 }

@@ -31,10 +31,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 @Component
 public class MainGui extends JFrame implements MessageBroker, TransactionListener, DataPusher, PathSyncListener {
@@ -275,7 +272,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     }
 
     private void updateFolderSyncLabel(SyncStatus syncStatus) {
-        switch(syncStatus) {
+        switch (syncStatus) {
             case OFFLINE:
                 folderSyncLabel.setForeground(Color.RED);
                 break;
@@ -325,15 +322,25 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     public void messageReceived(Peer peer, String message) {
         LOG.info("Received message from peer " + peer.getAddress() + ": " + message);
         try {
-            if(message.startsWith("DATA")) {
+            if (message.startsWith("DATA")) {
                 parseDataMessage(peer, message);
+            } else if (message.startsWith("TRNS")) {
+                transactionReceived(parseTransactionMessage(message));
             } else {
                 transactionReceived(storageService.parseTransactionMessage(message));
             }
-        }
-        catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) {
             LOG.error("Invalid message <" + message + ">. Reason: " + ex.getMessage());
         }
+    }
+
+    private Transaction parseTransactionMessage(String message) {
+        String[] parts = message.substring(4).split("-", 2);
+        int eventNumber = Integer.parseInt(parts[0]);
+        if (eventNumber != eventRepository.find().number) {
+            throw new IllegalArgumentException("Event number from received transaction does not match current event number");
+        }
+        return storageService.parseTransactionMessage(parts[1]);
     }
 
     public void transactionReceived(Transaction transaction) {
@@ -370,7 +377,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         new Thread(() -> {
             for (Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
                 LOG.info("Syncing transaction " + transaction.id + " with peer " + peer.getAddress());
-                peer.send(transaction.toString());
+                peer.send(createTransactionMessage(transaction));
             }
         }).start();
     }
@@ -393,9 +400,18 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     @Override
     public void notify(Transaction transaction) {
         LOG.info("Notifying all peers about transaction " + transaction.id);
-        String message = transaction.toString();
+        String message = createTransactionMessage(transaction);
         if (network != null) network.send(message);
         reportsGui.update();
+    }
+
+    private String createTransactionMessage(Transaction transaction) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("TRNS");
+        sb.append(eventRepository.find().number);
+        sb.append("-");
+        sb.append(transaction.toString());
+        return sb.toString();
     }
 
     @Override
@@ -405,7 +421,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         network.send("DATA" + converter.toBase64CompressedJson(event));
         for (Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
             LOG.info("Sending transaction " + transaction.id + " to all peers");
-            network.send(transaction.toString());
+            network.send(createTransactionMessage(transaction));
         }
     }
 
@@ -431,7 +447,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
     @Override
     public void synchronizationError() {
-        pathSyncErrorCount ++;
+        pathSyncErrorCount++;
     }
 
     enum SyncStatus {
