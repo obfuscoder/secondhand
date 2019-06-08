@@ -8,6 +8,7 @@ public class Item {
     public int reservationId;
     public String description;
     public String size;
+    public String gender;
     public BigDecimal price;
     public int number;
     public String code;

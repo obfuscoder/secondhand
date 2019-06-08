@@ -6,9 +6,16 @@ import java.util.Date;
 @Entity(name = "items")
 public class Item extends BaseItem {
 
+    public enum Gender {
+        MALE, FEMALE, BOTH
+    }
+
     @ManyToOne
     private Category category;
     private String size;
+
+    @Enumerated
+    private Gender gender;
     @ManyToOne
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
@@ -27,6 +34,10 @@ public class Item extends BaseItem {
 
     public String getSize() {
         return size;
+    }
+
+    public Gender getGender() {
+        return gender;
     }
 
     @Override
@@ -87,6 +98,10 @@ public class Item extends BaseItem {
 
     public void setSize(String size) {
         this.size = size;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
     }
 
     public void setDonation(boolean donation) {

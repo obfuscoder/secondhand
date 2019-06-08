@@ -133,7 +133,21 @@ class LabelSheet {
 
     private PdfPCell createDetailsCell(Item item) {
         StringBuilder sb = new StringBuilder();
-        sb.append(item.getCategoryName());
+        String category = item.getCategoryName();
+        if (item.getGender() != null) {
+            switch (item.getGender()) {
+                case FEMALE:
+                    category += " (M)";
+                    break;
+                case MALE:
+                    category += " (J)";
+                    break;
+                case BOTH:
+                    category += " (M/J)";
+                    break;
+            }
+        }
+        sb.append(category);
         sb.append("\n");
         sb.append(item.description);
         if (item.getSize() != null && item.getSize().length() > 0) {

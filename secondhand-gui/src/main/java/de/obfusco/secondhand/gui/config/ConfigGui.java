@@ -6,6 +6,7 @@ import com.intellij.uiDesigner.core.Spacer;
 import de.obfusco.secondhand.net.*;
 import de.obfusco.secondhand.net.dto.Event;
 import de.obfusco.secondhand.storage.repository.*;
+import ma.glasnost.orika.MappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,8 +145,21 @@ public class ConfigGui extends JDialog {
                     "Eingabefehler",
                     JOptionPane.WARNING_MESSAGE);
         } catch (IOException e) {
+            LOG.error("Error while downloading database", e);
             JOptionPane.showMessageDialog(null,
                     "Fehler beim Herunterladen der Daten. Bitte prüfen Sie die Internetverbindung und Eingabe.",
+                    "Downloadfehler",
+                    JOptionPane.WARNING_MESSAGE);
+        } catch (IllegalArgumentException | MappingException e) {
+            LOG.error("Error while downloading database", e);
+            JOptionPane.showMessageDialog(null,
+                    "Fehler beim Herunterladen der Daten. Sie haben möglicherweise eine veraltete Version der Kassensoftware installiert.",
+                    "Downloadfehler",
+                    JOptionPane.WARNING_MESSAGE);
+        } catch (RuntimeException e) {
+            LOG.error("Error while downloading database", e);
+            JOptionPane.showMessageDialog(null,
+                    "Ein unbekannter Fehler ist beim Herunterladen der Daten aufgetreten. Bitte kontaktieren Sie den technischen Support.",
                     "Downloadfehler",
                     JOptionPane.WARNING_MESSAGE);
         }

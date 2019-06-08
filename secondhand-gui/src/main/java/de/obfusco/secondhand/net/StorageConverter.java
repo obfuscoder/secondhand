@@ -6,6 +6,7 @@ import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.MappingContext;
+import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -75,6 +76,7 @@ public class StorageConverter {
 
     private void mapItem(MapperFactory mapperFactory) {
         mapperFactory.classMap(Item.class, de.obfusco.secondhand.storage.model.Item.class)
+                .exclude("gender")
                 .byDefault()
                 .customize(
                         new CustomMapper<Item, de.obfusco.secondhand.storage.model.Item>() {
@@ -83,6 +85,9 @@ public class StorageConverter {
                                 b.setCategory(categoryMap.get(a.categoryId));
                                 b.setReservation(reservationMap.get(a.reservationId));
                                 b.setSize(a.size);
+                                if (a.gender != null) {
+                                    b.setGender(de.obfusco.secondhand.storage.model.Item.Gender.valueOf(a.gender.toUpperCase()));
+                                }
                             }
 
                             @Override
@@ -90,6 +95,9 @@ public class StorageConverter {
                                 a.categoryId = b.getCategory().getId();
                                 a.reservationId = b.getReservation().getId();
                                 a.size = b.getSize();
+                                if (b.getGender() != null) {
+                                    a.gender = b.getGender().toString().toLowerCase();
+                                }
                             }
                         })
                 .register();
