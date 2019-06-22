@@ -5,6 +5,7 @@ import de.obfusco.secondhand.gui.config.ConfigGui;
 import de.obfusco.secondhand.gui.transactions.TransactionsGui;
 import de.obfusco.secondhand.labelgenerator.LabelGeneratorGui;
 import de.obfusco.secondhand.net.*;
+import de.obfusco.secondhand.payoff.Rounder;
 import de.obfusco.secondhand.payoff.gui.PayOffGui;
 import de.obfusco.secondhand.receipt.file.ReceiptFile;
 import de.obfusco.secondhand.refund.gui.RefundGui;
@@ -298,14 +299,13 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         if (withPayouts) {
             Map<Integer, String> payouts = new HashMap<>();
             Event event = eventRepository.find();
-            double pricePrecision = event.pricePrecision.doubleValue();
             for (Reservation reservation : reservationRepository.findAll()) {
                 double sum = 0;
                 for (Item item : itemRepository.findByReservationAndSoldNotNullOrderByNumberAsc(reservation)) {
                     sum += item.price.doubleValue();
                 }
-                double commissionCutSum = sum * (1 - reservation.commissionRate.doubleValue());
-                commissionCutSum = Math.floor(commissionCutSum / pricePrecision) * pricePrecision;
+                double commissionCut = Rounder.round(sum * reservation.commissionRate.doubleValue(), event.preciseBillAmounts, event.pricePrecision.doubleValue());
+                double commissionCutSum = sum - commissionCut;
                 if (event.incorporateReservationFee()) {
                     commissionCutSum -= reservation.fee.doubleValue();
                 }

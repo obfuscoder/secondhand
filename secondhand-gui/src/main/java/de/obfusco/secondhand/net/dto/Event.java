@@ -9,6 +9,7 @@ public class Event {
     public String name;
     public String token;
     public BigDecimal pricePrecision;
+    public boolean preciseBillAmounts;
     public BigDecimal commissionRate;
     public BigDecimal sellerFee;
     public boolean donationOfUnsoldItemsEnabled;

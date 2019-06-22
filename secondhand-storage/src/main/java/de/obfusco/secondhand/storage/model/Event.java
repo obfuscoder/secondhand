@@ -10,6 +10,7 @@ public class Event extends AbstractEntityWithId {
     public String name;
     public String token;
     public BigDecimal commissionRate;
+    public boolean preciseBillAmounts;
     public boolean donationOfUnsoldItemsEnabled;
     public BigDecimal pricePrecision;
     public BigDecimal sellerFee;

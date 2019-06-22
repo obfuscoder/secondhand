@@ -6,6 +6,7 @@ import com.itextpdf.text.Element;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import de.obfusco.secondhand.payoff.Rounder;
 import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Reservation;
@@ -127,10 +128,9 @@ public class TotalPayOff extends BasePayOff {
                 sum += item.price.doubleValue();
             }
             soldSum += sum;
-            double commissionCutSum = sum * (1 - reservation.commissionRate.doubleValue());
-
-            commissionCutSum = Math.floor(commissionCutSum / pricePrecision) * pricePrecision;
-            commissionSum += sum - commissionCutSum;
+            double commissionCut = Rounder.round(sum * reservation.commissionRate.doubleValue(), event.preciseBillAmounts, pricePrecision);
+            double commissionCutSum = sum - commissionCut;
+            commissionSum += commissionCut;
             feeSum += sellerFee;
             if (event.incorporateReservationFee()) {
                 commissionCutSum -= sellerFee;
@@ -151,8 +151,8 @@ public class TotalPayOff extends BasePayOff {
         addTotalLine(table, "Gewinn insgesamt", currency.format(commissionSum + feeSum + soldStockItemSum), true, 14);
 
         addTotalLine(table, "Auszahlbeträge", "", true, 14);
-        Map<Integer, Integer> totalCoins = new HashMap<>();
-        for(Payout payout : payouts) {
+        Map<Integer, Long> totalCoins = new HashMap<>();
+        for (Payout payout : payouts) {
             addTotalLine(table, payout.toString(), currency.format(payout.value), false, 12);
             addPayoutCoinsToTotal(totalCoins, payout);
         }
@@ -162,10 +162,10 @@ public class TotalPayOff extends BasePayOff {
         return table;
     }
 
-    private void addPayoutCoinsToTotal(Map<Integer, Integer> totalCoins, Payout payout) {
-        for (Map.Entry<Integer, Integer> entry : payout.coins.entrySet()) {
-            Integer count = totalCoins.get(entry.getKey());
-            if (count == null) count = 0;
+    private void addPayoutCoinsToTotal(Map<Integer, Long> totalCoins, Payout payout) {
+        for (Map.Entry<Integer, Long> entry : payout.coins.entrySet()) {
+            Long count = totalCoins.get(entry.getKey());
+            if (count == null) count = 0L;
             count += entry.getValue();
             totalCoins.put(entry.getKey(), count);
         }
@@ -197,7 +197,8 @@ public class TotalPayOff extends BasePayOff {
 
     private class Payout extends ReservationReference {
         double value;
-        Map<Integer, Integer> coins;
+        Map<Integer, Long> coins;
+
         Payout(Reservation reservation, double value) {
             super(reservation);
             this.value = value;
@@ -207,13 +208,13 @@ public class TotalPayOff extends BasePayOff {
         Payout() {
         }
 
-        private Map<Integer, Integer> calculateCoins() {
-            int cents = (int) (value * 100);
-            Map<Integer, Integer> coinCounts = new HashMap<>();
-            int[] coins = { 50000, 20000, 10000, 5000, 2000, 1000, 500, 200, 100, 50, 20, 10, 5, 2, 1 };
-            for(int coin : coins) {
+        private Map<Integer, Long> calculateCoins() {
+            long cents = Math.round(value * 100.0);
+            Map<Integer, Long> coinCounts = new HashMap<>();
+            int[] coins = {50000, 20000, 10000, 5000, 2000, 1000, 500, 200, 100, 50, 20, 10, 5, 2, 1};
+            for (int coin : coins) {
                 if (coin > cents) continue;
-                int coinCount = cents / coin;
+                long coinCount = cents / coin;
                 coinCounts.put(coin, coinCount);
                 cents -= coin * coinCount;
             }

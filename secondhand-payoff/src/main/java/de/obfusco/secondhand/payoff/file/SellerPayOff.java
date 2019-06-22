@@ -4,6 +4,7 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import de.obfusco.secondhand.payoff.Rounder;
 import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.Item;
 import de.obfusco.secondhand.storage.model.Reservation;
@@ -68,8 +69,8 @@ public class SellerPayOff extends BasePayOff {
             totalPrice += item.price.doubleValue();
         }
         double pricePrecision = event.pricePrecision.doubleValue();
-        double commissionCutSum = totalPrice * (1 - reservation.commissionRate.doubleValue());
-        commissionCutSum = Math.floor(commissionCutSum/pricePrecision) * pricePrecision;
+        double commissionCut = Rounder.round(totalPrice * reservation.commissionRate.doubleValue(), event.preciseBillAmounts, pricePrecision);
+        double commissionCutSum = totalPrice - commissionCut;
         double totalSum = commissionCutSum;
         if (event.incorporateReservationFee()) {
             totalSum -= reservation.fee.doubleValue();
@@ -77,10 +78,8 @@ public class SellerPayOff extends BasePayOff {
 
         PdfPTable table = createItemTable(soldItems);
         addTotalLine(table, "Summe", currency.format(totalPrice), true, 10);
-        String commissionText = String.format("Kommissionsanteil (%s - hinsichtlich Auszahlung auf %s bereinigt)",
-                percent.format(reservation.commissionRate.doubleValue()),
-                currency.format(pricePrecision));
-        addTotalLine(table, commissionText, currency.format(commissionCutSum-totalPrice), false, 10);
+        String commissionText = generateCommissionText(event, reservation, pricePrecision);
+        addTotalLine(table, commissionText, currency.format(-commissionCut), false, 10);
         if (event.incorporateReservationFee()) {
             addTotalLine(table, "Reservierungsgebühr", currency.format(-reservation.fee.doubleValue()), false, 10);
         }
@@ -103,6 +102,17 @@ public class SellerPayOff extends BasePayOff {
                 table = createItemTable(donatedItems);
                 document.add(table);
             }
+        }
+    }
+
+    private String generateCommissionText(Event event, Reservation reservation, double pricePrecision) {
+        if (event.preciseBillAmounts) {
+            return String.format("Kommissionsanteil (%s)",
+                    percent.format(reservation.commissionRate.doubleValue()));
+        } else {
+            return String.format("Kommissionsanteil (%s - hinsichtlich Auszahlung auf %s bereinigt)",
+                    percent.format(reservation.commissionRate.doubleValue()),
+                    currency.format(pricePrecision));
         }
     }
 
