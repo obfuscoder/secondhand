@@ -233,9 +233,17 @@ public class TotalPayOff extends BasePayOff {
             for (Integer key : keys) {
                 if (!first) sb.append(", ");
                 first = false;
-                sb.append(String.format("%dx%s", coins.get(key), currency.format((double) key / 100)));
+                sb.append(String.format("%dx%s", coins.get(key), coinValueString(key)));
             }
             return sb.toString();
+        }
+
+        String coinValueString(long value) {
+            if (value < 100) {
+                return String.format("%d¢", value);
+            } else {
+                return String.format("%d€", value/100);
+            }
         }
     }
 
