@@ -110,7 +110,7 @@ public class TotalPayOff extends BasePayOff {
 
     private PdfPTable createTotalTable(Event event) {
         long reservationCount = reservationRepository.count();
-        Iterable<Reservation> reservations = reservationRepository.findAll();
+        Iterable<Reservation> reservations = reservationRepository.findAllByOrderByNumberAsc();
 
         PdfPTable table = new PdfPTable(6);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);

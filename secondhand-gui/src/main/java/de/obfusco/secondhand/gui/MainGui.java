@@ -299,7 +299,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         if (withPayouts) {
             Map<Integer, String> payouts = new HashMap<>();
             Event event = eventRepository.find();
-            for (Reservation reservation : reservationRepository.findAll()) {
+            for (Reservation reservation : reservationRepository.findAllByOrderByNumberAsc()) {
                 double sum = 0;
                 for (Item item : itemRepository.findByReservationAndSoldNotNullOrderByNumberAsc(reservation)) {
                     sum += item.price.doubleValue();

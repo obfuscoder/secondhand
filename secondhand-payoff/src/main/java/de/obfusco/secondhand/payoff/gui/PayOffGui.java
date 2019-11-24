@@ -66,7 +66,7 @@ public class PayOffGui extends JFrame {
         final Event event = eventRepository.find();
         final PdfFileCreator totalPayoffCreator = () -> totalPayOff.createTotalPayoffFile(basePath, event);
 
-        final Iterable<Reservation> reservations = reservationRepository.findAll();
+        final Iterable<Reservation> reservations = reservationRepository.findAllByOrderByNumberAsc();
 
         final PdfFileCreator allSellerPayoffCreator = () -> sellerPayOff.createFileForAll(basePath, reservations);
 
