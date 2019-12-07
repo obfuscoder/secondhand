@@ -137,13 +137,13 @@ class LabelSheet {
         if (item.getGender() != null) {
             switch (item.getGender()) {
                 case FEMALE:
-                    category += " (M)";
+                    category += " (W)";
                     break;
                 case MALE:
-                    category += " (J)";
+                    category += " (M)";
                     break;
                 case BOTH:
-                    category += " (M/J)";
+                    category += " (M/W)";
                     break;
             }
         }

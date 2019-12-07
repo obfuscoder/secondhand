@@ -135,7 +135,7 @@ public class ConfigGui extends JDialog {
                     "Sind Sie sicher?";
             int dialogResult = JOptionPane.showConfirmDialog(null, question, "Achtung", dialogOptions);
             if (dialogResult == JOptionPane.YES_OPTION) {
-                downloadDatabase(rootUrl, tokenField.getText());
+                downloadDatabase(tokenField.getText());
                 reportSuccess();
             }
         } catch (MalformedURLException e) {
@@ -219,8 +219,8 @@ public class ConfigGui extends JDialog {
         JOptionPane.showMessageDialog(this, message, "Import erfolgreich", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void downloadDatabase(String baseUrl, String token) throws IOException {
-        InputStream inputStream = new EventDownloader().downloadEventData(baseUrl, token);
+    private void downloadDatabase(String token) throws IOException {
+        InputStream inputStream = new EventDownloader().downloadEventData(rootUrl, token);
         Event event = new JsonDataConverter().parse(inputStream);
         storageConverter.storeEvent(event);
     }

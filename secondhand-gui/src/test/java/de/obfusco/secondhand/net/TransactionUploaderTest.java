@@ -32,7 +32,7 @@ public class TransactionUploaderTest {
     @Test
     public void uploadTransactions() throws IOException {
         createTransactions();
-        assertTrue(transactionUploader.upload("localhost:3000", "MqQVsBFos1E"));
+        assertTrue(transactionUploader.upload("http://localhost:3000/", "MqQVsBFos1E"));
     }
 
     private void createTransactions() {
