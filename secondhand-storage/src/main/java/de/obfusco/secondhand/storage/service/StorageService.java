@@ -63,7 +63,7 @@ public class StorageService {
         Date date = new Date(Long.parseLong(messageParts[2]));
         String zipCode = messageParts[3];
         String[] itemCodes = messageParts[4].split(",");
-        if (transactionRepository.exists(id)) {
+        if (transactionRepository.existsById(id)) {
             LOG.debug("Skipping transaction {} as it is already known", id);
             return null;
         }

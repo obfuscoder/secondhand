@@ -347,7 +347,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         if (transaction != null) {
             LOG.debug("Received transaction: {}", transaction);
             synchronized (transactionRepository) {
-                if (!transactionRepository.exists(transaction.id)) {
+                if (!transactionRepository.existsById(transaction.id)) {
                     transactionRepository.save(transaction);
                     reportsGui.update();
                 } else {
@@ -375,7 +375,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         updateStatusLabel();
         reportsGui.update();
         new Thread(() -> {
-            for (Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
+            for (Transaction transaction : transactionRepository.findAll(Sort.by("created"))) {
                 LOG.info("Syncing transaction " + transaction.id + " with peer " + peer.getAddress());
                 peer.send(createTransactionMessage(transaction));
             }
@@ -419,7 +419,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         if (network == null) throw new IOException("Network is not available.");
         LOG.info("Sending data to all peers");
         network.send("DATA" + converter.toBase64CompressedJson(event));
-        for (Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
+        for (Transaction transaction : transactionRepository.findAll(Sort.by("created"))) {
             LOG.info("Sending transaction " + transaction.id + " to all peers");
             network.send(createTransactionMessage(transaction));
         }

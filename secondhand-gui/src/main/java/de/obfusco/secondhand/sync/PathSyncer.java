@@ -1,5 +1,6 @@
 package de.obfusco.secondhand.sync;
 
+import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.model.TransactionListener;
 import de.obfusco.secondhand.storage.repository.EventRepository;
@@ -30,8 +31,19 @@ public class PathSyncer {
 
     public void synchronize(final String path, final String localName) {
         new Thread(() -> {
-            int currentEventNumber = eventRepository.find().number;
             while (!stop) {
+                Event event = eventRepository.find();
+                if (event == null) {
+                    LOG.warn("Empty database. Synching not possible. Waiting 60 seconds ...");
+                    try {
+                        Thread.sleep(60000);
+                    } catch (InterruptedException e) {
+                        LOG.warn("Got interrupted while sleeping. Exiting!");
+                        break;
+                    }
+                    continue;
+                }
+                int currentEventNumber = event.number;
                 int sleepTime = 10000;
                 File folder = new File(path);
                 if (folder.exists() && folder.isDirectory()) {
@@ -42,7 +54,7 @@ public class PathSyncer {
                     LOG.info("Writing transactions to {}.", localFile);
                     try (PrintWriter writer = new PrintWriter(localFile)) {
                         writer.println(currentEventNumber);
-                        for (Transaction transaction : transactionRepository.findAll(new Sort("created"))) {
+                        for (Transaction transaction : transactionRepository.findAll(Sort.by("created"))) {
                             writer.println(transaction);
                         }
                     } catch (FileNotFoundException e) {
