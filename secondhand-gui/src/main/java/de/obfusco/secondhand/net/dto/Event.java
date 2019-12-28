@@ -14,6 +14,7 @@ public class Event {
     public BigDecimal sellerFee;
     public boolean donationOfUnsoldItemsEnabled;
     public boolean reservationFeesPayedInAdvance;
+    public boolean gates;
     public List<Category> categories;
     public List<Seller> sellers;
     public List<Reservation> reservations;

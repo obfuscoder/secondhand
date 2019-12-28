@@ -82,21 +82,21 @@ public class StorageConverter {
                         new CustomMapper<Item, de.obfusco.secondhand.storage.model.Item>() {
                             @Override
                             public void mapAtoB(Item a, de.obfusco.secondhand.storage.model.Item b, MappingContext context) {
-                                b.setCategory(categoryMap.get(a.categoryId));
-                                b.setReservation(reservationMap.get(a.reservationId));
-                                b.setSize(a.size);
+                                b.category = categoryMap.get(a.categoryId);
+                                b.reservation = reservationMap.get(a.reservationId);
+                                b.size = a.size;
                                 if (a.gender != null) {
-                                    b.setGender(de.obfusco.secondhand.storage.model.Item.Gender.valueOf(a.gender.toUpperCase()));
+                                    b.gender = de.obfusco.secondhand.storage.model.Item.Gender.valueOf(a.gender.toUpperCase());
                                 }
                             }
 
                             @Override
                             public void mapBtoA(de.obfusco.secondhand.storage.model.Item b, Item a, MappingContext context) {
-                                a.categoryId = b.getCategory().getId();
-                                a.reservationId = b.getReservation().getId();
+                                a.categoryId = b.category.getId();
+                                a.reservationId = b.reservation.getId();
                                 a.size = b.getSize();
-                                if (b.getGender() != null) {
-                                    a.gender = b.getGender().toString().toLowerCase();
+                                if (b.gender != null) {
+                                    a.gender = b.gender.toString().toLowerCase();
                                 }
                             }
                         })

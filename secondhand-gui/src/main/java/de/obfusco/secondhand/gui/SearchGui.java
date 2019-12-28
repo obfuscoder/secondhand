@@ -1,7 +1,6 @@
 package de.obfusco.secondhand.gui;
 
 import de.obfusco.secondhand.storage.model.Item;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +23,11 @@ class SearchGui extends JFrame {
     private static final String TITLE = "Artikelsuche";
 
     @Autowired
-    de.obfusco.secondhand.storage.repository.ItemRepository ItemRepository;
+    de.obfusco.secondhand.storage.repository.ItemRepository itemRepository;
+
+    @Autowired
+    de.obfusco.secondhand.storage.repository.EventRepository eventRepository;
+
     private JTextField searchText;
     private JTable resultTable;
 
@@ -48,6 +51,7 @@ class SearchGui extends JFrame {
         JPanel topPanel = new JPanel(new BorderLayout(2, 2));
         topPanel.add(hint, BorderLayout.NORTH);
         topPanel.add(searchText, BorderLayout.CENTER);
+        boolean gates = eventRepository.find().gates;
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -57,15 +61,15 @@ class SearchGui extends JFrame {
                     case 0:
                         return;
                     case 1:
-                        results = ItemRepository.findByKeywords(makeLike(keywords[0]));
+                        results = itemRepository.findByKeywords(makeLike(keywords[0]));
                         break;
                     case 2:
-                        results = ItemRepository.findByKeywords(makeLike(keywords[0]), makeLike(keywords[1]));
+                        results = itemRepository.findByKeywords(makeLike(keywords[0]), makeLike(keywords[1]));
                         break;
                     default:
-                        results = ItemRepository.findByKeywords(makeLike(keywords[0]), makeLike(keywords[1]), makeLike(keywords[2]));
+                        results = itemRepository.findByKeywords(makeLike(keywords[0]), makeLike(keywords[1]), makeLike(keywords[2]));
                 }
-                ResultsModel resultsModel = new ResultsModel(results);
+                ResultsModel resultsModel = new ResultsModel(results, gates);
                 resultTable.setModel(resultsModel);
             }
 
@@ -76,7 +80,7 @@ class SearchGui extends JFrame {
         topPanel.add(searchButton, BorderLayout.LINE_END);
         pane.add(topPanel, BorderLayout.NORTH);
         getRootPane().setDefaultButton(searchButton);
-        resultTable = new JTable(new ResultsModel(null));
+        resultTable = new JTable(new ResultsModel(null, gates));
         resultTable.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
@@ -115,11 +119,13 @@ class SearchGui extends JFrame {
 
         private final static NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
         private final static String[] COLUMN_NAMES = new String[] {
-                "ArtNr", "Kategorie", "Bezeichnung", "Größe", "Preis", "verkauft" };
+                "ArtNr", "Kategorie", "Bezeichnung", "Größe", "Preis", "verkauft", "eingecheckt", "ausgecheckt" };
         private final List<Item> results;
+        private boolean gates;
 
-        ResultsModel(List<Item> results) {
+        ResultsModel(List<Item> results, boolean gates) {
             this.results = results;
+            this.gates = gates;
         }
 
         @Override
@@ -135,7 +141,7 @@ class SearchGui extends JFrame {
 
         @Override
         public int getColumnCount() {
-            return 6;
+            return gates ? 8 : 6;
         }
 
         @Override
@@ -154,6 +160,10 @@ class SearchGui extends JFrame {
                     return currency.format(result.price);
                 case 5:
                     return result.wasSold() ? "ja" : "nein";
+                case 6:
+                    return result.checkedIn ? "ja" : "nein";
+                case 7:
+                    return result.checkedOut ? "ja" : "nein";
                 default:
                     return "";
             }

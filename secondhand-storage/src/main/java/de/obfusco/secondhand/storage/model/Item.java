@@ -11,33 +11,25 @@ public class Item extends BaseItem {
     }
 
     @ManyToOne
-    private Category category;
-    private String size;
+    public Category category;
+    public String size;
 
     @Enumerated
-    private Gender gender;
+    public Gender gender;
     @ManyToOne
     @JoinColumn(name = "reservation_id")
-    private Reservation reservation;
+    public Reservation reservation;
 
-    public Date getSold() {
-        return sold;
-    }
-
-    public void setSold(Date sold) {
-        this.sold = sold;
-    }
+    public boolean donation;
+    public boolean checkedIn;
+    public boolean checkedOut;
 
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    private Date sold;
-    private boolean donation;
+    public Date sold;
 
+    @Override
     public String getSize() {
         return size;
-    }
-
-    public Gender getGender() {
-        return gender;
     }
 
     @Override
@@ -48,19 +40,6 @@ public class Item extends BaseItem {
     @Override
     public boolean isUnique() {
         return true;
-    }
-
-    public Reservation getReservation() {
-        return reservation;
-    }
-
-    public boolean isDonation() {
-        return donation;
-    }
-
-    public Category getCategory() {
-
-        return category;
     }
 
     @Override
@@ -83,28 +62,8 @@ public class Item extends BaseItem {
         return sold == null;
     }
 
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
-    public void setReservation(Reservation reservation) {
-        this.reservation = reservation;
-    }
-
     @Transient
     public boolean wasSold() {
         return sold != null;
-    }
-
-    public void setSize(String size) {
-        this.size = size;
-    }
-
-    public void setGender(Gender gender) {
-        this.gender = gender;
-    }
-
-    public void setDonation(boolean donation) {
-        this.donation = donation;
     }
 }

@@ -98,15 +98,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         itemNr = new JTextField();
         itemNr.setFont(itemNr.getFont().deriveFont(20f));
         itemNr.setHorizontalAlignment(SwingConstants.CENTER);
-        itemNr.addKeyListener(new KeyListener() {
-
-            @Override
-            public void keyTyped(KeyEvent arg0) {
-            }
-
-            @Override
-            public void keyReleased(KeyEvent arg0) {
-            }
+        itemNr.addKeyListener(new KeyAdapter() {
 
             @Override
             public void keyPressed(KeyEvent e) {

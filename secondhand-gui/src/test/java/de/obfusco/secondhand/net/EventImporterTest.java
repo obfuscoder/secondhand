@@ -54,8 +54,8 @@ public class EventImporterTest {
         assertEquals(event.items.size(), itemRepository.count());
         de.obfusco.secondhand.storage.model.Item firstItem = itemRepository.findAll().iterator().next();
         assertEquals(731, firstItem.getId().intValue());
-        assertEquals(2, firstItem.getCategory().getId().intValue());
-        assertEquals(301, firstItem.getReservation().getId().intValue());
+        assertEquals(2, firstItem.category.getId().intValue());
+        assertEquals(301, firstItem.reservation.getId().intValue());
     }
 
     @Test

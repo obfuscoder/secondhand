@@ -80,7 +80,7 @@ class LabelSheet {
 
         int colSpanForDetails = table.getNumberOfColumns();
         int colSpanForDonation = 2;
-        if (item.isDonation()) {
+        if (item.donation) {
             PdfPCell donationCell = createDonationCell();
             donationCell.setColspan(colSpanForDonation);
             table.addCell(donationCell);
@@ -134,8 +134,8 @@ class LabelSheet {
     private PdfPCell createDetailsCell(Item item) {
         StringBuilder sb = new StringBuilder();
         String category = item.getCategoryName();
-        if (item.getGender() != null) {
-            switch (item.getGender()) {
+        if (item.gender != null) {
+            switch (item.gender) {
                 case FEMALE:
                     category += " (W)";
                     break;
@@ -164,7 +164,7 @@ class LabelSheet {
 
     private PdfPCell createReservationCell(Item item) {
         PdfPCell cell = new PdfPCell(new Phrase(new Chunk(
-                Integer.toString(item.getReservation().number),
+                Integer.toString(item.reservation.number),
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20))));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setBorderColor(BaseColor.BLACK);
