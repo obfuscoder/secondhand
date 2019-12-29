@@ -21,11 +21,14 @@ public class Item extends BaseItem {
     public Reservation reservation;
 
     public boolean donation;
-    public boolean checkedIn;
-    public boolean checkedOut;
 
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date sold;
+
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    private Date checkedIn;
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    private Date checkedOut;
 
     @Override
     public String getSize() {
@@ -58,7 +61,7 @@ public class Item extends BaseItem {
     }
 
     @Override
-    public boolean canSell() {
+    public boolean isAvailable() {
         return sold == null;
     }
 
@@ -66,4 +69,25 @@ public class Item extends BaseItem {
     public boolean wasSold() {
         return sold != null;
     }
+
+    @Transient
+    public boolean wasCheckedIn() {
+        return checkedIn != null;
+    }
+
+    @Transient
+    public boolean wasCheckedOut() {
+        return checkedOut != null;
+    }
+
+    @Override
+    public void checkIn() {
+        checkedIn = new Date();
+    }
+
+    @Override
+    public void checkOut() {
+        checkedOut = new Date();
+    }
+
 }

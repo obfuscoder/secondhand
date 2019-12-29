@@ -1,9 +1,7 @@
 package de.obfusco.secondhand.storage.service;
 
-import de.obfusco.secondhand.storage.model.BaseItem;
-import de.obfusco.secondhand.storage.model.Item;
-import de.obfusco.secondhand.storage.model.StockItem;
-import de.obfusco.secondhand.storage.model.Transaction;
+import de.obfusco.secondhand.storage.model.*;
+import de.obfusco.secondhand.storage.repository.EventRepository;
 import de.obfusco.secondhand.storage.repository.ItemRepository;
 import de.obfusco.secondhand.storage.repository.StockItemRepository;
 import de.obfusco.secondhand.storage.repository.TransactionRepository;
@@ -15,6 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -32,10 +31,35 @@ public class StorageService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private EventRepository eventRepository;
+
     @Transactional
     public Transaction storeSoldInformation(List<String> itemCodes, String zipCode) {
         LOG.info("SALE: {}", itemCodes);
         return createTransaction(Transaction.Type.PURCHASE, itemCodes, zipCode);
+    }
+
+    @Transactional
+    public Transaction checkInItems(List<Item> items) {
+        items.forEach(item -> {
+            item.checkIn();
+            itemRepository.save(item);
+        });
+        List<String> itemCodes = items.stream().map(i -> i.code).collect(Collectors.toList());
+        LOG.info("CHECKIN: {}", itemCodes);
+        return createTransaction(Transaction.Type.CHECKIN, itemCodes, null);
+    }
+
+    @Transactional
+    public Transaction checkOutItems(List<Item> items) {
+        items.forEach(item -> {
+            item.checkOut();
+            itemRepository.save(item);
+        });
+        List<String> itemCodes = items.stream().map(i -> i.code).collect(Collectors.toList());
+        LOG.info("CHECKOUT: {}", itemCodes);
+        return createTransaction(Transaction.Type.CHECKOUT, itemCodes, null);
     }
 
     private void saveItem(BaseItem item) {
@@ -90,13 +114,13 @@ public class StorageService {
             if (item == null) {
                 continue;
             }
-            sellOrRefund(type, item);
+            updateItem(type, item);
             items.add(item);
         }
         return items;
     }
 
-    private void sellOrRefund(Transaction.Type type, BaseItem item) {
+    private void updateItem(Transaction.Type type, BaseItem item) {
         switch (type) {
             case PURCHASE:
                 item.sold();
@@ -104,6 +128,8 @@ public class StorageService {
             case REFUND:
                 item.refund();
                 break;
+            case CHECKIN:
+                item.checkIn();
         }
         saveItem(item);
     }
@@ -126,5 +152,25 @@ public class StorageService {
         Stream<StockItem> stream = StreamSupport.stream(stockItemRepository.findAll().spliterator(), false);
         Optional<BigDecimal> stockItemSum = stream.map(it -> it.price.multiply(BigDecimal.valueOf(it.getSold()))).reduce(BigDecimal::add);
         return stockItemSum.map(BigDecimal::doubleValue).orElse(0.0);
+    }
+
+    public boolean canBeSold(BaseItem baseItem) {
+        if (baseItem instanceof StockItem) return baseItem.isAvailable();
+        if (baseItem instanceof Item) {
+            Item item = (Item) baseItem;
+            Event event = eventRepository.find();
+            return item.isAvailable() && (!event.gates || item.wasCheckedIn() && !item.wasCheckedOut());
+        }
+        throw new RuntimeException("Unbekannter Artikeltyp!");
+    }
+
+    public boolean canRefund(BaseItem baseItem) {
+        if (baseItem instanceof StockItem) return baseItem.canRefund();
+        if (baseItem instanceof Item) {
+            Item item = (Item) baseItem;
+            Event event = eventRepository.find();
+            return item.canRefund() && (!event.gates || item.wasCheckedIn() && !item.wasCheckedOut());
+        }
+        throw new RuntimeException("Unbekannter Artikeltyp!");
     }
 }

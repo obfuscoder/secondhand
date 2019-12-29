@@ -20,11 +20,15 @@ public abstract class BaseItem extends AbstractEntityWithId {
 
     public abstract String getCategoryName();
 
-    public abstract boolean canSell();
+    public abstract boolean isAvailable();
 
     public abstract String getSize();
 
     public abstract boolean canRefund();
 
     public abstract boolean isUnique();
+
+    public abstract void checkIn();
+
+    public abstract void checkOut();
 }

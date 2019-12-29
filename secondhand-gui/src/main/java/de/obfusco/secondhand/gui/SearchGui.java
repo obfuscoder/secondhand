@@ -119,7 +119,7 @@ class SearchGui extends JFrame {
 
         private final static NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
         private final static String[] COLUMN_NAMES = new String[] {
-                "ArtNr", "Kategorie", "Bezeichnung", "Größe", "Preis", "verkauft", "eingecheckt", "ausgecheckt" };
+                "Artikelcode", "Reservierung", "ArtNr", "Kategorie", "Bezeichnung", "Größe", "Preis", "verkauft", "eingecheckt", "ausgecheckt" };
         private final List<Item> results;
         private boolean gates;
 
@@ -141,7 +141,7 @@ class SearchGui extends JFrame {
 
         @Override
         public int getColumnCount() {
-            return gates ? 8 : 6;
+            return gates ? 10 : 8;
         }
 
         @Override
@@ -151,19 +151,23 @@ class SearchGui extends JFrame {
                 case 0:
                     return result.code;
                 case 1:
-                    return result.getCategoryName();
+                    return result.reservation.number;
                 case 2:
-                    return result.description;
+                    return result.number;
                 case 3:
-                    return result.getSize();
+                    return result.getCategoryName();
                 case 4:
-                    return currency.format(result.price);
+                    return result.description;
                 case 5:
-                    return result.wasSold() ? "ja" : "nein";
+                    return result.getSize();
                 case 6:
-                    return result.checkedIn ? "ja" : "nein";
+                    return currency.format(result.price);
                 case 7:
-                    return result.checkedOut ? "ja" : "nein";
+                    return result.wasSold() ? "ja" : "nein";
+                case 8:
+                    return result.wasCheckedIn() ? "ja" : "nein";
+                case 9:
+                    return result.wasCheckedOut() ? "ja" : "nein";
                 default:
                     return "";
             }

@@ -11,12 +11,11 @@ public interface ItemRepository extends CrudRepository<Item, Integer> {
     Item findByCode(String code);
 
     List<Item> findByReservationOrderByNumberAsc(Reservation reservation);
+    List<Item> findByReservationAndCheckedInNotNullAndSoldNullAndDonationFalseOrderByNumberAsc(Reservation reservation);
 
     List<Item> findByReservationAndSoldNotNullOrderByNumberAsc(Reservation reservation);
-    List<Item> findByReservationAndSoldNullAndCheckedInTrueOrderByNumberAsc(Reservation reservation);
-
+    List<Item> findByReservationAndSoldNullAndCheckedInNotNullAndDonationFalseOrderByNumberAsc(Reservation reservation);
     List<Item> findByReservationAndSoldNullAndDonationFalseOrderByNumberAsc(Reservation reservation);
-
     List<Item> findByReservationAndSoldNullAndDonationTrueOrderByNumberAsc(Reservation reservation);
 
     List<Item> findBySoldNotNull();
@@ -24,10 +23,10 @@ public interface ItemRepository extends CrudRepository<Item, Integer> {
     List<Item> findByCodeIn(List<String> codes);
 
     long countBySoldNotNull();
-
     long countByReservation(Reservation reservation);
-    long countByReservationAndCheckedInTrue(Reservation reservation);
-    long countByReservationAndCheckedOutTrue(Reservation reservation);
+    long countByReservationAndCheckedInNotNull(Reservation reservation);
+    long countByReservationAndCheckedInNotNullAndSoldNullAndDonationFalse(Reservation reservation);
+    long countByReservationAndCheckedOutNotNull(Reservation reservation);
 
     @Query("select sum(i.price) from items i where i.sold is not null")
     Double sumOfSoldItems();

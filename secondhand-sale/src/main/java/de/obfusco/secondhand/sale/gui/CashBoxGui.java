@@ -23,12 +23,10 @@ import java.util.Locale;
 @Component
 public class CashBoxGui extends JFrame implements ActionListener, TableModelListener {
 
-    private static final long serialVersionUID = -698049510249510666L;
-
     private NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
     private JTextField itemNr;
-    private CashTableModel tablemodel;
+    private CashTableModel tableModel;
     private JLabel errorLabel;
     private JLabel priceLabel;
     private JTable cashTable;
@@ -64,21 +62,12 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         errorLabel.setFont(errorLabel.getFont().deriveFont(30f));
         errorLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        tablemodel = new CashTableModel();
+        tableModel = new CashTableModel();
 
-        cashTable = new JTable(tablemodel);
+        cashTable = new JTable(tableModel);
         cashTable.setFont(pane.getFont());
         cashTable.setRowHeight(30);
-        cashTable.addKeyListener(new KeyListener() {
-
-            @Override
-            public void keyTyped(KeyEvent arg0) {
-            }
-
-            @Override
-            public void keyReleased(KeyEvent arg0) {
-            }
-
+        cashTable.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_DELETE) {
@@ -86,7 +75,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
                 }
             }
         });
-        tablemodel.addTableModelListener(this);
+        tableModel.addTableModelListener(this);
 
         DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
         rightRenderer.setHorizontalAlignment(DefaultTableCellRenderer.RIGHT);
@@ -110,10 +99,8 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
                         openDialog();
                         return;
                     }
-
                     addItem();
                 }
-
             }
         });
 
@@ -201,9 +188,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
 
     @Override
     public void actionPerformed(ActionEvent event) {
-
         if (event.getSource() == readyButton) {
-
             openDialog();
         }
     }
@@ -215,9 +200,9 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         cashTable.setEnabled(true);
 
         itemNr.setText("");
-        int rowCount = tablemodel.getRowCount();
+        int rowCount = tableModel.getRowCount();
         for (int i = 0; i < rowCount; i++) {
-            tablemodel.delRow(0);
+            tableModel.delRow(0);
         }
 
         priceLabel.setText("0,00");
@@ -241,11 +226,11 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
     }
 
     private void calcTotalPriceAndCount() {
-        int rowCount = tablemodel.getRowCount();
+        int rowCount = tableModel.getRowCount();
         readyButton.setEnabled(rowCount > 0);
         double totalPrice = 0;
         for (int i = 0; i < rowCount; i++) {
-            BigDecimal price = tablemodel.getData().get(i).price;
+            BigDecimal price = tableModel.getData().get(i).price;
             totalPrice += price.doubleValue();
         }
         priceLabel.setText(String.format("%.2f", totalPrice).replace('.', ','));
@@ -253,23 +238,23 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
     }
 
     List<BaseItem> getTableData() {
-        return tablemodel.getData();
+        return tableModel.getData();
     }
 
     private void addItem() {
         String code = itemNr.getText();
-        itemNr.setText("");
         setErrorText("");
         BaseItem item = storageService.getItem(code);
         if (item == null) {
-            setErrorText("Artikel mit Nummer \"" + code + "\" existiert nicht!");
+            setErrorText("Artikel existiert nicht!");
             return;
         }
-        if (!item.canSell()) {
-            setErrorText("Artikel mit Nummer \"" + code + "\" wurde bereits verkauft!");
+        if (!storageService.canBeSold(item)) {
+            setErrorText("Artikel kann nicht verkauft werden!");
             return;
         }
-        tablemodel.addRow(item);
+        itemNr.setText("");
+        tableModel.addRow(item);
     }
 
     private void setErrorText(String text) {
@@ -283,12 +268,12 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
         int n = JOptionPane.showConfirmDialog(
                 this,
                 "Möchten sie den Artikel \""
-                        + tablemodel.getValueAt(cashTable.getSelectedRow(), 0)
+                        + tableModel.getValueAt(cashTable.getSelectedRow(), 0)
                         + "\" wirklich löschen?", "Artikel löschen",
                 JOptionPane.YES_NO_OPTION);
 
         if (n == JOptionPane.YES_OPTION) {
-            tablemodel.delRow(cashTable.getSelectedRow());
+            tableModel.delRow(cashTable.getSelectedRow());
         }
 
         itemNr.requestFocus();

@@ -100,16 +100,7 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
         itemNr = new JTextField();
         itemNr.setFont(itemNr.getFont().deriveFont(20f));
         itemNr.setHorizontalAlignment(SwingConstants.CENTER);
-        itemNr.addKeyListener(new KeyListener() {
-
-            @Override
-            public void keyTyped(KeyEvent arg0) {
-            }
-
-            @Override
-            public void keyReleased(KeyEvent arg0) {
-            }
-
+        itemNr.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -120,7 +111,6 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
                         openDialog();
                         return;
                     }
-
                     addItem();
                 }
 
@@ -275,17 +265,17 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
 
     private void addItem() {
         String code = itemNr.getText();
-        itemNr.setText("");
         setErrorText("");
         BaseItem item = storageService.getItem(code);
         if (item == null) {
-            setErrorText("Artikel mit Nummer \"" + code + "\" existiert nicht!");
+            setErrorText("Artikel existiert nicht!");
             return;
         }
-        if (!item.canRefund()) {
-            setErrorText("Artikel mit Nummer \"" + code + "\" wurde noch nicht verkauft!");
+        if (storageService.canRefund(item)) {
+            setErrorText("Artikel kann nicht zurückgegeben werden!");
             return;
         }
+        itemNr.setText("");
         tableModel.addRow(item);
     }
 

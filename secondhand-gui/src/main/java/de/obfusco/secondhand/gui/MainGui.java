@@ -1,8 +1,8 @@
 package de.obfusco.secondhand.gui;
 
 import com.itextpdf.text.DocumentException;
-import de.obfusco.secondhand.gui.checkin.CheckinGui;
-import de.obfusco.secondhand.gui.checkout.CheckoutGui;
+import de.obfusco.secondhand.gui.checkin.SelectCheckinGui;
+import de.obfusco.secondhand.gui.checkout.SelectCheckoutDialog;
 import de.obfusco.secondhand.gui.config.ConfigGui;
 import de.obfusco.secondhand.gui.transactions.TransactionsGui;
 import de.obfusco.secondhand.labelgenerator.LabelGeneratorGui;
@@ -50,9 +50,9 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     @Autowired
     TestScanGui testScanGui;
     @Autowired
-    CheckinGui checkinGui;
+    SelectCheckinGui checkinGui;
     @Autowired
-    CheckoutGui checkoutGui;
+    SelectCheckoutDialog checkoutDialog;
     @Autowired
     LabelGeneratorGui labelGeneratorGui;
     @Autowired
@@ -207,11 +207,17 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         testScan.setFont(testScan.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         JButton checkin = new JButton("Check In");
-        checkin.addActionListener(e -> checkinGui.setVisible(true));
+        checkin.addActionListener(e -> {
+            checkinGui.setLocationRelativeTo(this);
+            checkinGui.setVisible(true);
+        });
         checkin.setFont(checkin.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         JButton checkout = new JButton("Check Out");
-        checkout.addActionListener(e -> checkoutGui.setVisible(true));
+        checkout.addActionListener(e -> {
+            checkoutDialog.setLocationRelativeTo(this);
+            checkoutDialog.setVisible(true);
+        });
         checkout.setFont(checkout.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         JButton barcodeGenerator = new JButton("Barcodes drucken");

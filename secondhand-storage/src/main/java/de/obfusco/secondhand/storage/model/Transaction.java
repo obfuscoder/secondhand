@@ -85,6 +85,18 @@ public class Transaction extends AbstractEntityWithUuid {
             public String toString() {
                 return "Storno";
             }
+        },
+        CHECKIN {
+            @Override
+            public String toString() {
+                return "Checkin";
+            }
+        },
+        CHECKOUT {
+            @Override
+            public String toString() {
+                return "Checkout";
+            }
         }
     }
 }

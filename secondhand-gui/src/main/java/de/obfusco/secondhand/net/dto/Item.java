@@ -14,6 +14,6 @@ public class Item {
     public String code;
     public Date sold;
     public boolean donation;
-    public boolean checkedIn;
-    public boolean checkedOut;
+    public Date checkedIn;
+    public Date checkedOut;
 }

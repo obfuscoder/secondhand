@@ -23,7 +23,7 @@ public class StockItem extends BaseItem {
     }
 
     @Override
-    public boolean canSell() {
+    public boolean isAvailable() {
         return true;
     }
 
@@ -40,6 +40,14 @@ public class StockItem extends BaseItem {
     @Override
     public boolean isUnique() {
         return false;
+    }
+
+    @Override
+    public void checkIn() {
+    }
+
+    @Override
+    public void checkOut() {
     }
 
     public int getSold() {
