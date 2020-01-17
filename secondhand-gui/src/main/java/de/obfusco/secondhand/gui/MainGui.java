@@ -202,6 +202,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         testScan.addActionListener(e -> testScanGui.setVisible(true));
         testScan.setFont(testScan.getFont().deriveFont(BUTTON_FONT_SIZE));
 
+        /*
         JButton checkin = new JButton("Check In");
         checkin.addActionListener(e -> {
             SelectCheckinGui checkinGui = new SelectCheckinGui(reservationRepository, itemRepository, storageService, this);
@@ -217,6 +218,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             checkoutDialog.setVisible(true);
         });
         checkout.setFont(checkout.getFont().deriveFont(BUTTON_FONT_SIZE));
+         */
 
         JButton barcodeGenerator = new JButton("Barcodes drucken");
         barcodeGenerator.addActionListener(e -> labelGeneratorGui.setVisible(true));
@@ -271,8 +273,8 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             panel.add(createSellerReceipt);
             panel.add(createSellerResultReceipt);
             panel.add(testScan);
-            panel.add(checkin);
-            panel.add(checkout);
+            //panel.add(checkin);
+            //panel.add(checkout);
             panel.add(barcodeGenerator);
             panel.add(billGenerator);
             panel.add(configButton);
