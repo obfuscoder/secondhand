@@ -17,27 +17,24 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
 
-@Component
 public class SelectCheckoutDialog extends JDialog {
     private JPanel contentPane;
     private JButton closeButton;
     private JTable reservationTable;
 
-    @Autowired
-    private ReservationRepository reservationRepository;
-
-    @Autowired
-    private ItemRepository itemRepository;
-
-    @Autowired
-    private StorageService storageService;
-
     private List<Reservation> reservations;
 
-    @Autowired
+    private ReservationRepository reservationRepository;
+    private ItemRepository itemRepository;
+    private StorageService storageService;
     private TransactionListener transactionListener;
 
-    public SelectCheckoutDialog() {
+    public SelectCheckoutDialog(ReservationRepository reservationRepository, ItemRepository itemRepository, StorageService storageService, TransactionListener transactionListener) {
+        this.reservationRepository = reservationRepository;
+        this.itemRepository = itemRepository;
+        this.storageService = storageService;
+        this.transactionListener = transactionListener;
+
         setContentPane(contentPane);
         setModal(true);
 

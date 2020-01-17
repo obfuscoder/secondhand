@@ -7,8 +7,6 @@ import de.obfusco.secondhand.storage.model.TransactionListener;
 import de.obfusco.secondhand.storage.repository.ItemRepository;
 import de.obfusco.secondhand.storage.repository.ReservationRepository;
 import de.obfusco.secondhand.storage.service.StorageService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -17,27 +15,27 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
 
-@Component
 public class SelectCheckinGui extends JDialog {
     private JPanel contentPane;
     private JButton closeButton;
     private JTable reservationTable;
 
-    @Autowired
     private ReservationRepository reservationRepository;
 
-    @Autowired
     private ItemRepository itemRepository;
 
-    @Autowired
     private StorageService storageService;
 
     private List<Reservation> reservations;
 
-    @Autowired
     private TransactionListener transactionListener;
 
-    public SelectCheckinGui() {
+    public SelectCheckinGui(ReservationRepository reservationRepository, ItemRepository itemRepository, StorageService storageService, TransactionListener transactionListener) {
+        this.reservationRepository = reservationRepository;
+        this.itemRepository = itemRepository;
+        this.storageService = storageService;
+        this.transactionListener = transactionListener;
+
         setContentPane(contentPane);
         setModal(true);
 

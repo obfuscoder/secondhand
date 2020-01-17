@@ -50,10 +50,6 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     @Autowired
     TestScanGui testScanGui;
     @Autowired
-    SelectCheckinGui checkinGui;
-    @Autowired
-    SelectCheckoutDialog checkoutDialog;
-    @Autowired
     LabelGeneratorGui labelGeneratorGui;
     @Autowired
     PayOffGui payOffGui;
@@ -208,6 +204,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
         JButton checkin = new JButton("Check In");
         checkin.addActionListener(e -> {
+            SelectCheckinGui checkinGui = new SelectCheckinGui(reservationRepository, itemRepository, storageService, this);
             checkinGui.setLocationRelativeTo(this);
             checkinGui.setVisible(true);
         });
@@ -215,6 +212,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
         JButton checkout = new JButton("Check Out");
         checkout.addActionListener(e -> {
+            SelectCheckoutDialog checkoutDialog = new SelectCheckoutDialog(reservationRepository, itemRepository, storageService, this);
             checkoutDialog.setLocationRelativeTo(this);
             checkoutDialog.setVisible(true);
         });
