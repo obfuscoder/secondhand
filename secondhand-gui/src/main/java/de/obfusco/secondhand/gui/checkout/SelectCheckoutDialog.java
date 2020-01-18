@@ -65,7 +65,7 @@ public class SelectCheckoutDialog extends JDialog {
             reservationTableModel.setColumnCount(0);
             reservationTableModel.addColumn("Nummer");
             reservationTableModel.addColumn("Name");
-            reservationTableModel.addColumn("eingecheckt");
+            reservationTableModel.addColumn("auszuchecken");
             reservationTableModel.addColumn("ausgecheckt");
 
             reservationTable.setDefaultRenderer(Object.class, new TableCellRender());

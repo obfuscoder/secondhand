@@ -88,7 +88,7 @@ public class SellerPayOff extends BasePayOff {
         List<Item> returnedItems = event.gates ?
                 itemRepository.findByReservationAndCheckedInNotNullAndSoldNullAndDonationFalseOrderByNumberAsc(reservation) :
                 itemRepository.findByReservationAndSoldNullAndDonationFalseOrderByNumberAsc(reservation);
-        document.add(new Phrase(new Chunk(returnedItems.size() + " Artikel zurückgegeben",
+        document.add(new Phrase(new Chunk(returnedItems.size() + " Artikel zurück",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
         table = createItemTable(returnedItems);
         document.add(table);

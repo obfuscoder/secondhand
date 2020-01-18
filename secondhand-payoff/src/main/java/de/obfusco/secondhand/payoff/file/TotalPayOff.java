@@ -87,12 +87,17 @@ public class TotalPayOff extends BasePayOff {
     }
 
     private PdfPTable createDonatorsTable() {
+        Event event = eventRepository.find();
         List<Donator> donators = new ArrayList<>();
         List<Returner> returns = new ArrayList<>();
         Iterable<Reservation> reservations = reservationRepository.findAllByOrderByNumberAsc();
         for (Reservation reservation : reservations) {
-            List<Item> returnedItems = itemRepository.findByReservationAndSoldNullAndDonationFalseOrderByNumberAsc(reservation);
-            List<Item> donatedItems = itemRepository.findByReservationAndSoldNullAndDonationTrueOrderByNumberAsc(reservation);
+            List<Item> returnedItems = event.gates ?
+                    itemRepository.findByReservationAndCheckedInNotNullAndSoldNullAndDonationFalseOrderByNumberAsc(reservation) :
+                    itemRepository.findByReservationAndSoldNullAndDonationFalseOrderByNumberAsc(reservation);
+            List<Item> donatedItems = event.gates ?
+                    itemRepository.findByReservationAndCheckedInNotNullAndSoldNullAndDonationTrueOrderByNumberAsc(reservation) :
+                    itemRepository.findByReservationAndSoldNullAndDonationTrueOrderByNumberAsc(reservation);
             if (returnedItems.isEmpty()) {
                 donators.add(new Donator(reservation, donatedItems.size()));
             } else {
@@ -316,7 +321,7 @@ public class TotalPayOff extends BasePayOff {
         table.setWidths(new int[]{2, 3, 5, 2, 1});
         addTotalLine(table, "Vermisste Artikel", true, 14, null);
         addTotalLine(table, "Nummer", true, 10, alignments, "Kategorie", "Beschreibung", "Größe", "Preis");
-        List<Item> items = itemRepository.findByCheckedInNotNullAndSoldNullAndDonationFalseOrderByNumberAsc();
+        List<Item> items = itemRepository.findByCheckedInNotNullAndSoldNullAndDonationFalseAndCheckedOutNullOrderByNumberAsc();
         for (Item item: items) {
             addTotalLine(table, String.format("%d - %d", item.reservation.number, item.number), false, 10,
                     alignments,

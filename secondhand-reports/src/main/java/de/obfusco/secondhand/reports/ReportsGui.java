@@ -28,7 +28,7 @@ public class ReportsGui extends JFrame {
     private StockItemRepository stockItemRepository;
 
     @Autowired
-    StorageService storageService;
+    private StorageService storageService;
 
     private JLabel itemCount;
     private JLabel stockItemCount;
@@ -36,6 +36,8 @@ public class ReportsGui extends JFrame {
     private JLabel soldItemCount;
     private JLabel soldStockItemCount;
     private JLabel soldSum;
+    private JLabel checkedInCount;
+    private JLabel checkedOutCount;
     private JLabel connections;
 
     private Network network;
@@ -52,7 +54,7 @@ public class ReportsGui extends JFrame {
         JPanel panel = new JPanel();
         Border padding = BorderFactory.createEmptyBorder(10, 10, 10, 10);
         panel.setBorder(padding);
-        GridLayout layout = new GridLayout(0,2, 10, 10);
+        GridLayout layout = new GridLayout(0, 2, 10, 10);
         panel.setLayout(layout);
         panel.add(new JLabel("Anzahl Artikel:"));
         panel.add(itemCount = new JLabel());
@@ -60,12 +62,18 @@ public class ReportsGui extends JFrame {
         panel.add(stockItemCount = new JLabel());
         panel.add(new JLabel("Anzahl Transaktionen:"));
         panel.add(transactionCount = new JLabel());
+        panel.add(new JLabel("Anzahl Artikel:"));
+        panel.add(itemCount = new JLabel());
         panel.add(new JLabel("Anzahl verkaufter Artikel:"));
         panel.add(soldItemCount = new JLabel());
         panel.add(new JLabel("Anzahl verkaufter Stammartikel:"));
         panel.add(soldStockItemCount = new JLabel());
         panel.add(new JLabel("Umsatz:"));
         panel.add(soldSum = new JLabel());
+        panel.add(new JLabel("Eingecheckte Artikel:"));
+        panel.add(checkedInCount = new JLabel());
+        panel.add(new JLabel("Ausgecheckte Artikel:"));
+        panel.add(checkedOutCount = new JLabel());
         panel.add(new JLabel("Verbunden mit:"));
         panel.add(connections = new JLabel());
         contentPane.add(panel);
@@ -73,14 +81,22 @@ public class ReportsGui extends JFrame {
     }
 
     public void update() {
-        itemCount.setText("" + itemRepository.count());
-        stockItemCount.setText("" + stockItemRepository.count());
-        transactionCount.setText("" + transactionRepository.count());
-        soldItemCount.setText("" + itemRepository.countBySoldNotNull());
+        long total = itemRepository.count();
+        long sold = itemRepository.countBySoldNotNull();
+        itemCount.setText(Long.toString(total));
+        stockItemCount.setText(Long.toString(stockItemRepository.count()));
+        transactionCount.setText(Long.toString(transactionRepository.count()));
+        soldItemCount.setText(countWithPercentage(sold, total));
         Long soldStockItems = stockItemRepository.countOfSoldItems();
         if (soldStockItems == null) soldStockItems = 0L;
-        soldStockItemCount.setText("" + soldStockItems);
+        soldStockItemCount.setText(Long.toString(soldStockItems));
         Double sumOfSoldItems = storageService.sumOfSoldItems();
+        if (storageService.isEventGated()) {
+            long checkedIn = itemRepository.countByCheckedInNotNull();
+            checkedInCount.setText(countWithPercentage(checkedIn, total));
+            long checkedOut = itemRepository.countByCheckedOutNotNull();
+            checkedOutCount.setText(countWithPercentage(checkedOut, checkedIn));
+        }
         soldSum.setText(currencyFormat.format(sumOfSoldItems));
 
         StringBuilder sb = new StringBuilder();
@@ -94,6 +110,13 @@ public class ReportsGui extends JFrame {
             sb.append("</html>");
         }
         connections.setText(sb.toString());
+    }
+
+    private String countWithPercentage(long part, long total) {
+        if (total > 0)
+            return String.format("%d (%.2f %%)", part, (double) part * 100.0 / total);
+        else
+            return Long.toString(part);
     }
 
     @Override

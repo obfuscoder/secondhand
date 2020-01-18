@@ -271,7 +271,7 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
             setErrorText("Artikel existiert nicht!");
             return;
         }
-        if (storageService.canRefund(item)) {
+        if (!storageService.canRefund(item)) {
             setErrorText("Artikel kann nicht zurückgegeben werden!");
             return;
         }

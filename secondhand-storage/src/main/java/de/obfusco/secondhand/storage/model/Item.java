@@ -24,11 +24,10 @@ public class Item extends BaseItem {
 
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date sold;
-
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    private Date checkedIn;
+    public Date checkedIn;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    private Date checkedOut;
+    public Date checkedOut;
 
     @Override
     public String getSize() {

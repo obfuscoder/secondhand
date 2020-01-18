@@ -173,4 +173,9 @@ public class StorageService {
         }
         throw new RuntimeException("Unbekannter Artikeltyp!");
     }
+
+    public boolean isEventGated() {
+        Event event = eventRepository.find();
+        return event != null && event.gates;
+    }
 }
