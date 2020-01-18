@@ -50,16 +50,23 @@ public class TotalPayOff extends BasePayOff {
     public File createTotalPayoffFile(Path basePath, Event event) throws DocumentException, IOException {
         Files.createDirectories(basePath);
         Path fullPath = Paths.get(basePath.toString(), "payoff.pdf");
-        Document document = new Document(PageSize.A4, 80, 50, 50, 30);
+        Document document = new Document(PageSize.A4, 50, 50, 50, 30);
         PdfWriter.getInstance(document,
                 new FileOutputStream(fullPath.toFile()));
         document.open();
         addHeader(document, event);
         document.add(createTotalTable(event));
+        document.newPage();
         document.add(createSoldStockItemsTable());
         if (event.donationOfUnsoldItemsEnabled) {
             document.newPage();
             document.add(createDonatorsTable());
+        }
+        if (event.gates) {
+            document.newPage();
+            document.add(createGatesTable());
+            document.newPage();
+            document.add(createMissingItemsTable());
         }
         document.close();
         return fullPath.toFile();
@@ -68,12 +75,13 @@ public class TotalPayOff extends BasePayOff {
     private PdfPTable createSoldStockItemsTable() {
         Stream<StockItem> stream = StreamSupport.stream(stockItemRepository.findAll().spliterator(), false);
         PdfPTable table = new PdfPTable(6);
+        table.setWidthPercentage(100f);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
         Long soldStockItems = stockItemRepository.countOfSoldItems();
         if (soldStockItems == null) soldStockItems = 0L;
-        addTotalLine(table, "verkaufte Stammartikel", String.valueOf(soldStockItems), true, 14);
+        addTotalLine(table, "verkaufte Stammartikel", true, 14, null, String.valueOf(soldStockItems));
         stream.filter(it -> it.getSold() > 0).forEach(
-                it -> addTotalLine(table, it.description, String.valueOf(it.getSold()), false, 12)
+                it -> addTotalLine(table, it.description, false, 12, null, String.valueOf(it.getSold()))
         );
         return table;
     }
@@ -93,16 +101,17 @@ public class TotalPayOff extends BasePayOff {
         }
 
         PdfPTable table = new PdfPTable(6);
+        table.setWidthPercentage(100f);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
 
-        addTotalLine(table, "Komplettspender", Integer.toString(donators.size()), true, 14);
+        addTotalLine(table, "Komplettspender", true, 14, null, Integer.toString(donators.size()));
         for (Donator donator : donators) {
-            addTotalLine(table, donator.toString(), Integer.toString(donator.count), false, 12);
+            addTotalLine(table, donator.toString(), false, 12, null, Integer.toString(donator.count));
         }
 
-        addTotalLine(table, "Verkäufer mit zurückzugebenden Artikeln", Integer.toString(returns.size()), true, 14);
+        addTotalLine(table, "Verkäufer mit zurückzugebenden Artikeln", true, 14, null, Integer.toString(returns.size()));
         for (Returner returner : returns) {
-            addTotalLine(table, returner.toString(), Integer.toString(returner.count), false, 12);
+            addTotalLine(table, returner.toString(), false, 12, null, Integer.toString(returner.count));
         }
 
         return table;
@@ -113,6 +122,7 @@ public class TotalPayOff extends BasePayOff {
         Iterable<Reservation> reservations = reservationRepository.findAllByOrderByNumberAsc();
 
         PdfPTable table = new PdfPTable(6);
+        table.setWidthPercentage(100f);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
 
         double pricePrecision = event.pricePrecision.doubleValue();
@@ -142,23 +152,23 @@ public class TotalPayOff extends BasePayOff {
         Long soldStockItemCount = stockItemRepository.countOfSoldItems();
         if (soldStockItemCount == null) soldStockItemCount = 0L;
         double soldStockItemSum = storageService.sumOfSoldStockItems();
-        addTotalLine(table, "Anzahl verkaufter Stammartikel", Long.toString(soldStockItemCount), true, 12);
-        addTotalLine(table, "Summe verkaufter Stammartikel", currency.format(soldStockItemSum), true, 12);
-        addTotalLine(table, "Anzahl verkaufter Artikel", Long.toString(soldItemCount), true, 12);
-        addTotalLine(table, "Summe verkaufter Artikel", currency.format(soldSum), true, 12);
-        addTotalLine(table, "Kommissionsanteil", currency.format(commissionSum), false, 12);
-        addTotalLine(table, "Reservierungsgebühren für " + reservationCount + " Reservierungen", currency.format(feeSum), false, 12);
-        addTotalLine(table, "Gewinn insgesamt", currency.format(commissionSum + feeSum + soldStockItemSum), true, 14);
+        addTotalLine(table, "Anzahl verkaufter Stammartikel", true, 12, null, Long.toString(soldStockItemCount));
+        addTotalLine(table, "Summe verkaufter Stammartikel", true, 12, null, currency.format(soldStockItemSum));
+        addTotalLine(table, "Anzahl verkaufter Artikel", true, 12, null, Long.toString(soldItemCount));
+        addTotalLine(table, "Summe verkaufter Artikel", true, 12, null, currency.format(soldSum));
+        addTotalLine(table, "Kommissionsanteil", false, 12, null, currency.format(commissionSum));
+        addTotalLine(table, "Reservierungsgebühren für " + reservationCount + " Reservierungen", false, 12, null, currency.format(feeSum));
+        addTotalLine(table, "Gewinn insgesamt", true, 14, null, currency.format(commissionSum + feeSum + soldStockItemSum));
 
-        addTotalLine(table, "Auszahlbeträge", "", true, 14);
+        addTotalLine(table, "Auszahlbeträge", true, 14, null, "");
         Map<Integer, Long> totalCoins = new HashMap<>();
         for (Payout payout : payouts) {
-            addTotalLine(table, payout.toString(), currency.format(payout.value), false, 12);
+            addTotalLine(table, payout.toString(), false, 12, null, currency.format(payout.value));
             addPayoutCoinsToTotal(totalCoins, payout);
         }
         Payout totalPayout = new Payout();
         totalPayout.coins = totalCoins;
-        addTotalLine(table, totalPayout.coinString(), "", true, 14);
+        addTotalLine(table, totalPayout.coinString(), true, 14, null, "");
         return table;
     }
 
@@ -171,7 +181,7 @@ public class TotalPayOff extends BasePayOff {
         }
     }
 
-    private class ReservationReference {
+    private static class ReservationReference {
         Reservation reservation;
 
         ReservationReference(Reservation reservation) {
@@ -182,20 +192,20 @@ public class TotalPayOff extends BasePayOff {
         }
 
         public String toString() {
-            return String.format("%d - %s", reservation.number, reservation.seller.getName());
+            return reservation.toString();
         }
     }
 
-    private class ReservationReferenceWithCount extends ReservationReference {
+    private static class ReservationWithCount extends ReservationReference {
         int count;
 
-        ReservationReferenceWithCount(Reservation reservation, int count) {
+        ReservationWithCount(Reservation reservation, int count) {
             super(reservation);
             this.count = count;
         }
     }
 
-    private class Payout extends ReservationReference {
+    private static class Payout extends ReservationReference {
         double value;
         Map<Integer, Long> coins;
 
@@ -247,15 +257,74 @@ public class TotalPayOff extends BasePayOff {
         }
     }
 
-    private class Returner extends ReservationReferenceWithCount {
+    private static class Returner extends ReservationWithCount {
         Returner(Reservation reservation, int itemCount) {
             super(reservation, itemCount);
         }
     }
 
-    private class Donator extends ReservationReferenceWithCount {
+    private static class Donator extends ReservationWithCount {
         Donator(Reservation reservation, int count) {
             super(reservation, count);
         }
+    }
+
+    private PdfPTable createGatesTable() {
+        PdfPTable table = new PdfPTable(9);
+        table.setWidthPercentage(100f);
+        table.setHeaderRows(2);
+        table.setHorizontalAlignment(Element.ALIGN_LEFT);
+        List<Reservation> reservations = reservationRepository.findAllByOrderByNumberAsc();
+        addTotalLine(table, "Check In/Out", true, 14, null);
+        addTotalLine(table, "Reservierung", true, 10, null, "Gesamt", "Checkin", "Verkauf", "Spende", "Checkout", "fehlen");
+        long totalItemCount = 0; 
+        long totalCheckinCount = 0; 
+        long totalSoldCount = 0;
+        long totalDonationCount = 0; 
+        long totalCheckoutCount = 0;
+        long totalMissingCount = 0;
+        for (Reservation reservation : reservations) {
+            long itemCount = itemRepository.countByReservation(reservation);
+            long checkinCount = itemRepository.countByReservationAndCheckedInNotNull(reservation);
+            long soldCount = itemRepository.countByReservationAndSoldNotNull(reservation);
+            long donationCount = itemRepository.countByReservationAndCheckedInNotNullAndSoldNullAndDonationTrue(reservation);
+            long checkoutCount = itemRepository.countByReservationAndCheckedOutNotNull(reservation);
+            long missingCount = itemRepository.countByReservationAndCheckedInNotNullAndSoldNullAndDonationFalseAndCheckedOutNull(reservation);
+            totalItemCount += itemCount;
+            totalCheckinCount += checkinCount;
+            totalCheckoutCount += checkoutCount;
+            totalSoldCount += soldCount;
+            totalDonationCount += donationCount;
+            totalMissingCount += missingCount;
+            addTotalLine(table, reservation.toString(), missingCount > 0, 12,
+                    null, Long.toString(itemCount), Long.toString(checkinCount), Long.toString(soldCount),
+                    Long.toString(donationCount), Long.toString(checkoutCount), Long.toString(missingCount));
+        }
+        addTotalLine(table, "Summe", true, 14,
+                null, Long.toString(totalItemCount), Long.toString(totalCheckinCount), Long.toString(totalSoldCount),
+                Long.toString(totalDonationCount), Long.toString(totalCheckoutCount), Long.toString(totalMissingCount));
+
+        return table;
+    }
+
+    private PdfPTable createMissingItemsTable() throws DocumentException {
+        PdfPTable table = new PdfPTable(5);
+        int[] alignments = { Element.ALIGN_LEFT, Element.ALIGN_LEFT, Element.ALIGN_LEFT, Element.ALIGN_LEFT, Element.ALIGN_RIGHT };
+        table.setWidthPercentage(100f);
+        table.setHeaderRows(2);
+        table.setHorizontalAlignment(Element.ALIGN_LEFT);
+        table.setWidths(new int[]{2, 3, 5, 2, 1});
+        addTotalLine(table, "Vermisste Artikel", true, 14, null);
+        addTotalLine(table, "Nummer", true, 10, alignments, "Kategorie", "Beschreibung", "Größe", "Preis");
+        List<Item> items = itemRepository.findByCheckedInNotNullAndSoldNullAndDonationFalseOrderByNumberAsc();
+        for (Item item: items) {
+            addTotalLine(table, String.format("%d - %d", item.reservation.number, item.number), false, 10,
+                    alignments,
+                    item.category.name,
+                    item.description,
+                    item.size == null ? "" : item.size,
+                    currency.format(item.price));
+        }
+        return table;
     }
 }

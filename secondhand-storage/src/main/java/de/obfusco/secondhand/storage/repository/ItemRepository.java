@@ -18,15 +18,18 @@ public interface ItemRepository extends CrudRepository<Item, Integer> {
     List<Item> findByReservationAndSoldNullAndDonationFalseOrderByNumberAsc(Reservation reservation);
     List<Item> findByReservationAndSoldNullAndDonationTrueOrderByNumberAsc(Reservation reservation);
 
-    List<Item> findBySoldNotNull();
+    List<Item> findByCheckedInNotNullAndSoldNullAndDonationFalseOrderByNumberAsc();
 
     List<Item> findByCodeIn(List<String> codes);
 
     long countBySoldNotNull();
     long countByReservation(Reservation reservation);
+    long countByReservationAndSoldNotNull(Reservation reservation);
     long countByReservationAndCheckedInNotNull(Reservation reservation);
     long countByReservationAndCheckedInNotNullAndSoldNullAndDonationFalse(Reservation reservation);
+    long countByReservationAndCheckedInNotNullAndSoldNullAndDonationTrue(Reservation reservation);
     long countByReservationAndCheckedOutNotNull(Reservation reservation);
+    long countByReservationAndCheckedInNotNullAndSoldNullAndDonationFalseAndCheckedOutNull(Reservation reservation);
 
     @Query("select sum(i.price) from items i where i.sold is not null")
     Double sumOfSoldItems();
@@ -43,4 +46,5 @@ public interface ItemRepository extends CrudRepository<Item, Integer> {
             "and (lower(i.code) like lower(?2) or lower(i.description) like lower(?2) or lower(i.size) like lower(?2) or lower(c.name) like lower(?2)) " +
             "and (lower(i.code) like lower(?3) or lower(i.description) like lower(?3) or lower(i.size) like lower(?3) or lower(c.name) like lower(?3))")
     List<Item> findByKeywords(String keyword1, String keyword2, String keyword3);
+
 }

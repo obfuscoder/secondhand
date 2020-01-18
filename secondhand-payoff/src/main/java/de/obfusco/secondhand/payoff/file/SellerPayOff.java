@@ -77,13 +77,13 @@ public class SellerPayOff extends BasePayOff {
         }
 
         PdfPTable table = createItemTable(soldItems);
-        addTotalLine(table, "Summe", currency.format(totalPrice), true, 10);
+        addTotalLine(table, "Summe", true, 10, null, currency.format(totalPrice));
         String commissionText = generateCommissionText(event, reservation, pricePrecision);
-        addTotalLine(table, commissionText, currency.format(-commissionCut), false, 10);
+        addTotalLine(table, commissionText, false, 10, null, currency.format(-commissionCut));
         if (event.incorporateReservationFee()) {
-            addTotalLine(table, "Reservierungsgebühr", currency.format(-reservation.fee.doubleValue()), false, 10);
+            addTotalLine(table, "Reservierungsgebühr", false, 10, null, currency.format(-reservation.fee.doubleValue()));
         }
-        addTotalLine(table, "Auszuzahlender Betrag", currency.format(totalSum), true, 12);
+        addTotalLine(table, "Auszuzahlender Betrag", true, 12, null, currency.format(totalSum));
         document.add(table);
         document.add(new Phrase("\n"));
 

@@ -3,7 +3,6 @@ package de.obfusco.secondhand.storage.model;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import java.math.BigDecimal;
-import java.util.Objects;
 
 @Entity(name = "reservations")
 public class Reservation extends AbstractEntityWithId {
@@ -13,4 +12,9 @@ public class Reservation extends AbstractEntityWithId {
     public Seller seller;
     public BigDecimal commissionRate;
     public BigDecimal fee;
+
+    @Override
+    public String toString() {
+        return String.format("%d - %s", number, seller.getName());
+    }
 }
