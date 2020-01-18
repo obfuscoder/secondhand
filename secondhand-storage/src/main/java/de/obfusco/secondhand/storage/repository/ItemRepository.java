@@ -11,12 +11,13 @@ public interface ItemRepository extends CrudRepository<Item, Integer> {
     Item findByCode(String code);
 
     List<Item> findByReservationOrderByNumberAsc(Reservation reservation);
-    List<Item> findByReservationAndCheckedInNotNullAndSoldNullAndDonationFalseOrderByNumberAsc(Reservation reservation);
 
     List<Item> findByReservationAndSoldNotNullOrderByNumberAsc(Reservation reservation);
-    List<Item> findByReservationAndSoldNullAndCheckedInNotNullAndDonationFalseOrderByNumberAsc(Reservation reservation);
+    List<Item> findByReservationAndCheckedInNotNullAndSoldNullAndDonationFalseOrderByNumberAsc(Reservation reservation);
     List<Item> findByReservationAndSoldNullAndDonationFalseOrderByNumberAsc(Reservation reservation);
+
     List<Item> findByReservationAndSoldNullAndDonationTrueOrderByNumberAsc(Reservation reservation);
+    List<Item> findByReservationAndCheckedInNotNullAndSoldNullAndDonationTrueOrderByNumberAsc(Reservation reservation);
 
     List<Item> findByCheckedInNotNullAndSoldNullAndDonationFalseOrderByNumberAsc();
 

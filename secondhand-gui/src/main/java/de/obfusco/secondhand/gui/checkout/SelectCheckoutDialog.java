@@ -85,7 +85,7 @@ public class SelectCheckoutDialog extends JDialog {
                 if (row < 0) return;
                 Reservation reservation = reservations.get(reservationTable.getSelectedRow());
                 if (reservation != null) {
-                    List<Item> items = itemRepository.findByReservationAndSoldNullAndCheckedInNotNullAndDonationFalseOrderByNumberAsc(reservation);
+                    List<Item> items = itemRepository.findByReservationAndCheckedInNotNullAndSoldNullAndDonationFalseOrderByNumberAsc(reservation);
                     CheckoutDialog checkoutDialog = new CheckoutDialog(items);
                     checkoutDialog.setLocationRelativeTo(this);
                     checkoutDialog.setVisible(true);

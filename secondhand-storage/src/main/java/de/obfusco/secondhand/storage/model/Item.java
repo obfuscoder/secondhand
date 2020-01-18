@@ -90,4 +90,11 @@ public class Item extends BaseItem {
         checkedOut = new Date();
     }
 
+    public boolean isMissing() {
+        return wasCheckedIn() && !wasSold() && !donation && !wasCheckedOut();
+    }
+
+    public boolean isDonated() {
+        return wasCheckedIn() && !wasSold() && donation;
+    }
 }

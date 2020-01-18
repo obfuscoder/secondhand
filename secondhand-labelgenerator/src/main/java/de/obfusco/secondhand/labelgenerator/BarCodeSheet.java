@@ -82,7 +82,7 @@ class BarCodeSheet {
         String customer = new DecimalFormat("000").format(reservation.number);
         Path targetPath = Paths.get(basePath.toString(), customer);
         Files.createDirectories(targetPath);
-        items = itemRepository.findByReservationAndCheckedInNotNullAndSoldNullAndDonationFalseOrderByNumberAsc(reservation);
+        items = itemRepository.findByReservationOrderByNumberAsc(reservation);
         return createPdf(targetPath);
     }
 }

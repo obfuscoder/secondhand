@@ -54,7 +54,7 @@ class LabelSheet {
         String customer = new DecimalFormat("000").format(reservation.number);
         Path targetPath = Paths.get(basePath.toString(), customer);
         Files.createDirectories(targetPath);
-        items = ItemRepository.findByReservationAndCheckedInNotNullAndSoldNullAndDonationFalseOrderByNumberAsc(reservation);
+        items = ItemRepository.findByReservationOrderByNumberAsc(reservation);
         return createPdf(targetPath);
     }
 
