@@ -23,8 +23,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 
 @Component
-public class ConfigGui extends JDialog {
-    private final static Logger LOG = LoggerFactory.getLogger(ConfigGui.class);
+public class ConfigDialog extends JDialog {
+    private final static Logger LOG = LoggerFactory.getLogger(ConfigDialog.class);
 
     @Autowired
     StorageConverter storageConverter;
@@ -40,19 +40,21 @@ public class ConfigGui extends JDialog {
     ItemRepository itemRepository;
     @Autowired
     TransactionRepository transactionRepository;
+
     private JPanel contentPane;
     private JButton downloadButton;
     private JTextField tokenField;
     private JButton pushDataButton;
     private JButton uploadButton;
     private JButton exportDataButton;
+
     @Autowired
     private DataPusher dataPusher;
     @Autowired
     private TransactionUploader transactionUploader;
     private String rootUrl;
 
-    private ConfigGui() {
+    private ConfigDialog() {
         setTitle("Einstellungen");
         setContentPane(contentPane);
         setModal(true);
@@ -135,8 +137,10 @@ public class ConfigGui extends JDialog {
                     "Sind Sie sicher?";
             int dialogResult = JOptionPane.showConfirmDialog(null, question, "Achtung", dialogOptions);
             if (dialogResult == JOptionPane.YES_OPTION) {
+                boolean oldGates = currentGatesOption();
                 downloadDatabase(tokenField.getText());
-                reportSuccess();
+                boolean newGates = currentGatesOption();
+                reportSuccess(oldGates != newGates);
             }
         } catch (MalformedURLException e) {
             LOG.error("Error while downloading database", e);
@@ -163,6 +167,11 @@ public class ConfigGui extends JDialog {
                     "Downloadfehler",
                     JOptionPane.WARNING_MESSAGE);
         }
+    }
+
+    private boolean currentGatesOption() {
+        de.obfusco.secondhand.storage.model.Event event = eventRepository.find();
+        return event != null && event.gates;
     }
 
     private void push() {
@@ -213,9 +222,11 @@ public class ConfigGui extends JDialog {
         dataPusher.push(event);
     }
 
-    private void reportSuccess() {
+    private void reportSuccess(boolean restartRequired) {
         String message = String.format("Daten für den Termin \"%s\" erfolgreich importiert.\nVerkäufer: %d, Artikel: %d",
                 eventRepository.find().name, sellerRepository.count(), itemRepository.count());
+        if (restartRequired)
+            message += "\n\nEs ist ein Neustart der Kassensoftware erforderlich, damit die Änderungen wirksam werden.";
         JOptionPane.showMessageDialog(this, message, "Import erfolgreich", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -247,16 +258,13 @@ public class ConfigGui extends JDialog {
         contentPane.add(panel1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(400, -1), null, null, 0, false));
         panel1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Datenaustausch mit Online-System"));
         final JPanel panel2 = new JPanel();
-        panel2.setLayout(new GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panel2.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
         panel1.add(panel2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label1 = new JLabel();
-        label1.setText("Homepage");
+        label1.setText("Token");
         panel2.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label2 = new JLabel();
-        label2.setText("Token");
-        panel2.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         tokenField = new JTextField();
-        panel2.add(tokenField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        panel2.add(tokenField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         downloadButton = new JButton();
         downloadButton.setText("Daten herunterladen");
         panel1.add(downloadButton, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -268,7 +276,7 @@ public class ConfigGui extends JDialog {
         contentPane.add(panel3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         panel3.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Datenaustausch mit anderen Kassensystemen"));
         pushDataButton = new JButton();
-        pushDataButton.setText("Daten zu anderen Kassensystemen synchronisieren");
+        pushDataButton.setText("Daten zu anderen Kassensystemen übertragen");
         panel3.add(pushDataButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         exportDataButton = new JButton();
         exportDataButton.setText("Daten exportieren");

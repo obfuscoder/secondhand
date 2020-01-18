@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Component
-public class CashBoxGui extends JFrame implements ActionListener, TableModelListener {
+public class SaleDialog extends JFrame implements ActionListener, TableModelListener {
 
     private NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
@@ -39,10 +39,10 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
 
     private JButton readyButton = new JButton("Fertig");
 
-    private CheckOutDialog checkout = null;
+    private FinalizeSaleDialog finalizeSaleDialog = null;
     private JLabel countLabel;
 
-    public CashBoxGui() {
+    public SaleDialog() {
         super("Flohmarkt Verkauf");
         setSize(1000, 700);
         addComponentsToPane(getContentPane());
@@ -194,7 +194,7 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
     }
 
     public void newCustomer() {
-        checkout = null;
+        finalizeSaleDialog = null;
         readyButton.setEnabled(false);
         itemNr.setEnabled(true);
         cashTable.setEnabled(true);
@@ -215,9 +215,9 @@ public class CashBoxGui extends JFrame implements ActionListener, TableModelList
     private void openDialog() {
         errorLabel.setText("");
 
-        checkout = new CheckOutDialog(this, transactionListener);
-        checkout.setLocationRelativeTo(this);
-        checkout.setVisible(true);
+        finalizeSaleDialog = new FinalizeSaleDialog(this, transactionListener);
+        finalizeSaleDialog.setLocationRelativeTo(this);
+        finalizeSaleDialog.setVisible(true);
     }
 
     @Override

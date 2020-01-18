@@ -1,9 +1,9 @@
 package de.obfusco.secondhand.gui;
 
 import com.itextpdf.text.DocumentException;
-import de.obfusco.secondhand.gui.checkin.SelectCheckinGui;
+import de.obfusco.secondhand.gui.checkin.SelectCheckinDialog;
 import de.obfusco.secondhand.gui.checkout.SelectCheckoutDialog;
-import de.obfusco.secondhand.gui.config.ConfigGui;
+import de.obfusco.secondhand.gui.config.ConfigDialog;
 import de.obfusco.secondhand.gui.transactions.TransactionsGui;
 import de.obfusco.secondhand.labelgenerator.LabelGeneratorGui;
 import de.obfusco.secondhand.net.*;
@@ -12,7 +12,7 @@ import de.obfusco.secondhand.payoff.gui.PayOffGui;
 import de.obfusco.secondhand.receipt.file.ReceiptFile;
 import de.obfusco.secondhand.refund.gui.RefundGui;
 import de.obfusco.secondhand.reports.ReportsGui;
-import de.obfusco.secondhand.sale.gui.CashBoxGui;
+import de.obfusco.secondhand.sale.gui.SaleDialog;
 import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.*;
 import de.obfusco.secondhand.storage.repository.*;
@@ -34,7 +34,10 @@ import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 
 @Component
 public class MainGui extends JFrame implements MessageBroker, TransactionListener, DataPusher, PathSyncListener {
@@ -44,7 +47,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     private static final long serialVersionUID = 4961295225628108431L;
     private Network network;
     @Autowired
-    CashBoxGui cashBoxGui;
+    SaleDialog saleDialog;
     @Autowired
     RefundGui refundGui;
     @Autowired
@@ -70,7 +73,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     @Autowired
     CategoryRepository categoryRepository;
     @Autowired
-    ConfigGui configGui;
+    ConfigDialog configDialog;
     private JLabel statusLabel;
     private JLabel folderSyncLabel;
     private Properties properties = new Properties();
@@ -115,11 +118,11 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     public void start() {
         Image image = new ImageIcon("favicon.ico").getImage();
         setIconImage(image);
+        importDataWhenPresent();
         addComponentsToPane(getContentPane());
         pack();
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        importDataWhenPresent();
         if (!initializeNetwork()) return;
         startPathSync();
         setVisible(true);
@@ -183,7 +186,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         panel.setLayout(new GridLayout(0, 1, 10, 10));
 
         JButton sale = new JButton("Verkauf");
-        sale.addActionListener(e -> cashBoxGui.setVisible(true));
+        sale.addActionListener(e -> saleDialog.setVisible(true));
         sale.setFont(sale.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         JButton refund = new JButton("Storno");
@@ -202,23 +205,21 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         testScan.addActionListener(e -> testScanGui.setVisible(true));
         testScan.setFont(testScan.getFont().deriveFont(BUTTON_FONT_SIZE));
 
-        /*
         JButton checkin = new JButton("Check In");
         checkin.addActionListener(e -> {
-            SelectCheckinGui checkinGui = new SelectCheckinGui(reservationRepository, itemRepository, storageService, this);
-            checkinGui.setLocationRelativeTo(this);
-            checkinGui.setVisible(true);
+            SelectCheckinDialog selectCheckinDialog = new SelectCheckinDialog(reservationRepository, itemRepository, storageService, this);
+            selectCheckinDialog.setLocationRelativeTo(this);
+            selectCheckinDialog.setVisible(true);
         });
         checkin.setFont(checkin.getFont().deriveFont(BUTTON_FONT_SIZE));
 
         JButton checkout = new JButton("Check Out");
         checkout.addActionListener(e -> {
-            SelectCheckoutDialog checkoutDialog = new SelectCheckoutDialog(reservationRepository, itemRepository, storageService, this);
-            checkoutDialog.setLocationRelativeTo(this);
-            checkoutDialog.setVisible(true);
+            SelectCheckoutDialog selectCheckoutDialog = new SelectCheckoutDialog(reservationRepository, itemRepository, storageService, this);
+            selectCheckoutDialog.setLocationRelativeTo(this);
+            selectCheckoutDialog.setVisible(true);
         });
         checkout.setFont(checkout.getFont().deriveFont(BUTTON_FONT_SIZE));
-         */
 
         JButton barcodeGenerator = new JButton("Barcodes drucken");
         barcodeGenerator.addActionListener(e -> labelGeneratorGui.setVisible(true));
@@ -255,8 +256,8 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         configButton.addActionListener(e -> {
             String rootUrl = properties.getProperty("online.root", "https://flohmarkthelfer.de/");
             if (rootUrl.isEmpty()) rootUrl = "https://flohmarkthelfer.de/";
-            configGui.setRootUrl(rootUrl);
-            configGui.setVisible(true);
+            configDialog.setRootUrl(rootUrl);
+            configDialog.setVisible(true);
         });
         configButton.setFont(configButton.getFont().deriveFont(BUTTON_FONT_SIZE));
 
@@ -273,8 +274,13 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             panel.add(createSellerReceipt);
             panel.add(createSellerResultReceipt);
             panel.add(testScan);
-            //panel.add(checkin);
-            //panel.add(checkout);
+
+            Event event = eventRepository.find();
+            if (event != null && event.gates) {
+                panel.add(checkin);
+                panel.add(checkout);
+            }
+
             panel.add(barcodeGenerator);
             panel.add(billGenerator);
             panel.add(configButton);

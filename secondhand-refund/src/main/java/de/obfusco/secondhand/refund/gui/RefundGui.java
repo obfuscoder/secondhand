@@ -43,7 +43,7 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
 
     private JButton readyButton = new JButton("Fertig");
 
-    private CommitRefundDialog checkout = null;
+    private CommitRefundDialog commitRefundDialog;
     private JLabel countLabel;
 
     public RefundGui() {
@@ -211,7 +211,7 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
     }
 
     private void newCustomer() {
-        checkout = null;
+        commitRefundDialog = null;
         readyButton.setEnabled(false);
         itemNr.setEnabled(true);
         itemTable.setEnabled(true);
@@ -232,9 +232,9 @@ public class RefundGui extends JFrame implements ActionListener, TableModelListe
     private void openDialog() {
         errorLabel.setText("");
 
-        checkout = new CommitRefundDialog(this, transactionListener);
-        checkout.setLocationRelativeTo(this);
-        checkout.setVisible(true);
+        commitRefundDialog = new CommitRefundDialog(this, transactionListener);
+        commitRefundDialog.setLocationRelativeTo(this);
+        commitRefundDialog.setVisible(true);
         newCustomer();
     }
 

@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-class CheckOutDialog extends JDialog implements ActionListener {
+class FinalizeSaleDialog extends JDialog implements ActionListener {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CheckOutDialog.class);
+    private final static Logger LOG = LoggerFactory.getLogger(FinalizeSaleDialog.class);
 
     private static final long serialVersionUID = -9004809235134991240L;
 
@@ -43,7 +43,7 @@ class CheckOutDialog extends JDialog implements ActionListener {
 
     private JLabel title = new JLabel("Verkauf abschließen");
 
-    private CashBoxGui frame;
+    private SaleDialog frame;
 
     private StorageService storageService;
     private List<BaseItem> items;
@@ -54,7 +54,7 @@ class CheckOutDialog extends JDialog implements ActionListener {
     private Path basePath = Paths.get("data/pdfs/sale");
     private TransactionListener transactionListener;
 
-    public CheckOutDialog(JFrame parentFrame, TransactionListener orderListener) {
+    public FinalizeSaleDialog(JFrame parentFrame, TransactionListener orderListener) {
         super(parentFrame, "Verkauf abschließen", true);
 
         Properties properties = new Properties();
@@ -64,7 +64,7 @@ class CheckOutDialog extends JDialog implements ActionListener {
         this.transactionListener = orderListener;
         setSize(400, 300);
 
-        frame = (CashBoxGui) parentFrame;
+        frame = (SaleDialog) parentFrame;
         this.storageService = frame.getStorageService();
         this.items = frame.getTableData();
         errorLabel = new JLabel(" ");
@@ -100,9 +100,9 @@ class CheckOutDialog extends JDialog implements ActionListener {
         title.setHorizontalAlignment(SwingConstants.CENTER);
         this.add(title, BorderLayout.NORTH);
 
-        JPanel checkOutPanel = new JPanel(new GridLayout(8, 0));
+        JPanel contentPanel = new JPanel(new GridLayout(8, 0));
 
-        checkOutPanel.add(new JSeparator(JSeparator.HORIZONTAL));
+        contentPanel.add(new JSeparator(JSeparator.HORIZONTAL));
 
         JLabel sumLabel = new JLabel("SUMME: ");
         priceLabel = new JLabel(frame.getPrice());
@@ -192,20 +192,20 @@ class CheckOutDialog extends JDialog implements ActionListener {
         changePanel.add(changeBarlabel);
         changePanel.add(changeeuroLabel);
 
-        checkOutPanel.add(sumPanel);
-        checkOutPanel.add(barPanel);
-        checkOutPanel.add(changePanel);
+        contentPanel.add(sumPanel);
+        contentPanel.add(barPanel);
+        contentPanel.add(changePanel);
         if (showPostCode) {
             JPanel postCodePanel = new JPanel(new GridLayout(0, 3));
             postCodePanel.add(new JLabel("PLZ (optional)"));
             postCodePanel.add(postCodeTextField);
 
-            checkOutPanel.add(new JPanel());
-            checkOutPanel.add(postCodePanel);
+            contentPanel.add(new JPanel());
+            contentPanel.add(postCodePanel);
         }
-        checkOutPanel.add(new JPanel());
+        contentPanel.add(new JPanel());
 
-        this.add(checkOutPanel, BorderLayout.CENTER);
+        this.add(contentPanel, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new GridLayout(2, 1));
 
