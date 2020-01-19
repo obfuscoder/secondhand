@@ -83,42 +83,48 @@ public class SellerPayOff extends BasePayOff {
         }
         addTotalLine(table, "Auszuzahlender Betrag", true, 12, null, currency.format(totalSum));
         document.add(table);
-        document.add(new Phrase("\n"));
 
-        List<Item> returnedItems = event.gates ?
+        addReturnedSection(document, reservation, event);
+        if (event.donationOfUnsoldItemsEnabled) {
+            addDonatedItems(document, reservation, event);
+        }
+        if (event.gates) {
+            addMissingItems(document, reservation);
+            addLostItems(document, reservation);
+        }
+    }
+
+    private void addReturnedSection(Document document, Reservation reservation, Event event) throws DocumentException {
+        List<Item> items = event.gates ?
                 itemRepository.findByReservationAndCheckedInNotNullAndSoldNullAndDonationFalseOrderByNumberAsc(reservation) :
                 itemRepository.findByReservationAndSoldNullAndDonationFalseOrderByNumberAsc(reservation);
-        document.add(new Phrase(new Chunk(returnedItems.size() + " Artikel zurück",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
-        table = createItemTable(returnedItems);
-        document.add(table);
+        addItemSection(document, "zurück", items);
+    }
 
-        if (event.donationOfUnsoldItemsEnabled) {
-            List<Item> donatedItems = event.gates ?
-                    itemRepository.findByReservationAndCheckedInNotNullAndSoldNullAndDonationTrueOrderByNumberAsc(reservation) :
-                    itemRepository.findByReservationAndSoldNullAndDonationTrueOrderByNumberAsc(reservation);
-            if (donatedItems.size() > 0) {
-                document.add(new Phrase("\n"));
-                document.add(new Phrase(new Chunk(donatedItems.size() + " Artikel gespendet",
-                        FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
-                table = createItemTable(donatedItems);
-                document.add(table);
-            }
+    private void addDonatedItems(Document document, Reservation reservation, Event event) throws DocumentException {
+        List<Item> items = event.gates ?
+                itemRepository.findByReservationAndCheckedInNotNullAndSoldNullAndDonationTrueOrderByNumberAsc(reservation) :
+                itemRepository.findByReservationAndSoldNullAndDonationTrueOrderByNumberAsc(reservation);
+        addItemSection(document, "gespendet", items);
+    }
+
+    private void addMissingItems(Document document, Reservation reservation) throws DocumentException {
+        List<Item> items = itemRepository.findByReservationAndCheckedInNullOrderByNumberAsc(reservation);
+        addItemSection(document, "nicht abgegeben", items);
+    }
+
+    private void addItemSection(Document document, String text, List<Item> items) throws DocumentException {
+        if (items.size() > 0) {
+            document.add(new Phrase("\n"));
+            document.add(new Phrase(new Chunk(items.size() + " Artikel " + text,
+                    FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
+            document.add(createItemTable(items));
         }
+    }
 
-        if (event.gates) {
-            document.newPage();
-            document.add(new Phrase(new Chunk("Artikelübersicht\n", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12))));
-            document.add(new Phrase(new Chunk("grau = Artikel nicht abgegeben\n", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.GRAY))));
-            document.add(new Phrase(new Chunk("grün = Artikel verkauft\n", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.GREEN))));
-            document.add(new Phrase(new Chunk("blau = Artikel gespendet\n", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.BLUE))));
-            document.add(new Phrase(new Chunk("schwarz = Artikel zurück\n", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.BLACK))));
-            document.add(new Phrase(new Chunk("rot = Artikel fehlt\n", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.RED))));
-
-            List<Item> items = itemRepository.findByReservationOrderByNumberAsc(reservation);
-            table = createItemGateTable(items);
-            document.add(table);
-        }
+    private void addLostItems(Document document, Reservation reservation) throws DocumentException {
+        List<Item> items = itemRepository.findByReservationAndCheckedInNotNullAndSoldNullAndDonationFalseAndCheckedOutNullOrderByNumberAsc(reservation);
+        addItemSection(document, "verloren gegangen", items);
     }
 
     private String generateCommissionText(Event event, Reservation reservation, double pricePrecision) {
@@ -164,52 +170,6 @@ public class SellerPayOff extends BasePayOff {
         return table;
     }
 
-    private PdfPTable createItemGateTable(List<Item> items) throws DocumentException {
-        PdfPTable table = new PdfPTable(5);
-        table.setWidthPercentage(100f);
-        table.setWidths(new int[] {1, 4, 8, 4, 2 });
-        int[] alignments = { Element.ALIGN_RIGHT, Element.ALIGN_LEFT, Element.ALIGN_LEFT, Element.ALIGN_LEFT, Element.ALIGN_RIGHT };
-        table.setHorizontalAlignment(Element.ALIGN_LEFT);
-        addItemGateHeader(table);
-
-        for (Item item : items) {
-            for (int column = 0; column < table.getNumberOfColumns(); column++) {
-                PdfPCell cell = new PdfPCell(new Phrase(getGateColumnText(item, column),
-                        FontFactory.getFont(FontFactory.HELVETICA, 10, getItemColor(item))));
-                cell.setBorder(column == 0 ? 0 : Rectangle.LEFT);
-                cell.setBorderWidth(1);
-                cell.setHorizontalAlignment(alignments[column]);
-                table.addCell(cell);
-            }
-        }
-        return table;
-    }
-
-    private BaseColor getItemColor(Item item) {
-        if (!item.wasCheckedIn()) return BaseColor.GRAY;
-        if (item.wasSold()) return BaseColor.GREEN;
-        if (item.isDonated()) return BaseColor.BLUE;
-        if (item.isMissing()) return BaseColor.RED;
-        return BaseColor.BLACK;
-    }
-
-    private String getGateColumnText(Item item, int column) {
-        switch (column) {
-            case 0:
-                return Integer.toString(item.number);
-            case 1:
-                return item.category.name;
-            case 2:
-                return item.description;
-            case 3:
-                return item.size;
-            case 4:
-                return currency.format(item.price);
-            default:
-                return StringUtils.EMPTY;
-        }
-    }
-
     private boolean isFirstCellInLine(int item, int column) {
         return column == 0 && item % NUMBER_OF_ITEMS_PER_LINE == 0;
     }
@@ -225,19 +185,6 @@ public class SellerPayOff extends BasePayOff {
                 cell.setBorderWidth(1);
                 table.addCell(cell);
             }
-        }
-        table.setHeaderRows(1);
-    }
-
-    private void addItemGateHeader(PdfPTable table) {
-        String[] columnNames = { "Nr.", "Kategorie", "Beschreibung", "Größe", "Preis" };
-        for (int c = 0; c < columnNames.length; c++) {
-            String columnName = columnNames[c];
-            PdfPCell cell = new PdfPCell(new Phrase(new Chunk(columnName,
-                    FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10))));
-            cell.setBorder((c == 0 ? 0 : Rectangle.LEFT) | Rectangle.BOTTOM);
-            cell.setBorderWidth(1);
-            table.addCell(cell);
         }
         table.setHeaderRows(1);
     }
