@@ -274,14 +274,12 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             panel.add(createSellerReceipt);
             panel.add(createSellerResultReceipt);
             panel.add(testScan);
-
+            panel.add(barcodeGenerator);
             Event event = eventRepository.find();
             if (event != null && event.gates) {
                 panel.add(checkin);
                 panel.add(checkout);
             }
-
-            panel.add(barcodeGenerator);
             panel.add(billGenerator);
             panel.add(configButton);
             panel.add(transactionsButton);

@@ -2,9 +2,11 @@ package de.obfusco.secondhand.gui.checkout;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import de.obfusco.secondhand.gui.checkin.CheckinDialog;
 import de.obfusco.secondhand.storage.model.Item;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -61,13 +63,16 @@ public class CheckoutDialog extends JDialog {
         itemTableModel.addColumn("Beschreibung");
         itemTableModel.addColumn("Preis");
         itemTableModel.addColumn("ausgecheckt");
+
+        itemTable.setDefaultRenderer(Object.class, new TableCellRender());
+
         for (Item item : items) {
             itemTableModel.addRow(new Object[]{
                     item.number,
                     (item.category != null) ? item.category.name : "",
                     item.description,
                     CURRENCY.format(item.price),
-                    item.wasCheckedIn() ? "ja" : "nein"
+                    item.wasCheckedOut() ? "ja" : "nein"
             });
         }
         itemCodeField.requestFocus();
@@ -182,5 +187,26 @@ public class CheckoutDialog extends JDialog {
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
+    }
+
+    private static class TableCellRender extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus, int row, int column) {
+            Component component = super.getTableCellRendererComponent(table, value, selected, focus, row, column);
+            String status = table.getValueAt(row, 4).toString();
+            component.setBackground(getBackgroundColor(status));
+            return component;
+        }
+
+        private Color getBackgroundColor(String status) {
+            switch (status) {
+                case "GESCANNT":
+                    return Color.YELLOW;
+                case "ja":
+                    return Color.GREEN;
+                default:
+                    return Color.WHITE;
+            }
+        }
     }
 }
