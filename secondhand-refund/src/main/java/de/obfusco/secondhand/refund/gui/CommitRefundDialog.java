@@ -2,6 +2,7 @@ package de.obfusco.secondhand.refund.gui;
 
 import com.itextpdf.text.DocumentException;
 import de.obfusco.secondhand.storage.model.BaseItem;
+import de.obfusco.secondhand.storage.model.Event;
 import de.obfusco.secondhand.storage.model.Transaction;
 import de.obfusco.secondhand.storage.model.TransactionListener;
 import de.obfusco.secondhand.storage.service.StorageService;
@@ -16,14 +17,22 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 class CommitRefundDialog extends JDialog implements ActionListener {
 
+    private static NumberFormat CURRENCY = NumberFormat.getCurrencyInstance(Locale.GERMANY);
+
     private final static Logger LOG = LoggerFactory.getLogger(CommitRefundDialog.class);
+    private BigDecimal totalPrice;
+    private BigDecimal finalPrice;
+    private BigDecimal priceFactor;
 
     private JLabel errorLabel;
 
@@ -41,12 +50,16 @@ class CommitRefundDialog extends JDialog implements ActionListener {
     private Path basePath = Paths.get("data/pdfs/refund");
     private TransactionListener transactionListener;
 
-    CommitRefundDialog(JFrame parentFrame, TransactionListener transactionListener) {
-
+    CommitRefundDialog(RefundGui parentFrame, TransactionListener transactionListener) {
         super(parentFrame, "Storno abschließen", true);
+        refundGui = parentFrame;
+        Event event = parentFrame.eventRepository.find();
+        priceFactor = event.priceFactor;
+        totalPrice = parentFrame.totalPrice;
+        finalPrice = (priceFactor == null) ? totalPrice : totalPrice.multiply(priceFactor);
+
         setSize(400, 300);
 
-        refundGui = (RefundGui) parentFrame;
         this.storageService = refundGui.getStorageService();
         this.transactionListener = transactionListener;
         this.items = refundGui.getTableData();
@@ -71,17 +84,25 @@ class CommitRefundDialog extends JDialog implements ActionListener {
         checkOutPanel.add(new JSeparator(JSeparator.HORIZONTAL));
 
         JLabel sumLabel = new JLabel("Summe:");
-        sumLabel.setFont(title.getFont().deriveFont(20.0f));
-        JLabel priceLabel = new JLabel(refundGui.getPrice());
-        priceLabel.setFont(title.getFont().deriveFont(20.0f));
-        JLabel currencyLabel = new JLabel("Euro");
-        currencyLabel.setFont(title.getFont().deriveFont(20.0f));
-        JPanel sumPanel = new JPanel(new GridLayout(0, 3));
+        JLabel priceLabel = new JLabel(CURRENCY.format(totalPrice));
+        JPanel sumPanel = new JPanel(new GridLayout(0, 2));
         sumPanel.add(sumLabel);
         sumPanel.add(priceLabel);
-        sumPanel.add(currencyLabel);
-
         checkOutPanel.add(sumPanel);
+        if (priceFactor == null) {
+            sumLabel.setFont(title.getFont().deriveFont(20.0f));
+            priceLabel.setFont(title.getFont().deriveFont(20.0f));
+        } else {
+            JLabel finalSumLabel = new JLabel("ENDSUMME:");
+            JLabel finalPriceLabel = new JLabel(CURRENCY.format(finalPrice));
+            JPanel finalSumPanel = new JPanel(new GridLayout(0, 2));
+            finalSumPanel.add(finalSumLabel);
+            finalSumPanel.add(finalPriceLabel);
+
+            finalSumLabel.setFont(title.getFont().deriveFont(20.0f));
+            finalPriceLabel.setFont(title.getFont().deriveFont(20.0f));
+            checkOutPanel.add(finalSumPanel);
+        }
 
         this.add(checkOutPanel, BorderLayout.CENTER);
 
@@ -134,8 +155,7 @@ class CommitRefundDialog extends JDialog implements ActionListener {
             this.dispose();
         } else if (e.getSource() == printButton) {
             try {
-                File pdfFile = new RefundPDFCreator().createPdf(basePath, refundGui.getTableData(),
-                        Double.parseDouble(refundGui.getPrice().replace(",", ".")));
+                File pdfFile = new RefundPDFCreator().createPdf(basePath, refundGui.getTableData(), finalPrice);
                 Desktop.getDesktop().open(pdfFile);
             } catch (DocumentException | IOException ex) {
                 JOptionPane.showMessageDialog(this, "Fehler",

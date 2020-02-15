@@ -42,7 +42,7 @@ public class ReportsGui extends JFrame {
 
     private Network network;
 
-    private NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.GERMANY);
+    private static NumberFormat CURRENCY = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
     public ReportsGui() {
         super("Flohmarkt Reports");
@@ -97,7 +97,7 @@ public class ReportsGui extends JFrame {
             long checkedOut = itemRepository.countByCheckedOutNotNull();
             checkedOutCount.setText(countWithPercentage(checkedOut, checkedIn));
         }
-        soldSum.setText(currencyFormat.format(sumOfSoldItems));
+        soldSum.setText(CURRENCY.format(sumOfSoldItems));
 
         StringBuilder sb = new StringBuilder();
         if (network != null) {

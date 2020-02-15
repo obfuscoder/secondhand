@@ -18,14 +18,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
 class FinalizeSaleDialog extends JDialog implements ActionListener {
-
+    private static NumberFormat CURRENCY = NumberFormat.getCurrencyInstance(Locale.GERMANY);
     private final static Logger LOG = LoggerFactory.getLogger(FinalizeSaleDialog.class);
 
     private static final long serialVersionUID = -9004809235134991240L;
@@ -34,8 +37,9 @@ class FinalizeSaleDialog extends JDialog implements ActionListener {
     private JLabel changeBarlabel;
     private JTextField barTextField;
     private JFormattedTextField postCodeTextField;
-    private Double change;
+    private BigDecimal change;
     private JLabel errorLabel;
+    private BigDecimal finalPrice;
 
     private JButton okButton = new JButton("OK");
     private JButton cancelButton = new JButton("Cancel");
@@ -44,6 +48,7 @@ class FinalizeSaleDialog extends JDialog implements ActionListener {
     private JLabel title = new JLabel("Verkauf abschließen");
 
     private SaleDialog frame;
+    private BigDecimal priceFactor;
 
     private StorageService storageService;
     private List<BaseItem> items;
@@ -54,8 +59,13 @@ class FinalizeSaleDialog extends JDialog implements ActionListener {
     private Path basePath = Paths.get("data/pdfs/sale");
     private TransactionListener transactionListener;
 
-    public FinalizeSaleDialog(JFrame parentFrame, TransactionListener orderListener) {
+    public FinalizeSaleDialog(SaleDialog parentFrame, TransactionListener orderListener) {
         super(parentFrame, "Verkauf abschließen", true);
+        frame = parentFrame;
+        priceFactor = frame.eventRepository.find().priceFactor;
+        finalPrice = (priceFactor == null) ? parentFrame.totalPrice : parentFrame.totalPrice.multiply(priceFactor);
+        storageService = frame.getStorageService();
+        items = frame.getTableData();
 
         Properties properties = new Properties();
         loadProperties(properties);
@@ -64,9 +74,6 @@ class FinalizeSaleDialog extends JDialog implements ActionListener {
         this.transactionListener = orderListener;
         setSize(400, 300);
 
-        frame = (SaleDialog) parentFrame;
-        this.storageService = frame.getStorageService();
-        this.items = frame.getTableData();
         errorLabel = new JLabel(" ");
         errorLabel.setForeground(new Color(255, 0, 0, 255));
 
@@ -104,19 +111,29 @@ class FinalizeSaleDialog extends JDialog implements ActionListener {
 
         contentPanel.add(new JSeparator(JSeparator.HORIZONTAL));
 
+        JPanel sumPanel = new JPanel(new GridLayout(0, 2));
         JLabel sumLabel = new JLabel("SUMME: ");
-        priceLabel = new JLabel(frame.getPrice());
-        JLabel sumeuroLabel = new JLabel("Euro");
-        JPanel sumPanel = new JPanel(new GridLayout(0, 3));
-        sumLabel.setFont(title.getFont().deriveFont(20.0f));
-        priceLabel.setFont(title.getFont().deriveFont(20.0f));
-        sumeuroLabel.setFont(title.getFont().deriveFont(20.0f));
+        priceLabel = new JLabel(CURRENCY.format(frame.totalPrice));
         sumPanel.add(sumLabel);
         sumPanel.add(priceLabel);
-        sumPanel.add(sumeuroLabel);
+        contentPanel.add(sumPanel);
 
-        JLabel bareuroLabel = new JLabel("Euro");
-        JLabel barLabel = new JLabel("BAR (optinal)");
+        if (priceFactor == null) {
+            sumLabel.setFont(title.getFont().deriveFont(20.0f));
+            priceLabel.setFont(title.getFont().deriveFont(20.0f));
+        } else {
+            JPanel finalSumPanel = new JPanel(new GridLayout(0, 2));
+            JLabel finalSumLabel = new JLabel("ENDSUMME: ");
+            JLabel finalPriceLabel = new JLabel(CURRENCY.format(finalPrice));
+            finalSumPanel.add(finalSumLabel);
+            finalSumPanel.add(finalPriceLabel);
+            contentPanel.add(finalSumPanel);
+
+            finalSumLabel.setFont(title.getFont().deriveFont(20.0f));
+            finalPriceLabel.setFont(title.getFont().deriveFont(20.0f));
+        }
+
+        JLabel barLabel = new JLabel("BAR (optional)");
         barTextField = new JTextField();
         barTextField.addKeyListener(new KeyListener() {
 
@@ -176,23 +193,19 @@ class FinalizeSaleDialog extends JDialog implements ActionListener {
 
         });
 
-        JLabel changeeuroLabel = new JLabel("Euro");
         JLabel changeLabel = new JLabel("RÜCKGELD");
-        changeBarlabel = new JLabel("0,00");
+        changeBarlabel = new JLabel(CURRENCY.format(BigDecimal.ZERO));
         changeBarlabel.setForeground(Color.red);
         changeBarlabel.setFont(getFont());
 
-        JPanel barPanel = new JPanel(new GridLayout(0, 3));
+        JPanel barPanel = new JPanel(new GridLayout(0, 2));
         barPanel.add(barLabel);
         barPanel.add(barTextField);
-        barPanel.add(bareuroLabel);
 
-        JPanel changePanel = new JPanel(new GridLayout(0, 3));
+        JPanel changePanel = new JPanel(new GridLayout(0, 2));
         changePanel.add(changeLabel);
         changePanel.add(changeBarlabel);
-        changePanel.add(changeeuroLabel);
 
-        contentPanel.add(sumPanel);
         contentPanel.add(barPanel);
         contentPanel.add(changePanel);
         if (showPostCode) {
@@ -278,7 +291,7 @@ class FinalizeSaleDialog extends JDialog implements ActionListener {
             this.dispose();
         } else if (e.getSource() == printButton) {
             try {
-                File pdfFile = new BillPDFCreator().createPdf(basePath, frame.getTableData());
+                File pdfFile = new BillPDFCreator().createPdf(basePath, frame.getTableData(), finalPrice);
                 Desktop.getDesktop().open(pdfFile);
                 completeOrder();
             } catch (DocumentException | IOException ex) {
@@ -315,11 +328,10 @@ class FinalizeSaleDialog extends JDialog implements ActionListener {
         if (barTextField.getText() == null || barTextField.getText().equals("")) {
             return;
         }
-        Double bar = Double.parseDouble(barTextField.getText().replace(",", "."));
-        Double price = Double.parseDouble(priceLabel.getText().replace(",", "."));
-        change = bar - price;
+        BigDecimal bar = new BigDecimal(barTextField.getText().replace(",", "."));
+        change = bar.subtract(finalPrice);
 
-        String back = String.format("%.2f", change);
+        String back = CURRENCY.format(change);
         changeBarlabel.setText(back);
     }
 

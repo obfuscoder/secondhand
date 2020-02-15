@@ -14,6 +14,7 @@ public class Event extends AbstractEntityWithId {
     public boolean donationOfUnsoldItemsEnabled;
     public BigDecimal pricePrecision;
     public BigDecimal sellerFee;
+    public BigDecimal priceFactor;
     public boolean reservationFeesPayedInAdvance;
     public boolean gates;
 

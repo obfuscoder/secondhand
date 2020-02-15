@@ -12,6 +12,7 @@ public class Event {
     public boolean preciseBillAmounts;
     public BigDecimal commissionRate;
     public BigDecimal sellerFee;
+    public BigDecimal priceFactor;
     public boolean donationOfUnsoldItemsEnabled;
     public boolean reservationFeesPayedInAdvance;
     public boolean gates;

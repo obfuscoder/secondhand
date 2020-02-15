@@ -9,6 +9,7 @@ import de.obfusco.secondhand.storage.model.BaseItem;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,9 +21,9 @@ import java.util.Locale;
 @SuppressWarnings("ALL")
 class RefundPDFCreator {
 
-    private static NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
+    private static NumberFormat CURRENCY = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
-    private static PdfPTable insertItemTable(List<BaseItem> data, Double sum) {
+    private static PdfPTable insertItemTable(List<BaseItem> data, BigDecimal sum) {
 
         PdfPTable table = new PdfPTable(5);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -54,7 +55,7 @@ class RefundPDFCreator {
             table.addCell(cell);
             cell = new PdfPCell(new Phrase(item.getSize()));
             table.addCell(cell);
-            cell = new PdfPCell(new Phrase(currency.format(item.price)));
+            cell = new PdfPCell(new Phrase(CURRENCY.format(item.price)));
             cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             table.addCell(cell);
             //new Row
@@ -71,7 +72,7 @@ class RefundPDFCreator {
         cell = new PdfPCell(new Phrase(new Chunk("Summe", FontFactory.getFont(
                 FontFactory.HELVETICA_BOLD, 12))));
         table.addCell(cell);
-        cell = new PdfPCell(new Phrase(new Chunk(currency.format(sum), FontFactory.getFont(
+        cell = new PdfPCell(new Phrase(new Chunk(CURRENCY.format(sum), FontFactory.getFont(
                 FontFactory.HELVETICA_BOLD, 12))));
         cell.setColspan(4);
         cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -80,7 +81,7 @@ class RefundPDFCreator {
         return table;
     }
 
-    public File createPdf(Path basePath, List<BaseItem> data, Double sum)
+    public File createPdf(Path basePath, List<BaseItem> data, BigDecimal sum)
             throws IOException, DocumentException {
 
         Files.createDirectories(basePath);

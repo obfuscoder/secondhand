@@ -9,6 +9,7 @@ import de.obfusco.secondhand.storage.model.BaseItem;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,9 +21,9 @@ import java.util.Locale;
 
 public class BillPDFCreator {
 
-    private static NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
+    private static NumberFormat CURRENCY = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
-    private static PdfPTable insertItemTable(List<BaseItem> data) {
+    private static PdfPTable insertItemTable(List<BaseItem> data, BigDecimal sum) {
 
         PdfPTable table = new PdfPTable(5);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -45,7 +46,6 @@ public class BillPDFCreator {
         cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
         table.addCell(cell);
 
-        double sum = 0.0;
         for (int i = 0; i < data.size(); i++) {
             BaseItem item = data.get(i);
             table.addCell(Integer.toString(i + 1));
@@ -55,21 +55,19 @@ public class BillPDFCreator {
             table.addCell(cell);
             cell = new PdfPCell(new Phrase(item.getSize()));
             table.addCell(cell);
-            cell = new PdfPCell(new Phrase(currency.format(item.price)));
+            cell = new PdfPCell(new Phrase(CURRENCY.format(item.price)));
             cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             table.addCell(cell);
             //new Row
             cell = new PdfPCell(new Phrase(item.description));
             cell.setColspan(5);
             table.addCell(cell);
-
-            sum += item.price.doubleValue();
         }
 
         cell = new PdfPCell(new Phrase(new Chunk("Summe", FontFactory.getFont(
                 FontFactory.HELVETICA_BOLD, 12))));
         table.addCell(cell);
-        cell = new PdfPCell(new Phrase(new Chunk(currency.format(sum), FontFactory.getFont(
+        cell = new PdfPCell(new Phrase(new Chunk(CURRENCY.format(sum), FontFactory.getFont(
                 FontFactory.HELVETICA_BOLD, 12))));
         cell.setColspan(4);
         cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -78,7 +76,7 @@ public class BillPDFCreator {
         return table;
     }
 
-    public File createPdf(Path basePath, List<BaseItem> data)
+    public File createPdf(Path basePath, List<BaseItem> data, BigDecimal sum)
             throws IOException, DocumentException {
 
         Files.createDirectories(basePath);
@@ -98,7 +96,7 @@ public class BillPDFCreator {
                 FontFactory.HELVETICA_BOLD, 12))));
         document.add(new Paragraph("\n"));
 
-        document.add(insertItemTable(data));
+        document.add(insertItemTable(data, sum));
 
         document.add(new Paragraph("\n"));
         document.add(new Phrase(new Chunk("Vielen Dank für Ihren Einkauf.",

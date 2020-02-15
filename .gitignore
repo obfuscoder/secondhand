@@ -8,3 +8,5 @@ dependency-reduced-pom.xml
 Output
 config.properties
 flohmarkt_installer.iss
+*.transactions
+*.versionsBackup

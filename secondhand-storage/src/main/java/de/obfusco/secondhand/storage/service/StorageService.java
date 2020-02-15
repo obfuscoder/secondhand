@@ -145,6 +145,10 @@ public class StorageService {
         Double itemSum = itemRepository.sumOfSoldItems();
         if (itemSum == null) itemSum = 0.0;
         itemSum += sumOfSoldStockItems();
+        BigDecimal priceFactor = eventRepository.find().priceFactor;
+        if (priceFactor != null) {
+            itemSum *= priceFactor.doubleValue();
+        }
         return itemSum;
     }
 

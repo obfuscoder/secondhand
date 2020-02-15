@@ -254,7 +254,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
 
         JButton configButton = new JButton("Einstellungen");
         configButton.addActionListener(e -> {
-            String rootUrl = properties.getProperty("online.root", "https://flohmarkthelfer.de/");
+            String rootUrl = properties.getProperty("online.url", "https://flohmarkthelfer.de/");
             if (rootUrl.isEmpty()) rootUrl = "https://flohmarkthelfer.de/";
             configDialog.setRootUrl(rootUrl);
             configDialog.setVisible(true);

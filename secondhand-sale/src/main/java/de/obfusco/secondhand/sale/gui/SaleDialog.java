@@ -2,6 +2,7 @@ package de.obfusco.secondhand.sale.gui;
 
 import de.obfusco.secondhand.storage.model.BaseItem;
 import de.obfusco.secondhand.storage.model.TransactionListener;
+import de.obfusco.secondhand.storage.repository.EventRepository;
 import de.obfusco.secondhand.storage.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,19 +24,23 @@ import java.util.Locale;
 @Component
 public class SaleDialog extends JFrame implements ActionListener, TableModelListener {
 
-    private NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.GERMANY);
+    private static NumberFormat CURRENCY = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
     private JTextField itemNr;
     private CashTableModel tableModel;
     private JLabel errorLabel;
     private JLabel priceLabel;
     private JTable cashTable;
+    BigDecimal totalPrice = BigDecimal.ZERO;
 
     @Autowired
     StorageService storageService;
 
     @Autowired
     TransactionListener transactionListener;
+
+    @Autowired
+    EventRepository eventRepository;
 
     private JButton readyButton = new JButton("Fertig");
 
@@ -121,8 +126,7 @@ public class SaleDialog extends JFrame implements ActionListener, TableModelList
         JLabel countDescLabel = new JLabel("Artikel: ");
         countLabel = new JLabel("0");
         JLabel sumLabel = new JLabel("Summe: ");
-        priceLabel = new JLabel("0,00");
-        JLabel euroLabel = new JLabel(" €");
+        priceLabel = new JLabel(CURRENCY.format(totalPrice));
         JPanel totalPanel = new JPanel(new GridLayout(0, 2));
         JPanel countPanel = new JPanel(new GridBagLayout());
         JPanel sumPanel = new JPanel(new GridBagLayout());
@@ -133,12 +137,10 @@ public class SaleDialog extends JFrame implements ActionListener, TableModelList
         sumLabel.setFont(pane.getFont().deriveFont(40f));
         priceLabel.setFont(pane.getFont().deriveFont(40f));
         priceLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        euroLabel.setFont(pane.getFont().deriveFont(40f));
         countPanel.add(countDescLabel);
         countPanel.add(countLabel);
         sumPanel.add(sumLabel);
         sumPanel.add(priceLabel);
-        sumPanel.add(euroLabel);
         pane.add(itemPanel, BorderLayout.CENTER);
 
         readyButton.setEnabled(false);
@@ -178,10 +180,6 @@ public class SaleDialog extends JFrame implements ActionListener, TableModelList
         return storageService;
     }
 
-    public String getPrice() {
-        return priceLabel.getText();
-    }
-
     public JTextField getItemNr() {
         return itemNr;
     }
@@ -205,8 +203,6 @@ public class SaleDialog extends JFrame implements ActionListener, TableModelList
             tableModel.delRow(0);
         }
 
-        priceLabel.setText("0,00");
-        countLabel.setText("0");
         validate();
 
         itemNr.requestFocus();
@@ -228,12 +224,11 @@ public class SaleDialog extends JFrame implements ActionListener, TableModelList
     private void calcTotalPriceAndCount() {
         int rowCount = tableModel.getRowCount();
         readyButton.setEnabled(rowCount > 0);
-        double totalPrice = 0;
+        totalPrice = BigDecimal.ZERO;
         for (int i = 0; i < rowCount; i++) {
-            BigDecimal price = tableModel.getData().get(i).price;
-            totalPrice += price.doubleValue();
+            totalPrice = totalPrice.add(tableModel.getData().get(i).price);
         }
-        priceLabel.setText(String.format("%.2f", totalPrice).replace('.', ','));
+        priceLabel.setText(CURRENCY.format(totalPrice));
         countLabel.setText(Integer.toString(rowCount));
     }
 
@@ -314,7 +309,7 @@ public class SaleDialog extends JFrame implements ActionListener, TableModelList
                 case 3:
                     return item.getSize();
                 case 4:
-                    return currency.format(item.price);
+                    return CURRENCY.format(item.price);
                 default:
                     return null;
             }

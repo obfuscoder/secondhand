@@ -5,7 +5,9 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.itextpdf.text.DocumentException;
 import de.obfusco.secondhand.sale.gui.BillPDFCreator;
+import de.obfusco.secondhand.storage.model.BaseItem;
 import de.obfusco.secondhand.storage.model.Transaction;
+import de.obfusco.secondhand.storage.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,13 +19,18 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @Component
 public class TransactionsGui extends JDialog {
     @Autowired
     TransactionsTableModel transactionsTableModel;
+
+    @Autowired
+    EventRepository eventRepository;
 
     private JPanel contentPane;
     private JButton printButton;
@@ -71,7 +78,16 @@ public class TransactionsGui extends JDialog {
         Path basePath = Paths.get("data/pdfs/sale");
         File pdfFile;
         try {
-            pdfFile = new BillPDFCreator().createPdf(basePath, selectedTransaction.getAllItems());
+            List<BaseItem> items = selectedTransaction.getAllItems();
+            BigDecimal total = BigDecimal.ZERO;
+            for (BaseItem item : items) {
+                total = total.add(item.price);
+            }
+            BigDecimal priceFactor = eventRepository.find().priceFactor;
+            if (priceFactor != null) {
+                total = total.multiply(priceFactor);
+            }
+            pdfFile = new BillPDFCreator().createPdf(basePath, items, total);
             Desktop.getDesktop().open(pdfFile);
         } catch (IOException | DocumentException e) {
             JOptionPane.showMessageDialog(this, "Fehler",
