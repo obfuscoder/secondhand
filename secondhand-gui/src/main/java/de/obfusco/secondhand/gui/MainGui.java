@@ -230,7 +230,8 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             try {
                 Desktop.getDesktop().open(receiptFile.createFile(Paths.get("data/pdfs/receipts"),
                         "Annahme Flohmarkt",
-                        "Mit meiner Unterschrift bestätige ich die Teilnahmebedingungen."));
+                        "Mit meiner Unterschrift bestätige ich die Teilnahmebedingungen.",
+                        askForOrderByName()));
 
             } catch (IOException | DocumentException e1) {
                 LOG.error("Failed to create and open receipts file", e1);
@@ -298,6 +299,14 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         pane.add(panel, BorderLayout.SOUTH);
     }
 
+    private boolean askForOrderByName() {
+        int answer = JOptionPane.showConfirmDialog(
+                this,
+                "Sortierung nach Name anstelle Reservierungsnummer?", "Sortierung",
+                JOptionPane.YES_NO_OPTION);
+        return answer == JOptionPane.YES_OPTION;
+    }
+
     private void updateFolderSyncLabel(SyncStatus syncStatus) {
         switch (syncStatus) {
             case OFFLINE:
@@ -315,6 +324,7 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
     }
 
     private void createPayoutReceipt() throws IOException, DocumentException {
+        boolean orderByName = askForOrderByName();
         boolean withPayouts = JOptionPane.showConfirmDialog(
                 null, "Soll eine Spalte für den Auszahlbetrag mit enthalten sein?", "Auszahlbetrag",
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION;
@@ -337,9 +347,9 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
                 }
                 payouts.put(reservation.number, currency.format(commissionCutSum));
             }
-            file = receiptFile.createFile(fileBasePath, title, introText, "Betrag", payouts);
+            file = receiptFile.createFile(fileBasePath, title, introText, "Betrag", payouts, orderByName);
         } else {
-            file = receiptFile.createFile(fileBasePath, title, introText, null, null);
+            file = receiptFile.createFile(fileBasePath, title, introText, null, null, orderByName);
         }
         Desktop.getDesktop().open(file);
     }

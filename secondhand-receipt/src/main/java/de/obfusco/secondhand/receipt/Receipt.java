@@ -27,7 +27,7 @@ public class Receipt {
         ReceiptFile receipt = applicationContext.getBean(ReceiptFile.class);
         try {
             receipt.createFile(Paths.get("data/pdfs/receipt"), "Annahme Flohmarkt",
-                    "Mit meiner Unterschrift bestaetige ich die Teilnahmebedingungen.");
+                    "Mit meiner Unterschrift bestaetige ich die Teilnahmebedingungen.", false);
         } catch (DocumentException | IOException e) {
             LOG.error("Could not create file", e);
         }

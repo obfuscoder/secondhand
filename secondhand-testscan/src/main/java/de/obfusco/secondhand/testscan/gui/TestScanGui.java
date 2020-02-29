@@ -159,14 +159,14 @@ public class TestScanGui extends JFrame implements ActionListener {
     }
 
     private void deleteSelectedRow() {
-        int n = JOptionPane.showConfirmDialog(
+        int answer = JOptionPane.showConfirmDialog(
                 this,
                 "Möchten sie den Artikel \""
                         + tablemodel.getValueAt(cashTable.getSelectedRow(), 0)
                         + "\" wirklich löschen?", "Artikel löschen",
                 JOptionPane.YES_NO_OPTION);
 
-        if (n == JOptionPane.YES_OPTION) {
+        if (answer == JOptionPane.YES_OPTION) {
             tablemodel.delRow(cashTable.getSelectedRow());
         }
 

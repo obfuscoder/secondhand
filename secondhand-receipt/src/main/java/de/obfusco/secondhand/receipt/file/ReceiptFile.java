@@ -29,8 +29,8 @@ public class ReceiptFile {
     @Autowired
     EventRepository eventRepository;
 
-    public File createFile(Path basePath, String title, String introText) throws DocumentException, IOException {
-        return createFile(basePath, title, introText, null, null);
+    public File createFile(Path basePath, String title, String introText, boolean orderByName) throws DocumentException, IOException {
+        return createFile(basePath, title, introText, null, null, orderByName);
     }
 
     private void addHeader(Document document, String title) throws DocumentException {
@@ -38,7 +38,7 @@ public class ReceiptFile {
                 .getFont(FontFactory.HELVETICA_BOLD, 24))));
     }
 
-    public File createFile(Path basePath, String title, String introText, String payoutTitle, Map<Integer, String> payouts) throws IOException, DocumentException {
+    public File createFile(Path basePath, String title, String introText, String payoutTitle, Map<Integer, String> payouts, boolean orderByName) throws IOException, DocumentException {
         Files.createDirectories(basePath);
         Path fullPath = Paths.get(basePath.toString(), "receipt.pdf");
         Document document = new Document(PageSize.A4, 80, 50, 50, 30);
@@ -49,7 +49,7 @@ public class ReceiptFile {
         document.open();
         addHeader(document, title);
 
-        Iterable<Reservation> reservations = reservationRepository.findAllByOrderByNumberAsc();
+        Iterable<Reservation> reservations = orderByName ? reservationRepository.findAllByOrderBySellerAsc() : reservationRepository.findAllByOrderByNumberAsc();
 
         String[] columnNames = ((payoutTitle != null) ? new String[]{"ResNr", "Name", payoutTitle, "Unterschrift"} : new String[]{"ResNr", "Name", "Unterschrift"});
         float[] widths = (payoutTitle != null) ? new float[]{12f, 40f, 20f, 40f} : new float[]{12f, 40f, 40f};
