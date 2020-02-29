@@ -130,6 +130,10 @@ public class StorageService {
                 break;
             case CHECKIN:
                 item.checkIn();
+                break;
+            case CHECKOUT:
+                item.checkOut();
+                break;
         }
         saveItem(item);
     }
