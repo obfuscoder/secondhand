@@ -226,7 +226,7 @@ public class TotalPayOff extends BasePayOff {
         private Map<Integer, Long> calculateCoins() {
             long cents = Math.round(value * 100.0);
             Map<Integer, Long> coinCounts = new HashMap<>();
-            int[] coins = {50000, 20000, 10000, 5000, 2000, 1000, 500, 200, 100, 50, 20, 10, 5, 2, 1};
+            int[] coins = {5000, 2000, 1000, 500, 200, 100, 50, 20, 10, 5, 2, 1};
             for (int coin : coins) {
                 if (coin > cents) continue;
                 long coinCount = cents / coin;
