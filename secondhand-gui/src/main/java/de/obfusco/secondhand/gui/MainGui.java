@@ -361,12 +361,22 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
             if (message.startsWith("DATA")) {
                 parseDataMessage(peer, message);
             } else if (message.startsWith("TRNS")) {
+                assertEventExists();
                 transactionReceived(parseTransactionMessage(message));
             } else {
+                assertEventExists();
                 transactionReceived(storageService.parseTransactionMessage(message));
             }
         } catch (IllegalArgumentException ex) {
             LOG.error("Invalid message <" + message + ">. Reason: " + ex.getMessage());
+        } catch (EventDataMissingException ex) {
+            LOG.error("Cannot process message as there is no event data in the database yet.");
+        }
+    }
+
+    private void assertEventExists() {
+        if (eventRepository.count() == 0) {
+            throw new EventDataMissingException("Event data is missing!");
         }
     }
 

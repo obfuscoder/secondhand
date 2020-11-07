@@ -94,7 +94,6 @@ public class StorageService {
         return createTransaction(id, type, date, Arrays.asList(itemCodes), zipCode);
     }
 
-
     private Transaction createTransaction(String id, Transaction.Type type, Date date, List<String> itemCodes, String zipCode) {
         List<BaseItem> items = fetchAndUpdateItemsFromCodes(type, itemCodes);
         if (items.isEmpty()) return null;

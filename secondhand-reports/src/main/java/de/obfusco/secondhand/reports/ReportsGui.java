@@ -82,22 +82,24 @@ public class ReportsGui extends JFrame {
 
     public void update() {
         long total = itemRepository.count();
-        long sold = itemRepository.countBySoldNotNull();
-        itemCount.setText(Long.toString(total));
-        stockItemCount.setText(Long.toString(stockItemRepository.count()));
-        transactionCount.setText(Long.toString(transactionRepository.count()));
-        soldItemCount.setText(countWithPercentage(sold, total));
-        Long soldStockItems = stockItemRepository.countOfSoldItems();
-        if (soldStockItems == null) soldStockItems = 0L;
-        soldStockItemCount.setText(Long.toString(soldStockItems));
-        Double sumOfSoldItems = storageService.sumOfSoldItems();
-        if (storageService.isEventGated()) {
-            long checkedIn = itemRepository.countByCheckedInNotNull();
-            checkedInCount.setText(countWithPercentage(checkedIn, total));
-            long checkedOut = itemRepository.countByCheckedOutNotNull();
-            checkedOutCount.setText(countWithPercentage(checkedOut, checkedIn));
+        if (total > 0) {
+            long sold = itemRepository.countBySoldNotNull();
+            itemCount.setText(Long.toString(total));
+            stockItemCount.setText(Long.toString(stockItemRepository.count()));
+            transactionCount.setText(Long.toString(transactionRepository.count()));
+            soldItemCount.setText(countWithPercentage(sold, total));
+            Long soldStockItems = stockItemRepository.countOfSoldItems();
+            if (soldStockItems == null) soldStockItems = 0L;
+            soldStockItemCount.setText(Long.toString(soldStockItems));
+            Double sumOfSoldItems = storageService.sumOfSoldItems();
+            if (storageService.isEventGated()) {
+                long checkedIn = itemRepository.countByCheckedInNotNull();
+                checkedInCount.setText(countWithPercentage(checkedIn, total));
+                long checkedOut = itemRepository.countByCheckedOutNotNull();
+                checkedOutCount.setText(countWithPercentage(checkedOut, checkedIn));
+            }
+            soldSum.setText(CURRENCY.format(sumOfSoldItems));
         }
-        soldSum.setText(CURRENCY.format(sumOfSoldItems));
 
         StringBuilder sb = new StringBuilder();
         if (network != null) {

@@ -63,6 +63,7 @@ public class PathSyncer {
                     }
 
                     File[] files = folder.listFiles((folder1, fileName) -> !fileName.startsWith(localName) && fileName.endsWith(".transactions"));
+                    if (files == null) continue;
                     for (File file : files) {
                         LOG.info("Reading transactions from file {}", file);
                         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {

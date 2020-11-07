@@ -51,7 +51,7 @@ class SearchGui extends JFrame {
         JPanel topPanel = new JPanel(new BorderLayout(2, 2));
         topPanel.add(hint, BorderLayout.NORTH);
         topPanel.add(searchText, BorderLayout.CENTER);
-        boolean gates = eventRepository.find().gates;
+        boolean gates = eventRepository.count() > 0 && eventRepository.find().gates;
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
