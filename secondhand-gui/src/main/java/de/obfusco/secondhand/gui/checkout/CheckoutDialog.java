@@ -57,7 +57,7 @@ public class CheckoutDialog extends JDialog {
         DefaultTableModel itemTableModel = (DefaultTableModel) itemTable.getModel();
         itemTableModel.setRowCount(0);
         itemTableModel.setColumnCount(0);
-        itemTableModel.addColumn("Nummber");
+        itemTableModel.addColumn("Nummer");
         itemTableModel.addColumn("Kategorie");
         itemTableModel.addColumn("Beschreibung");
         itemTableModel.addColumn("Preis");
@@ -92,6 +92,7 @@ public class CheckoutDialog extends JDialog {
         if (item == null) {
             JOptionPane.showMessageDialog(this, "Der Artikel zu diesem Artikelcode ist nicht in der Liste.",
                     "Unbekannter Code", JOptionPane.ERROR_MESSAGE);
+            itemCodeField.setText("");
             itemCodeField.requestFocus();
             return;
         }
@@ -103,6 +104,7 @@ public class CheckoutDialog extends JDialog {
         if (item.wasCheckedOut()) {
             JOptionPane.showMessageDialog(this, "Der Artikel ist bereits ausgecheckt.",
                     "Bereits ausgecheckt", JOptionPane.WARNING_MESSAGE);
+            itemCodeField.setText("");
             itemCodeField.requestFocus();
             return;
         }
@@ -110,6 +112,7 @@ public class CheckoutDialog extends JDialog {
         if (scannedItems.contains(item)) {
             JOptionPane.showMessageDialog(this, "Der Artikel ist bereits eingescannt.",
                     "Bereits eingescannt", JOptionPane.WARNING_MESSAGE);
+            itemCodeField.setText("");
             itemCodeField.requestFocus();
             return;
         }
