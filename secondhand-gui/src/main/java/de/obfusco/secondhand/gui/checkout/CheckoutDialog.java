@@ -2,7 +2,6 @@ package de.obfusco.secondhand.gui.checkout;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import de.obfusco.secondhand.gui.checkin.CheckinDialog;
 import de.obfusco.secondhand.storage.model.Item;
 
 import javax.swing.*;
@@ -154,32 +153,11 @@ public class CheckoutDialog extends JDialog {
         itemTable = new JTable();
         scrollPane1.setViewportView(itemTable);
         itemCodeField = new JTextField();
-        Font itemCodeFieldFont = this.$$$getFont$$$(null, -1, 36, itemCodeField.getFont());
-        if (itemCodeFieldFont != null) itemCodeField.setFont(itemCodeFieldFont);
         itemCodeField.setHorizontalAlignment(0);
         contentPane.add(itemCodeField, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JLabel label1 = new JLabel();
         label1.setText("Hier sind alle relevanten Artikel der Reservierung. Bitte die Artikel einscannen und abschließend auschecken.");
         contentPane.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-    }
-
-    /**
-     * @noinspection ALL
-     */
-    private Font $$$getFont$$$(String fontName, int style, int size, Font currentFont) {
-        if (currentFont == null) return null;
-        String resultName;
-        if (fontName == null) {
-            resultName = currentFont.getName();
-        } else {
-            Font testFont = new Font(fontName, Font.PLAIN, 10);
-            if (testFont.canDisplay('a') && testFont.canDisplay('1')) {
-                resultName = fontName;
-            } else {
-                resultName = currentFont.getName();
-            }
-        }
-        return new Font(resultName, style >= 0 ? style : currentFont.getStyle(), size >= 0 ? size : currentFont.getSize());
     }
 
     /**
@@ -195,6 +173,7 @@ public class CheckoutDialog extends JDialog {
             Component component = super.getTableCellRendererComponent(table, value, selected, focus, row, column);
             String status = table.getValueAt(row, 4).toString();
             component.setBackground(getBackgroundColor(status));
+            component.setFont(component.getFont().deriveFont(selected ? Font.BOLD : Font.PLAIN));
             return component;
         }
 

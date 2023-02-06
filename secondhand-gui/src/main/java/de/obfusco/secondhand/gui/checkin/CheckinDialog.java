@@ -57,7 +57,7 @@ public class CheckinDialog extends JDialog {
         DefaultTableModel itemTableModel = (DefaultTableModel) itemTable.getModel();
         itemTableModel.setRowCount(0);
         itemTableModel.setColumnCount(0);
-        itemTableModel.addColumn("Nummber");
+        itemTableModel.addColumn("Nummer");
         itemTableModel.addColumn("Kategorie");
         itemTableModel.addColumn("Beschreibung");
         itemTableModel.addColumn("Preis");
@@ -119,8 +119,8 @@ public class CheckinDialog extends JDialog {
             return;
         }
 
-        scannedItems.add(item);
         DefaultTableModel itemTableModel = (DefaultTableModel) itemTable.getModel();
+        scannedItems.add(item);
         itemTableModel.setValueAt("GESCANNT", index, 4);
         itemTableModel.fireTableRowsUpdated(index, index);
 
@@ -159,8 +159,6 @@ public class CheckinDialog extends JDialog {
         itemTable = new JTable();
         scrollPane1.setViewportView(itemTable);
         itemCodeField = new JTextField();
-        Font itemCodeFieldFont = this.$$$getFont$$$(null, -1, 36, itemCodeField.getFont());
-        if (itemCodeFieldFont != null) itemCodeField.setFont(itemCodeFieldFont);
         itemCodeField.setHorizontalAlignment(0);
         contentPane.add(itemCodeField, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JLabel label1 = new JLabel();
@@ -171,35 +169,18 @@ public class CheckinDialog extends JDialog {
     /**
      * @noinspection ALL
      */
-    private Font $$$getFont$$$(String fontName, int style, int size, Font currentFont) {
-        if (currentFont == null) return null;
-        String resultName;
-        if (fontName == null) {
-            resultName = currentFont.getName();
-        } else {
-            Font testFont = new Font(fontName, Font.PLAIN, 10);
-            if (testFont.canDisplay('a') && testFont.canDisplay('1')) {
-                resultName = fontName;
-            } else {
-                resultName = currentFont.getName();
-            }
-        }
-        return new Font(resultName, style >= 0 ? style : currentFont.getStyle(), size >= 0 ? size : currentFont.getSize());
-    }
-
-    /**
-     * @noinspection ALL
-     */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
 
     private static class TableCellRender extends DefaultTableCellRenderer {
+
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus, int row, int column) {
             Component component = super.getTableCellRendererComponent(table, value, selected, focus, row, column);
             String status = table.getValueAt(row, 4).toString();
             component.setBackground(getBackgroundColor(status));
+            component.setFont(component.getFont().deriveFont(selected ? Font.BOLD : Font.PLAIN));
             return component;
         }
 
