@@ -4,7 +4,7 @@
 
 Thank you for your interest in contributing to this project ("We" or "Us").
 
-The purpose of this contributor agreement ("Agreement") is to clarify and document the rights granted by contributors to Us. To make this document effective, please follow the instructions in the READMNE.md.
+The purpose of this contributor agreement ("Agreement") is to clarify and document the rights granted by contributors to Us. To make this document effective, please follow the instructions in the [README](README.md).
 
 ### How to use this Contributor Agreement
 
@@ -98,23 +98,25 @@ IF THE DISCLAIMER AND DAMAGE WAIVER MENTIONED IN SECTION 4. AND SECTION 5. CANNO
 
 ### You
 
-Date:
+    Date:
 
-Name:
+    Name:
 
-Title:
+    Company:
 
-Address:
+    Address:
+
+    GH-Username:
 
 ### Us
 
-Date:
+    Date:
 
-Name:
+    Name:
 
-Title:
+    Company:
 
-Address:
+    Address:
 
 #### Remarks
 
