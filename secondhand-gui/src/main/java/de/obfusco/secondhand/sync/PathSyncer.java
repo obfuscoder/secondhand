@@ -71,7 +71,7 @@ public class PathSyncer {
                             while (true) {
                                 String line = reader.readLine();
                                 if (line == null) break;
-                                Transaction transaction = storageService.parseTransactionMessage(line);
+                                Transaction transaction = storageService.parseTransactionMessageAndCreateTransaction(line);
                                 transactionListener.transactionReceived(transaction);
                             }
                         } catch (FileNotFoundException e) {

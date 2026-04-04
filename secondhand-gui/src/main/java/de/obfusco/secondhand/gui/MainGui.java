@@ -362,10 +362,10 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
                 parseDataMessage(peer, message);
             } else if (message.startsWith("TRNS")) {
                 assertEventExists();
-                transactionReceived(parseTransactionMessage(message));
+                transactionReceived(parseTransactionMessageAndCreateTransaction(message));
             } else {
                 assertEventExists();
-                transactionReceived(storageService.parseTransactionMessage(message));
+                transactionReceived(storageService.parseTransactionMessageAndCreateTransaction(message));
             }
         } catch (IllegalArgumentException ex) {
             LOG.error("Invalid message <" + message + ">. Reason: " + ex.getMessage());
@@ -380,26 +380,19 @@ public class MainGui extends JFrame implements MessageBroker, TransactionListene
         }
     }
 
-    private Transaction parseTransactionMessage(String message) {
+    private Transaction parseTransactionMessageAndCreateTransaction(String message) {
         String[] parts = message.substring(4).split("-", 2);
         int eventNumber = Integer.parseInt(parts[0]);
         if (eventNumber != eventRepository.find().number) {
-            throw new IllegalArgumentException("Event number from received transaction does not match current event number");
+            throw new IllegalArgumentException("Event number from received transaction does not match current event number " + eventRepository.find().number);
         }
-        return storageService.parseTransactionMessage(parts[1]);
+        return storageService.parseTransactionMessageAndCreateTransaction(parts[1]);
     }
 
     public void transactionReceived(Transaction transaction) {
         if (transaction != null) {
             LOG.debug("Received transaction: {}", transaction);
-            synchronized (transactionRepository) {
-                if (!transactionRepository.existsById(transaction.id)) {
-                    transactionRepository.save(transaction);
-                    reportsGui.update();
-                } else {
-                    LOG.debug("Skipping transaction {} as it is already known", transaction.id);
-                }
-            }
+            reportsGui.update();
         }
     }
 
